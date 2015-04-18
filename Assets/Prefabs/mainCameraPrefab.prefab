@@ -41,7 +41,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 1
-  m_BackGroundColor: {r: .392156869, g: .392156869, b: .392156869, a: 0}
+  m_BackGroundColor: {r: 0, g: 0, b: 0, a: 0}
   m_NormalizedViewPortRect:
     serializedVersion: 2
     x: 0
@@ -89,8 +89,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 36404cded83f6b746b819d834707c786, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerPrefab: {fileID: 114074, guid: 58cda14e50f6d8d42a46b3077f960e56, type: 2}
-  basicEnemyPrefab: {fileID: 139786, guid: 566fefe5e59b580429b5c12346896bd0, type: 2}
+  playerPrefab_: {fileID: 114074, guid: 58cda14e50f6d8d42a46b3077f960e56, type: 2}
+  basicEnemyPrefab_: {fileID: 139786, guid: 566fefe5e59b580429b5c12346896bd0, type: 2}
 --- !u!124 &12488314
 Behaviour:
   m_ObjectHideFlags: 1

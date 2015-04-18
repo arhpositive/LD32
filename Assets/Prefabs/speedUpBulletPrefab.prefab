@@ -1,70 +1,42 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &114074
+--- !u!1 &181600
 GameObject:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   serializedVersion: 4
   m_Component:
-  - 4: {fileID: 471690}
-  - 212: {fileID: 21282420}
-  - 114: {fileID: 11442940}
-  - 61: {fileID: 6197716}
-  - 50: {fileID: 5060936}
+  - 4: {fileID: 488158}
+  - 212: {fileID: 21296554}
+  - 114: {fileID: 11460860}
+  - 50: {fileID: 5035460}
+  - 60: {fileID: 6066378}
   m_Layer: 8
-  m_Name: playerPrefab
-  m_TagString: Player
+  m_Name: speedUpBulletPrefab
+  m_TagString: StunBullet
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!1 &195174
-GameObject:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  serializedVersion: 4
-  m_Component:
-  - 4: {fileID: 448418}
-  m_Layer: 8
-  m_Name: bulletStart
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &448418
+--- !u!4 &488158
 Transform:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 195174}
+  m_GameObject: {fileID: 181600}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: .200000003, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
-  m_Father: {fileID: 471690}
-  m_RootOrder: 0
---- !u!4 &471690
-Transform:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 114074}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 5.05000019, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children:
-  - {fileID: 448418}
   m_Father: {fileID: 0}
   m_RootOrder: 0
---- !u!50 &5060936
+--- !u!50 &5035460
 Rigidbody2D:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 114074}
+  m_GameObject: {fileID: 181600}
   m_Mass: 1
   m_LinearDrag: 0
   m_AngularDrag: .0500000007
@@ -74,40 +46,45 @@ Rigidbody2D:
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
---- !u!61 &6197716
-BoxCollider2D:
+--- !u!60 &6066378
+PolygonCollider2D:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 114074}
+  m_GameObject: {fileID: 181600}
   m_Enabled: 1
   m_Material: {fileID: 0}
   m_IsTrigger: 1
   m_UsedByEffector: 0
   m_Offset: {x: 0, y: 0}
-  serializedVersion: 2
-  m_Size: {x: .400000006, y: .460000008}
---- !u!114 &11442940
+  m_Points:
+    m_Paths:
+    - - {x: -.0500000007, y: .0500000007}
+      - {x: -.0500000007, y: -.0500000007}
+      - {x: .0299999993, y: -.0500000007}
+      - {x: .0500000007, y: -.0299999993}
+      - {x: .0500000007, y: .0299999993}
+      - {x: .0299999993, y: .0500000007}
+--- !u!114 &11460860
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 114074}
+  m_GameObject: {fileID: 181600}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4f2bc28f901bf394e8ca6d666938a2cb, type: 3}
+  m_Script: {fileID: 11500000, guid: 8068337a984edaf42aac853db1881909, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  stunBulletPrefab_: {fileID: 151552, guid: c01a9ecebecac134facbcd4665a1a13d, type: 2}
-  speedUpBulletPrefab_: {fileID: 181600, guid: 40481044129877d4a8fb8bc8e9f3acc3, type: 2}
-  playerSpeedLimit_: 5
-  playerAcceleration_: .100000001
---- !u!212 &21282420
+  speed_: 3
+  direction_: {x: 1, y: 0}
+  bulletType_: 1
+--- !u!212 &21296554
 SpriteRenderer:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 114074}
+  m_GameObject: {fileID: 181600}
   m_Enabled: 1
   m_CastShadows: 0
   m_ReceiveShadows: 0
@@ -125,9 +102,9 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
-  m_SortingOrder: 1
-  m_Sprite: {fileID: 21300000, guid: be2824703aa8ea2468cc6c03f5757d63, type: 3}
-  m_Color: {r: 1, g: 1, b: 0, a: 1}
+  m_SortingOrder: 0
+  m_Sprite: {fileID: 21300000, guid: 2e96a42464849194d99a8ef3c1a28794, type: 3}
+  m_Color: {r: 0, g: 1, b: 0, a: 1}
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1
@@ -137,5 +114,5 @@ Prefab:
     m_Modifications: []
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}
-  m_RootGameObject: {fileID: 114074}
+  m_RootGameObject: {fileID: 181600}
   m_IsPrefabParent: 1
