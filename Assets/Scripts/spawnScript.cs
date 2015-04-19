@@ -27,6 +27,10 @@ public class spawnScript : MonoBehaviour
     public GameObject playerPrefab_;
     public GameObject[] enemyPrefabs_;
     public GameObject[] powerupPrefabs_;
+    public GameObject[] meteorPrefabs_;
+    public GameObject starPrefab_;
+    public int initMeteorCount_;
+    public int initStarCount_;
 
     public static float horizontalEnterCoord_ = 8.0f;
     public static float horizontalExitCoord_ = -1.0f;
@@ -34,10 +38,16 @@ public class spawnScript : MonoBehaviour
     public static float spawnZCoord_ = 0.0f;
 
     float previousWaveSpawnTime_;
-    float waveSpawnInterval_ = 5.0f;
+    float waveSpawnInterval_ = 8.0f;
 
     float previousPowerupSpawnTime_;
     float powerupSpawnInterval_ = 2.0f;
+
+    float previousMeteorSpawnTime_;
+    float meteorSpawnInterval_ = 1.0f;
+
+    float previousStarSpawnTime_;
+    float starSpawnInterval_ = 100.0f;
 
     //float enemyHorizontalSpawnInterval_ = 0.9f; //TODO_ARHAN open up later
 
@@ -55,8 +65,11 @@ public class spawnScript : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        previousWaveSpawnTime_ = Time.time;
+        previousWaveSpawnTime_ = Time.time - (waveSpawnInterval_ * 0.5f);
         previousPowerupSpawnTime_ = Time.time;
+        previousMeteorSpawnTime_ = Time.time;
+        previousStarSpawnTime_ = Time.time;
+        InitialMeteorSpawn();
         nextWave_ = new List<WaveEntity>();
     }
 
@@ -75,6 +88,23 @@ public class spawnScript : MonoBehaviour
         {
             SpawnNewPowerup();
             previousPowerupSpawnTime_ = Time.time;
+        }
+
+        if (Time.time - previousMeteorSpawnTime_ > meteorSpawnInterval_)
+        {
+            int meteorKind = Random.Range(0, meteorPrefabs_.Length);
+            Vector3 meteorPos = new Vector3(Random.Range(horizontalEnterCoord_ - 0.5f, horizontalEnterCoord_ + 0.5f), 
+                Random.Range(playerScript.minVerticalMovementLimit_ - 1.0f, playerScript.maxVerticalMovementLimit_ + 1.0f), spawnZCoord_);
+            SpawnMeteor(meteorKind, meteorPos);
+            previousMeteorSpawnTime_ = Time.time;
+        }
+
+        if (Time.time - previousStarSpawnTime_ > starSpawnInterval_)
+        {
+            Vector3 starPos = new Vector3(Random.Range(horizontalEnterCoord_ - 0.1f, horizontalEnterCoord_ + 0.1f),
+                Random.Range(playerScript.minVerticalMovementLimit_ - 1.0f, playerScript.maxVerticalMovementLimit_ + 1.0f), spawnZCoord_);
+            SpawnStar(starPos);
+            previousStarSpawnTime_ = Time.time;
         }
     }
 
@@ -106,4 +136,34 @@ public class spawnScript : MonoBehaviour
         powerup.GetComponent<powerupScript>().setDirection(new Vector2(-1.0f, Random.Range(-0.5f, 0.5f)));
     }
 
+    void InitialMeteorSpawn()
+    {
+        for (int i = 0; i < initMeteorCount_; i++)
+        {
+            int meteorKind = Random.Range(0, meteorPrefabs_.Length);
+            Vector3 meteorPos = new Vector3(Random.Range(playerScript.minHorizontalMovementLimit_ - 0.5f, horizontalEnterCoord_ - 0.5f),
+                Random.Range(playerScript.minVerticalMovementLimit_, playerScript.maxVerticalMovementLimit_), spawnZCoord_);
+            SpawnMeteor(meteorKind, meteorPos);
+        }
+
+        for (int i = 0; i < initStarCount_; i++)
+        {
+            Vector3 starPos = new Vector3(Random.Range(playerScript.minHorizontalMovementLimit_ - 0.5f, horizontalEnterCoord_ - 0.5f),
+                Random.Range(playerScript.minVerticalMovementLimit_ - 1.0f, playerScript.maxVerticalMovementLimit_ + 1.0f), spawnZCoord_);
+            SpawnStar(starPos);
+        }
+    }
+
+    void SpawnMeteor(int meteorKind, Vector3 meteorPos)
+    {
+        GameObject meteor = Instantiate(meteorPrefabs_[meteorKind], meteorPos, Quaternion.identity) as GameObject;
+        Vector2 direction = new Vector2(-1.0f, Random.Range(-1.0f, 1.0f));
+        direction.Normalize();
+        meteor.GetComponent<meteorScript>().setDirection(direction);
+    }
+
+    void SpawnStar(Vector3 starPos)
+    {
+        Instantiate(starPrefab_, starPos, Quaternion.identity);
+    }
 }

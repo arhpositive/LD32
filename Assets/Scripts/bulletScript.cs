@@ -21,6 +21,7 @@ public class bulletScript : MonoBehaviour
     public float speed_;
     public Vector2 direction_;
     public BulletType bulletType_;
+    public AudioClip bulletHitClip_;
 
 	// Use this for initialization
 	void Start () {
@@ -52,9 +53,11 @@ public class bulletScript : MonoBehaviour
                 default:
                     break;
             }
+            AudioSource.PlayClipAtPoint(bulletHitClip_, transform.position);
             Destroy(gameObject);
         }
-        else if (other.gameObject.tag == "Player" && !other.gameObject.GetComponent<playerScript>().isInvulnerable())
+        else if (other.gameObject.tag == "Player" && !other.gameObject.GetComponent<playerScript>().isInvulnerable() &&
+            !other.gameObject.GetComponent<playerScript>().isDead())
         {
             switch(bulletType_)
             {
@@ -64,6 +67,7 @@ public class bulletScript : MonoBehaviour
                 default:
                     break;
             }
+            AudioSource.PlayClipAtPoint(bulletHitClip_, transform.position);
             Destroy(gameObject);
         }
     }

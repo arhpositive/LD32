@@ -21,6 +21,8 @@ public class basicEnemyScript : MonoBehaviour
     public bool canShoot_;
     public float shootingInterval_;
     public GameObject bulletPrefab_;
+    public GameObject explosionPrefab_;
+    public AudioClip explosionClip_;
 
     bool isStunned_;
     float stunTime_;    
@@ -81,9 +83,10 @@ public class basicEnemyScript : MonoBehaviour
 
     void OnTriggerStay2D(Collider2D other)
     {
-        if (other.gameObject.tag == "Player" && !other.gameObject.GetComponent<playerScript>().isInvulnerable() ||
-            other.gameObject.tag == "Enemy")
+        if ((other.gameObject.tag == "Player" && !other.gameObject.GetComponent<playerScript>().isInvulnerable() && 
+            !other.gameObject.GetComponent<playerScript>().isDead()) || other.gameObject.tag == "Enemy")
         {
+            AudioSource.PlayClipAtPoint(explosionClip_, transform.position);
             Destroy(gameObject);
         }
     }
@@ -93,9 +96,12 @@ public class basicEnemyScript : MonoBehaviour
         lastShotTime_ = Time.time;
         for(int i = 0; i < transform.childCount; i++)
         {
-            Vector3 bulletStartPoint = transform.GetChild(i).position;
-            GameObject bullet = Instantiate(bulletPrefab_, bulletStartPoint, Quaternion.identity) as GameObject;
-            bullet.GetComponent<bulletScript>().SetDirection(new Vector2(-1.0f, (i % 2 == 1 ? 0.1f : -0.1f)));
+            if (transform.GetChild(i).CompareTag("BulletStart"))
+            {
+                Vector3 bulletStartPoint = transform.GetChild(i).position;
+                GameObject bullet = Instantiate(bulletPrefab_, bulletStartPoint, Quaternion.identity) as GameObject;
+                bullet.GetComponent<bulletScript>().SetDirection(new Vector2(-1.0f, (i % 2 == 1 ? 0.1f : -0.1f)));
+            }            
         }
     }
 }

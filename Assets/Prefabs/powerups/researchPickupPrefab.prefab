@@ -73,6 +73,7 @@ MonoBehaviour:
   speed_: 1
   direction_: {x: -1, y: 0}
   powerupType_: 2
+  powerupGainClip_: {fileID: 8300000, guid: ad88cb7e7d7fa8a49af79977ff10de68, type: 3}
 --- !u!212 &21296114
 SpriteRenderer:
   m_ObjectHideFlags: 1

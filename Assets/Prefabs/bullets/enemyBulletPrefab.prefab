@@ -89,6 +89,7 @@ MonoBehaviour:
   speed_: 1.5
   direction_: {x: -1, y: 0}
   bulletType_: 2
+  bulletHitClip_: {fileID: 8300000, guid: 936894d938984564f82df28798b05926, type: 3}
 --- !u!212 &21204176
 SpriteRenderer:
   m_ObjectHideFlags: 1

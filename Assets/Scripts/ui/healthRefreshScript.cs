@@ -1,4 +1,11 @@
-﻿using UnityEngine;
+﻿/* 
+ * Ludum Dare 32 Game
+ * Author: Arhan Bakan
+ * 
+ * healthRefreshScript.cs
+ */
+
+using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
 

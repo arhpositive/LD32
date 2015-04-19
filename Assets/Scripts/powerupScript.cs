@@ -22,6 +22,7 @@ public class powerupScript : MonoBehaviour
     public float speed_;
     public Vector2 direction_;
     public PowerupType powerupType_;
+    public AudioClip powerupGainClip_;
 
 	// Use this for initialization
 	void Start () 
@@ -49,7 +50,7 @@ public class powerupScript : MonoBehaviour
 
     void OnTriggerStay2D(Collider2D other)
     {
-        if (other.gameObject.tag == "Player")
+        if (other.gameObject.tag == "Player" && !other.gameObject.GetComponent<playerScript>().isDead())
         {
             switch (powerupType_)
             {
@@ -65,8 +66,7 @@ public class powerupScript : MonoBehaviour
                 default:
                     break;
             }
-
-
+            AudioSource.PlayClipAtPoint(powerupGainClip_, transform.position);
             Destroy(gameObject);
         }
     }

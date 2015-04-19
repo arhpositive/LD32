@@ -34,10 +34,15 @@ public class playerScript : MonoBehaviour
 
     public static int playerScore_ = 0;
 
+    public GameObject explosionPrefab_;
     public GameObject stunBulletPrefab_;
     public GameObject speedUpBulletPrefab_;
     public float playerSpeedLimit_;
     public float playerAcceleration_; //TODO_ARHAN adjust acceleration values
+
+    public AudioClip fireStunGunClip_;
+    public AudioClip fireSpeedUpGunClip_;
+    public AudioClip explosionClip_;
     
     float currentHorizontalSpeed_;
     float currentVerticalSpeed_;
@@ -53,7 +58,7 @@ public class playerScript : MonoBehaviour
     float invulnerabilityStart_;
     
     SpriteRenderer sprRenderer_;
-    Collider2D collider_;
+    SpriteRenderer[] childRenderers_;
 
     Gun stunGun_;
     Gun speedUpGun_;
@@ -61,7 +66,7 @@ public class playerScript : MonoBehaviour
     void Awake()
     {
         sprRenderer_ = gameObject.GetComponent<SpriteRenderer>();
-        collider_ = gameObject.GetComponent<Collider2D>();
+        childRenderers_ = gameObject.GetComponentsInChildren<SpriteRenderer>();
     }
 
 	// Use this for initialization
@@ -87,8 +92,11 @@ public class playerScript : MonoBehaviour
             {
                 //rise from dead
                 isDead_ = false;
-                collider_.enabled = true;
                 sprRenderer_.enabled = true;
+                foreach (SpriteRenderer r in childRenderers_)
+                {
+                    r.enabled = true;
+                }
 
                 //spawn
                 transform.position = new Vector3(0.0f, Random.Range(minVerticalMovementLimit_, maxVerticalMovementLimit_), spawnScript.spawnZCoord_);
@@ -107,10 +115,18 @@ public class playerScript : MonoBehaviour
             if ((Time.time - invulnerabilityStart_) % 0.5f > 0.25f)
             {
                 sprRenderer_.enabled = false;
+                foreach (SpriteRenderer r in childRenderers_)
+                {
+                    r.enabled = false;
+                }
             }
             else
             {
                 sprRenderer_.enabled = true;
+                foreach (SpriteRenderer r in childRenderers_)
+                {
+                    r.enabled = true;
+                }
             }
         }
 
@@ -195,11 +211,7 @@ public class playerScript : MonoBehaviour
 
     void OnTriggerStay2D(Collider2D other)
     {
-        if (other.gameObject.tag == "Powerup")
-        {
-            //TODO pick up powerup
-        }
-        else if (!isInvulnerable_ && other.gameObject.tag == "Enemy")
+        if (!isDead_ && !isInvulnerable_ && other.gameObject.tag == "Enemy")
         {
             playerGotHit();
         }
@@ -216,10 +228,14 @@ public class playerScript : MonoBehaviour
         }
         else
         {
+            AudioSource.PlayClipAtPoint(explosionClip_, transform.position);
             deathStart_ = Time.time;
             isDead_ = true;
-            collider_.enabled = false;
             sprRenderer_.enabled = false;
+            foreach(SpriteRenderer r in childRenderers_)
+            {
+                r.enabled = false;
+            }
         }
     }
 
@@ -268,15 +284,31 @@ public class playerScript : MonoBehaviour
     void FireStunGun()
     {
         stunGun_.shootTime_ = Time.time;
-        Vector3 bulletStartPoint = transform.GetChild(0).position;
-        Instantiate(stunGun_.bulletPrefab_, bulletStartPoint, Quaternion.identity);
+
+        for (int i = 0; i < transform.childCount; i++)
+        {
+            if (transform.GetChild(i).CompareTag("BulletStart"))
+            {
+                Vector3 bulletStartPoint = transform.GetChild(i).position;
+                Instantiate(stunGun_.bulletPrefab_, bulletStartPoint, Quaternion.identity);
+                AudioSource.PlayClipAtPoint(fireStunGunClip_, transform.GetChild(i).position);
+            }
+        }        
     }
 
     void FireSpeedUpGun()
     {
         speedUpGun_.shootTime_ = Time.time;
-        Vector3 bulletStartPoint = transform.GetChild(0).position;
-        Instantiate(speedUpGun_.bulletPrefab_, bulletStartPoint, Quaternion.identity);
-        speedUpGun_.ammoCount_--;
+
+        for (int i = 0; i < transform.childCount; i++)
+        {
+            if (transform.GetChild(i).CompareTag("BulletStart"))
+            {
+                Vector3 bulletStartPoint = transform.GetChild(i).position;
+                Instantiate(speedUpGun_.bulletPrefab_, bulletStartPoint, Quaternion.identity);
+                speedUpGun_.ammoCount_--;
+                AudioSource.PlayClipAtPoint(fireSpeedUpGunClip_, bulletStartPoint);
+            }
+        }
     }
 }
