@@ -22,42 +22,44 @@ struct WaveEntity
     }
 };
 
-public class spawnScript : MonoBehaviour 
+public class spawnScript : MonoBehaviour
 {
     public GameObject playerPrefab_;
-    public GameObject basicEnemyPrefab_;
+    public GameObject[] enemyPrefabs_;
+    public GameObject[] powerupPrefabs_;
 
     public static float horizontalEnterCoord_ = 8.0f;
     public static float horizontalExitCoord_ = -1.0f;
 
-    float spawnZCoord_ = 0.0f;
+    public static float spawnZCoord_ = 0.0f;
 
     float previousWaveSpawnTime_;
     float waveSpawnInterval_ = 5.0f;
 
-    bool playerNeedsRespawn_;
-    float playerDeathTime_;
-    float playerRespawnTimer_ = 2.0f;
-    
+    float previousPowerupSpawnTime_;
+    float powerupSpawnInterval_ = 2.0f;
+
     //float enemyHorizontalSpawnInterval_ = 0.9f; //TODO_ARHAN open up later
-    
-    static float[] enemyVerticalSpawnPosArray_ = {0.55f, 1.45f, 2.35f, 3.25f, 4.15f, 5.05f};
-    
+
+    static float[] verticalSpawnPosArray_ = { 0.55f, 1.45f, 2.35f, 3.25f, 4.15f, 5.05f };
+
     List<WaveEntity> nextWave_;
 
-	// Use this for initialization
-	void Start () 
+    // Use this for initialization
+    void Start()
     {
-        SpawnPlayer();
+        Instantiate(playerPrefab_,
+            new Vector3(0.0f, Random.Range(playerScript.minVerticalMovementLimit_, playerScript.maxVerticalMovementLimit_), spawnZCoord_),
+            Quaternion.identity);
         previousWaveSpawnTime_ = Time.time;
-        playerDeathTime_ = Time.time;
+        previousPowerupSpawnTime_ = Time.time;
         nextWave_ = new List<WaveEntity>();
-	}
-	
-	// Update is called once per frame
-	void Update () 
+    }
+
+    // Update is called once per frame
+    void Update()
     {
-	    if (Time.time - previousWaveSpawnTime_ > waveSpawnInterval_)
+        if (Time.time - previousWaveSpawnTime_ > waveSpawnInterval_)
         {
             FormNewWave();
             SpawnNewWave();
@@ -65,18 +67,19 @@ public class spawnScript : MonoBehaviour
             previousWaveSpawnTime_ = Time.time;
         }
 
-        if (playerNeedsRespawn_ && Time.time - playerDeathTime_ > playerRespawnTimer_)
+        if (Time.time - previousPowerupSpawnTime_ > powerupSpawnInterval_)
         {
-            //TODO_ARHAN end game if player is out of lives
-            SpawnPlayer();
+            SpawnNewPowerup();
+            previousPowerupSpawnTime_ = Time.time;
         }
-	}
+    }
 
     void FormNewWave()
     {
-        for (int i = 0; i < enemyVerticalSpawnPosArray_.Length; i++)
+        for (int i = 0; i < verticalSpawnPosArray_.Length; i++)
         {
-            WaveEntity entity = new WaveEntity(new Vector3(horizontalEnterCoord_, enemyVerticalSpawnPosArray_[i], spawnZCoord_), basicEnemyPrefab_);
+            int enemyKind = Random.Range(0, enemyPrefabs_.Length);
+            WaveEntity entity = new WaveEntity(new Vector3(horizontalEnterCoord_, verticalSpawnPosArray_[i], spawnZCoord_), enemyPrefabs_[enemyKind]);
             nextWave_.Add(entity);
         }
     }
@@ -89,17 +92,14 @@ public class spawnScript : MonoBehaviour
         }
     }
 
-    public void PlayerDied()
+    void SpawnNewPowerup()
     {
-        playerNeedsRespawn_ = true;
-        playerDeathTime_ = Time.time;
+        int powerupKind = Random.Range(0, powerupPrefabs_.Length);
+
+        Vector3 powerupPos = new Vector3(horizontalEnterCoord_, Random.Range(playerScript.minVerticalMovementLimit_, playerScript.maxVerticalMovementLimit_), spawnZCoord_);
+
+        GameObject powerup = Instantiate(powerupPrefabs_[powerupKind], powerupPos, Quaternion.identity) as GameObject;
+        powerup.GetComponent<powerupScript>().setDirection(new Vector2(-1.0f, Random.Range(-1.0f, 1.0f)));
     }
 
-    void SpawnPlayer()
-    {
-        Instantiate(playerPrefab_,
-            new Vector3(0.0f, Random.Range(playerScript.minVerticalMovementLimit_, playerScript.maxVerticalMovementLimit_), spawnZCoord_),
-            Quaternion.identity);
-        playerNeedsRespawn_ = false;
-    }
 }

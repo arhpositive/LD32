@@ -40,25 +40,33 @@ public class playerScript : MonoBehaviour
     float currentHorizontalSpeed_;
     float currentVerticalSpeed_;
 
+    int playerHealth_;
+
+    bool isDead_;
+    float deathDuration_ = 2.0f;
+    float deathStart_;
+
     bool isInvulnerable_;
     float invulnerabilityDuration_ = 2.0f;
     float invulnerabilityStart_;
+    
     SpriteRenderer sprRenderer_;
+    Collider2D collider_;
 
     Gun stunGun_;
     Gun speedUpGun_;
 
-    spawnScript scriptSpawn_;
-
     void Awake()
     {
-        scriptSpawn_ = Camera.main.gameObject.GetComponent<spawnScript>();
         sprRenderer_ = gameObject.GetComponent<SpriteRenderer>();
+        collider_ = gameObject.GetComponent<Collider2D>();
     }
 
 	// Use this for initialization
 	void Start () 
     {
+        playerHealth_ = 3;
+        isDead_ = false;
         isInvulnerable_ = true;
         invulnerabilityStart_ = Time.time;
         currentHorizontalSpeed_ = 0.0f;
@@ -71,6 +79,26 @@ public class playerScript : MonoBehaviour
 	// Update is called once per frame
 	void Update () 
     {
+        if (isDead_)
+        {
+            if (Time.time - deathStart_ > deathDuration_)
+            {
+                //rise from dead
+                isDead_ = false;
+                collider_.enabled = true;
+                sprRenderer_.enabled = true;
+
+                //spawn
+                transform.position = new Vector3(0.0f, Random.Range(minVerticalMovementLimit_, maxVerticalMovementLimit_), spawnScript.spawnZCoord_);
+                isInvulnerable_ = true;
+                invulnerabilityStart_ = Time.time;
+            }
+            else
+            {
+                return;
+            }
+        }
+
         //invulnerability
         if (isInvulnerable_)
         {
@@ -165,16 +193,53 @@ public class playerScript : MonoBehaviour
 
     void OnTriggerStay2D(Collider2D other)
     {
-        if (!isInvulnerable_ && other.gameObject.tag == "Enemy")
+        if (other.gameObject.tag == "Powerup")
         {
-            scriptSpawn_.PlayerDied();
-            Destroy(gameObject);
+            //TODO pick up powerup
+        }
+        else if (!isInvulnerable_ && other.gameObject.tag == "Enemy")
+        {
+            playerHealth_--;
+
+            if (playerHealth_ == 0)
+            {
+                Destroy(gameObject);
+                //TODO end game
+            }
+            else
+            {
+                deathStart_ = Time.time;
+                isDead_ = true;
+                collider_.enabled = false;
+                sprRenderer_.enabled = false;
+            }
         }
     }
 
     public bool isInvulnerable()
     {
         return isInvulnerable_;
+    }
+
+    public bool isDead()
+    {
+        return isDead_;
+    }
+
+    public void triggerHealthPickup()
+    {
+        playerHealth_++;
+    }
+
+    public void triggerSpeedUpPickup()
+    {
+        speedUpGun_.ammoCount_++;
+        //TODO keep ui updated
+    }
+
+    public void triggerCoinPickup()
+    {
+        //TODO update high score
     }
 
     void FireStunGun()

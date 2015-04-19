@@ -26,6 +26,7 @@ public class basicEnemyScript : MonoBehaviour
 	// Use this for initialization
 	void Start () 
     {
+        direction_.Normalize();
         isStunned_ = false;
         stunTime_ = 0.0f;
         speedBoostActive = false;

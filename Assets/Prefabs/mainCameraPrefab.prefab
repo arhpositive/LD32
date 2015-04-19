@@ -90,7 +90,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerPrefab_: {fileID: 114074, guid: 58cda14e50f6d8d42a46b3077f960e56, type: 2}
-  basicEnemyPrefab_: {fileID: 139786, guid: 566fefe5e59b580429b5c12346896bd0, type: 2}
+  enemyPrefabs_:
+  - {fileID: 139786, guid: 566fefe5e59b580429b5c12346896bd0, type: 2}
+  - {fileID: 190498, guid: a9dbab4630dcdae4ca684a97057da1a1, type: 2}
+  powerupPrefabs_:
+  - {fileID: 186326, guid: 34c4edda1b1fbba4bb38a7f81c642d6b, type: 2}
+  - {fileID: 195642, guid: 7e24ad8ee91fea748a9cf394b8bd4c47, type: 2}
+  - {fileID: 107878, guid: e27706cab5b9776428cddb7dee2575de, type: 2}
 --- !u!124 &12488314
 Behaviour:
   m_ObjectHideFlags: 1

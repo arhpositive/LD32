@@ -15,8 +15,8 @@ public enum BulletType
     bt_speedup
 }
 
-public class bulletScript : MonoBehaviour {
-
+public class bulletScript : MonoBehaviour 
+{
     public float speed_;
     public Vector2 direction_;
     public BulletType bulletType_;
