@@ -32,6 +32,8 @@ public class playerScript : MonoBehaviour
     public static float minVerticalMovementLimit_ = 0.45f;
     public static float maxVerticalMovementLimit_ = 5.15f;
 
+    public static int playerScore_ = 0;
+
     public GameObject stunBulletPrefab_;
     public GameObject speedUpBulletPrefab_;
     public float playerSpeedLimit_;
@@ -72,7 +74,7 @@ public class playerScript : MonoBehaviour
         currentHorizontalSpeed_ = 0.0f;
         currentVerticalSpeed_ = 0.0f;
 
-        stunGun_ = new Gun(stunBulletPrefab_, 0.5f, 0.0f, -1);
+        stunGun_ = new Gun(stunBulletPrefab_, 0.3f, 0.0f, -1);
         speedUpGun_ = new Gun(speedUpBulletPrefab_, 0.5f, 0.0f, 3);
 	}
 	
@@ -199,20 +201,25 @@ public class playerScript : MonoBehaviour
         }
         else if (!isInvulnerable_ && other.gameObject.tag == "Enemy")
         {
-            playerHealth_--;
+            playerGotHit();
+        }
+    }
 
-            if (playerHealth_ == 0)
-            {
-                Destroy(gameObject);
-                //TODO end game
-            }
-            else
-            {
-                deathStart_ = Time.time;
-                isDead_ = true;
-                collider_.enabled = false;
-                sprRenderer_.enabled = false;
-            }
+    void playerGotHit()
+    {
+        playerHealth_--;
+
+        if (playerHealth_ == 0)
+        {
+            Destroy(gameObject);
+            //TODO end game
+        }
+        else
+        {
+            deathStart_ = Time.time;
+            isDead_ = true;
+            collider_.enabled = false;
+            sprRenderer_.enabled = false;
         }
     }
 
@@ -237,9 +244,25 @@ public class playerScript : MonoBehaviour
         //TODO keep ui updated
     }
 
-    public void triggerCoinPickup()
+    public void triggerResearchPickup()
     {
         //TODO update high score
+        playerScore_ += 100;
+    }
+
+    public void triggerGettingShot()
+    {
+        playerGotHit();
+    }
+
+    public int getHealth()
+    {
+        return playerHealth_;
+    }
+
+    public int getSpeedUpGunAmmo()
+    {
+        return speedUpGun_.ammoCount_;
     }
 
     void FireStunGun()

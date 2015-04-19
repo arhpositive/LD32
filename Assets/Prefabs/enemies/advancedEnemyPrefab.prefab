@@ -144,6 +144,9 @@ MonoBehaviour:
   direction_: {x: -1, y: 0}
   stunDuration_: .100000001
   speedBoostPercentage_: 1.25
+  canShoot_: 1
+  shootingInterval_: 3
+  bulletPrefab_: {fileID: 104536, guid: efb3702b3f1e6b140ae6e81f3396926b, type: 2}
 --- !u!212 &21203258
 SpriteRenderer:
   m_ObjectHideFlags: 1

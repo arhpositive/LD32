@@ -18,10 +18,14 @@ public class basicEnemyScript : MonoBehaviour
     public Vector2 direction_;
     public float stunDuration_;
     public float speedBoostPercentage_;
+    public bool canShoot_;
+    public float shootingInterval_;
+    public GameObject bulletPrefab_;
 
     bool isStunned_;
     float stunTime_;    
-    bool speedBoostActive;
+    bool speedBoostActive_;
+    float lastShotTime_;
 
 	// Use this for initialization
 	void Start () 
@@ -29,7 +33,8 @@ public class basicEnemyScript : MonoBehaviour
         direction_.Normalize();
         isStunned_ = false;
         stunTime_ = 0.0f;
-        speedBoostActive = false;
+        speedBoostActive_ = false;
+        lastShotTime_ = Time.time;
 	}
 	
 	// Update is called once per frame
@@ -38,10 +43,16 @@ public class basicEnemyScript : MonoBehaviour
         if (isStunned_ && Time.time - stunTime_ > stunDuration_)
         {
             isStunned_ = false;
+            lastShotTime_ = Time.time;
         }
 
         if (!isStunned_)
         {
+            if (canShoot_ && Time.time - lastShotTime_ > shootingInterval_)
+            {
+                FireGun();
+            }
+
             transform.Translate(direction_ * speed_ * Time.deltaTime, Space.World);
 
             if (transform.position.x < spawnScript.horizontalExitCoord_ || transform.position.x > spawnScript.horizontalEnterCoord_)
@@ -60,9 +71,9 @@ public class basicEnemyScript : MonoBehaviour
 
     public void triggerSpeedBoost()
     {
-        if (!speedBoostActive)
+        if (!speedBoostActive_)
         {
-            speedBoostActive = true;
+            speedBoostActive_ = true;
             speed_ *= speedBoostPercentage_;
         }
         //TODO consider changing material color
@@ -74,6 +85,17 @@ public class basicEnemyScript : MonoBehaviour
             other.gameObject.tag == "Enemy")
         {
             Destroy(gameObject);
+        }
+    }
+
+    void FireGun()
+    {
+        lastShotTime_ = Time.time;
+        for(int i = 0; i < transform.childCount; i++)
+        {
+            Vector3 bulletStartPoint = transform.GetChild(i).position;
+            GameObject bullet = Instantiate(bulletPrefab_, bulletStartPoint, Quaternion.identity) as GameObject;
+            bullet.GetComponent<bulletScript>().SetDirection(new Vector2(-1.0f, (i % 2 == 1 ? 0.1f : -0.1f)));
         }
     }
 }

@@ -13,7 +13,7 @@ public enum PowerupType
 {
     pt_health,
     pt_speedup,
-    pt_coin
+    pt_research
 }
 
 public class powerupScript : MonoBehaviour 
@@ -34,9 +34,11 @@ public class powerupScript : MonoBehaviour
     {
         transform.Translate(direction_ * speed_ * Time.deltaTime, Space.World);
 
-        if  (transform.position.y < playerScript.minVerticalMovementLimit_ || transform.position.y > playerScript.maxVerticalMovementLimit_)
+        if  (transform.position.y < playerScript.minVerticalMovementLimit_ && direction_.y < 0.0f || 
+            transform.position.y > playerScript.maxVerticalMovementLimit_ && direction_.y > 0.0f)
         {
             direction_.y = -direction_.y;
+            direction_.Normalize();
         }
 
         if (transform.position.x < spawnScript.horizontalExitCoord_ || transform.position.x > spawnScript.horizontalEnterCoord_)
@@ -57,8 +59,8 @@ public class powerupScript : MonoBehaviour
                 case PowerupType.pt_speedup:
                     other.gameObject.GetComponent<playerScript>().triggerSpeedUpPickup();
                     break;
-                case PowerupType.pt_coin:
-                    other.gameObject.GetComponent<playerScript>().triggerCoinPickup();
+                case PowerupType.pt_research:
+                    other.gameObject.GetComponent<playerScript>().triggerResearchPickup();
                     break;
                 default:
                     break;

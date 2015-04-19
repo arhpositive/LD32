@@ -45,12 +45,16 @@ public class spawnScript : MonoBehaviour
 
     List<WaveEntity> nextWave_;
 
-    // Use this for initialization
-    void Start()
+    void Awake()
     {
         Instantiate(playerPrefab_,
             new Vector3(0.0f, Random.Range(playerScript.minVerticalMovementLimit_, playerScript.maxVerticalMovementLimit_), spawnZCoord_),
             Quaternion.identity);
+    }
+
+    // Use this for initialization
+    void Start()
+    {
         previousWaveSpawnTime_ = Time.time;
         previousPowerupSpawnTime_ = Time.time;
         nextWave_ = new List<WaveEntity>();
@@ -99,7 +103,7 @@ public class spawnScript : MonoBehaviour
         Vector3 powerupPos = new Vector3(horizontalEnterCoord_, Random.Range(playerScript.minVerticalMovementLimit_, playerScript.maxVerticalMovementLimit_), spawnZCoord_);
 
         GameObject powerup = Instantiate(powerupPrefabs_[powerupKind], powerupPos, Quaternion.identity) as GameObject;
-        powerup.GetComponent<powerupScript>().setDirection(new Vector2(-1.0f, Random.Range(-1.0f, 1.0f)));
+        powerup.GetComponent<powerupScript>().setDirection(new Vector2(-1.0f, Random.Range(-0.5f, 0.5f)));
     }
 
 }

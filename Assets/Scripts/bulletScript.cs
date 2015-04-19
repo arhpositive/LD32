@@ -12,7 +12,8 @@ using System.Collections;
 public enum BulletType
 {
     bt_stun,
-    bt_speedup
+    bt_speedup,
+    bt_killer
 }
 
 public class bulletScript : MonoBehaviour 
@@ -23,7 +24,7 @@ public class bulletScript : MonoBehaviour
 
 	// Use this for initialization
 	void Start () {
-	
+        direction_.Normalize();
 	}
 	
 	// Update is called once per frame
@@ -53,5 +54,23 @@ public class bulletScript : MonoBehaviour
             }
             Destroy(gameObject);
         }
+        else if (other.gameObject.tag == "Player" && !other.gameObject.GetComponent<playerScript>().isInvulnerable())
+        {
+            switch(bulletType_)
+            {
+                case BulletType.bt_killer:
+                    other.gameObject.GetComponent<playerScript>().triggerGettingShot();
+                    break;
+                default:
+                    break;
+            }
+            Destroy(gameObject);
+        }
+    }
+
+    public void SetDirection(Vector2 direction)
+    {
+        direction_ = direction;
+        direction_.Normalize();
     }
 }
