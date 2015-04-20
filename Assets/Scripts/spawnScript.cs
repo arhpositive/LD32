@@ -214,9 +214,16 @@ public class spawnScript : MonoBehaviour
         {
             powerupKind = (int)PowerupType.pt_health;
         }
-        else if (randomizePowerup < 25.0f)
+        else if (randomizePowerup < 35.0f)
         {
-            powerupKind = (int)PowerupType.pt_speedup;
+            if (scriptPlayer_.getHealth() == 1)
+            {
+                powerupKind = (int)PowerupType.pt_health;
+            }
+            else
+            {
+                powerupKind = (int)PowerupType.pt_speedup;
+            }            
         }
         else
         {
