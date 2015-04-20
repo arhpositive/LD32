@@ -11,9 +11,9 @@ using System.Collections;
 
 public enum PowerupType
 {
-    pt_health,
-    pt_speedup,
-    pt_research
+    pt_health = 0,
+    pt_speedup = 1,
+    pt_research = 2
 }
 
 public class powerupScript : MonoBehaviour 
@@ -27,6 +27,7 @@ public class powerupScript : MonoBehaviour
 	// Use this for initialization
 	void Start () 
     {
+        direction_ = new Vector2(-1.0f, Random.Range(-0.5f, 0.5f));
         direction_.Normalize();
 	}
 	

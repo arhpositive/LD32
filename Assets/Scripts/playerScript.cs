@@ -43,6 +43,8 @@ public class playerScript : MonoBehaviour
     public AudioClip fireStunGunClip_;
     public AudioClip fireSpeedUpGunClip_;
     public AudioClip explosionClip_;
+
+    endScoreRefreshText endGameScoreDisplay_;
     
     float currentHorizontalSpeed_;
     float currentVerticalSpeed_;
@@ -67,6 +69,7 @@ public class playerScript : MonoBehaviour
     {
         sprRenderer_ = gameObject.GetComponent<SpriteRenderer>();
         childRenderers_ = gameObject.GetComponentsInChildren<SpriteRenderer>();
+        endGameScoreDisplay_ = GameObject.FindGameObjectWithTag("ScoreText").GetComponent<endScoreRefreshText>();
     }
 
 	// Use this for initialization
@@ -137,11 +140,11 @@ public class playerScript : MonoBehaviour
         }
 
         //shooting
-        if (Input.GetAxisRaw("Fire1") > Mathf.Epsilon && Time.time - stunGun_.shootTime_ > stunGun_.cooldown_)
+        if (Input.GetKey(KeyCode.Space) && Time.time - stunGun_.shootTime_ > stunGun_.cooldown_)
         {
             FireStunGun();
         }
-        else if (Input.GetAxisRaw("Fire2") > Mathf.Epsilon && 
+        else if (Input.GetKey(KeyCode.C) && 
             Time.time - speedUpGun_.shootTime_ > speedUpGun_.cooldown_ &&
             speedUpGun_.ammoCount_ > 0)
         {
@@ -223,8 +226,8 @@ public class playerScript : MonoBehaviour
 
         if (playerHealth_ == 0)
         {
+            endGameScoreDisplay_.SetTextVisible();
             Destroy(gameObject);
-            //TODO end game
         }
         else
         {
@@ -239,6 +242,11 @@ public class playerScript : MonoBehaviour
         }
     }
 
+    public int getPlayerHealth()
+    {
+        return playerHealth_;
+    }
+
     public bool isInvulnerable()
     {
         return isInvulnerable_;
@@ -249,6 +257,16 @@ public class playerScript : MonoBehaviour
         return isDead_;
     }
 
+    public void triggerEnemyDestruction()
+    {
+        playerScore_ -= 100;
+    }
+
+    public void triggerEnemyDisplacement(int scoreAddition)
+    {
+        playerScore_ += scoreAddition;
+    }
+
     public void triggerHealthPickup()
     {
         playerHealth_++;
@@ -257,13 +275,11 @@ public class playerScript : MonoBehaviour
     public void triggerSpeedUpPickup()
     {
         speedUpGun_.ammoCount_++;
-        //TODO keep ui updated
     }
 
     public void triggerResearchPickup()
     {
-        //TODO update high score
-        playerScore_ += 100;
+        playerScore_ += 50;
     }
 
     public void triggerGettingShot()

@@ -21,13 +21,16 @@ public class basicEnemyScript : MonoBehaviour
     public bool canShoot_;
     public float shootingInterval_;
     public GameObject bulletPrefab_;
-    public GameObject explosionPrefab_;
     public AudioClip explosionClip_;
 
     bool isStunned_;
     float stunTime_;    
     bool speedBoostActive_;
     float lastShotTime_;
+
+    playerScript scriptPlayer_;
+
+    public float displacementAmount_; //used for scoring
 
 	// Use this for initialization
 	void Start () 
@@ -37,6 +40,8 @@ public class basicEnemyScript : MonoBehaviour
         stunTime_ = 0.0f;
         speedBoostActive_ = false;
         lastShotTime_ = Time.time;
+        displacementAmount_ = 0.0f;
+        scriptPlayer_ = GameObject.FindGameObjectWithTag("Player").GetComponent<playerScript>();
 	}
 	
 	// Update is called once per frame
@@ -46,6 +51,7 @@ public class basicEnemyScript : MonoBehaviour
         {
             isStunned_ = false;
             lastShotTime_ = Time.time;
+            displacementAmount_ += stunDuration_ * speed_;
         }
 
         if (!isStunned_)
@@ -55,10 +61,18 @@ public class basicEnemyScript : MonoBehaviour
                 FireGun();
             }
 
+            if (speedBoostActive_)
+            {
+                displacementAmount_ -= stunDuration_ * speed_;
+            }
+
             transform.Translate(direction_ * speed_ * Time.deltaTime, Space.World);
 
             if (transform.position.x < spawnScript.horizontalExitCoord_ || transform.position.x > spawnScript.horizontalEnterCoord_)
             {
+                //cash in the points
+                scriptPlayer_.triggerEnemyDisplacement((int)Mathf.Abs(displacementAmount_));
+
                 Destroy(gameObject);
             }
         }
