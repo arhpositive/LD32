@@ -149,9 +149,10 @@ MonoBehaviour:
   direction_: {x: -1, y: 0}
   stunDuration_: .200000003
   speedBoostPercentage_: 1.5
-  canShoot_: 0
-  shootingInterval_: 0
-  bulletPrefab_: {fileID: 0}
+  canShoot_: 1
+  shootingInterval_: 7
+  randomShot_: 1
+  bulletPrefab_: {fileID: 104536, guid: efb3702b3f1e6b140ae6e81f3396926b, type: 2}
   explosionClip_: {fileID: 8300000, guid: 2c95fdf00a27c874cb6cf05c7be45376, type: 3}
   displacementAmount_: 0
 --- !u!212 &21226966

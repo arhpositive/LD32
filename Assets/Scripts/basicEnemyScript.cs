@@ -20,16 +20,20 @@ public class basicEnemyScript : MonoBehaviour
     public float speedBoostPercentage_;
     public bool canShoot_;
     public float shootingInterval_;
+    public bool randomShot_;
     public GameObject bulletPrefab_;
     public AudioClip explosionClip_;
+    
 
     bool isStunned_;
     float stunTime_;    
     bool speedBoostActive_;
     float lastShotTime_;
+    float nextShootingInterval_;
 
     GameObject playerObject_;
     playerScript scriptPlayer_;
+    spawnScript scriptSpawn_;
 
     public float displacementAmount_; //used for scoring
 
@@ -47,7 +51,8 @@ public class basicEnemyScript : MonoBehaviour
         {
             scriptPlayer_ = playerObject_.GetComponent<playerScript>();
         }
-        
+        scriptSpawn_ = Camera.main.GetComponent<spawnScript>();
+        nextShootingInterval_ = (Random.Range(shootingInterval_ - 1.0f, shootingInterval_ + 1.0f) / scriptSpawn_.getDifficultyMultiplier()) * 0.5f;
 	}
 	
 	// Update is called once per frame
@@ -62,7 +67,7 @@ public class basicEnemyScript : MonoBehaviour
 
         if (!isStunned_)
         {
-            if (canShoot_ && Time.time - lastShotTime_ > shootingInterval_)
+            if (canShoot_ && Time.time - lastShotTime_ > nextShootingInterval_)
             {
                 FireGun();
             }
@@ -123,8 +128,17 @@ public class basicEnemyScript : MonoBehaviour
             {
                 Vector3 bulletStartPoint = transform.GetChild(i).position;
                 GameObject bullet = Instantiate(bulletPrefab_, bulletStartPoint, Quaternion.identity) as GameObject;
-                bullet.GetComponent<bulletScript>().SetDirection(new Vector2(-1.0f, (i % 2 == 1 ? 0.1f : -0.1f)));
+
+                if (!randomShot_)
+                {
+                    bullet.GetComponent<bulletScript>().SetDirection(new Vector2(-1.0f, (i % 2 == 1 ? 0.1f : -0.1f)));
+                }
+                else
+                {
+                    bullet.GetComponent<bulletScript>().SetDirection(new Vector2(-1.0f, (Random.Range(0, 2) % 2 == 1 ? 0.05f : -0.05f)));
+                }
             }            
         }
+        nextShootingInterval_ = Random.Range(shootingInterval_ - 1.0f, shootingInterval_ + 1.0f) / scriptSpawn_.getDifficultyMultiplier();
     }
 }
