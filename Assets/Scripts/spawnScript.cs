@@ -62,6 +62,13 @@ public class spawnScript : MonoBehaviour
 
     static float[] verticalSpawnPosArray_ = { 0.55f, 1.45f, 2.35f, 3.25f, 4.15f, 5.05f };
 
+    static float[] fixedOffset1 = { -0.4f, 0.0f, 0.4f, 0.4f, 0.0f, -0.4f };
+    static float[] fixedOffset2 = { -0.4f, 0.4f, -0.4f, 0.4f, -0.4f, 0.4f };
+    static float[] fixedOffset3 = { 0.4f, 0.0f, -0.4f, -0.4f, 0.0f, 0.4f };
+    static float[] fixedOffset4 = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+    float[][] offsets = { fixedOffset1, fixedOffset2, fixedOffset3, fixedOffset4 };
+
+
     List<WaveEntity> nextWave_;
 
     void Awake()
@@ -155,6 +162,8 @@ public class spawnScript : MonoBehaviour
     {
         float advancedEnemyPercentage = (Mathf.Clamp(difficultyMultiplier_, 1.0f, 2.0f) - 1.0f) * 100.0f;
 
+        int randomOffset = Random.Range(0, offsets.Length);
+
         for (int i = 0; i < verticalSpawnPosArray_.Length; i++)
         {
             float randomEnemy = Random.Range(0.0f, 100.0f);
@@ -169,7 +178,7 @@ public class spawnScript : MonoBehaviour
                 enemyKind = 0;
             }
 
-            WaveEntity entity = new WaveEntity(new Vector3(horizontalEnterCoord_, verticalSpawnPosArray_[i], spawnZCoord_), enemyPrefabs_[enemyKind]);
+            WaveEntity entity = new WaveEntity(new Vector3(horizontalEnterCoord_ + offsets[randomOffset][i], verticalSpawnPosArray_[i], spawnZCoord_), enemyPrefabs_[enemyKind]);
             nextWave_.Add(entity);
         }
     }

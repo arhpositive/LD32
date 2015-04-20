@@ -28,6 +28,7 @@ public class basicEnemyScript : MonoBehaviour
     bool speedBoostActive_;
     float lastShotTime_;
 
+    GameObject playerObject_;
     playerScript scriptPlayer_;
 
     public float displacementAmount_; //used for scoring
@@ -41,7 +42,12 @@ public class basicEnemyScript : MonoBehaviour
         speedBoostActive_ = false;
         lastShotTime_ = Time.time;
         displacementAmount_ = 0.0f;
-        scriptPlayer_ = GameObject.FindGameObjectWithTag("Player").GetComponent<playerScript>();
+        playerObject_ = GameObject.FindGameObjectWithTag("Player");
+        if (playerObject_)
+        {
+            scriptPlayer_ = playerObject_.GetComponent<playerScript>();
+        }
+        
 	}
 	
 	// Update is called once per frame
@@ -68,10 +74,13 @@ public class basicEnemyScript : MonoBehaviour
 
             transform.Translate(direction_ * speed_ * Time.deltaTime, Space.World);
 
-            if (transform.position.x < spawnScript.horizontalExitCoord_ || transform.position.x > spawnScript.horizontalEnterCoord_)
+            if (transform.position.x < spawnScript.horizontalExitCoord_)
             {
                 //cash in the points
-                scriptPlayer_.triggerEnemyDisplacement((int)Mathf.Abs(displacementAmount_));
+                if (scriptPlayer_)
+                {
+                    scriptPlayer_.triggerEnemyDisplacement((int)Mathf.Abs(displacementAmount_));
+                }
 
                 Destroy(gameObject);
             }
