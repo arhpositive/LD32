@@ -75,6 +75,7 @@ public class playerScript : MonoBehaviour
 	// Use this for initialization
 	void Start () 
     {
+        playerScore_ = 0;
         playerHealth_ = 3;
         isDead_ = false;
         isInvulnerable_ = true;
