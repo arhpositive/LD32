@@ -1,4 +1,12 @@
-﻿using UnityEngine;
+﻿/* 
+ * Game: Dislocator
+ * Author: Arhan Bakan
+ * 
+ * GameConstants.cs
+ * Holds constant values
+ */
+
+using UnityEngine;
 using System.Collections;
 
 public static class GameConstants 

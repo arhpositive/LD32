@@ -206,14 +206,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f2bc28f901bf394e8ca6d666938a2cb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  explosionPrefab_: {fileID: 103958, guid: fde55fb321738214fb8c19450c8ef612, type: 2}
-  stunBulletPrefab_: {fileID: 151552, guid: c01a9ecebecac134facbcd4665a1a13d, type: 2}
-  speedUpBulletPrefab_: {fileID: 181600, guid: 40481044129877d4a8fb8bc8e9f3acc3, type: 2}
-  playerSpeedLimit_: 4
-  playerAcceleration_: .100000001
-  fireStunGunClip_: {fileID: 8300000, guid: d8dbd1a7727573844b51d2e5e2fe2fed, type: 3}
-  fireSpeedUpGunClip_: {fileID: 8300000, guid: e4fd3e08cf0dc614d98186276bddbf7d, type: 3}
-  explosionClip_: {fileID: 8300000, guid: 2c95fdf00a27c874cb6cf05c7be45376, type: 3}
+  StunBulletPrefab: {fileID: 0}
+  SpeedUpBulletPrefab: {fileID: 0}
+  PlayerSpeedLimit: 0
+  PlayerAcceleration: 0
+  FireStunGunClip: {fileID: 0}
+  FireSpeedUpGunClip: {fileID: 0}
+  ExplosionClip: {fileID: 0}
 --- !u!212 &21220314
 SpriteRenderer:
   m_ObjectHideFlags: 1

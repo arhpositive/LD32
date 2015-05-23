@@ -1,5 +1,5 @@
 ﻿/* 
- * Ludum Dare 32 Game
+ * Game: Dislocator
  * Author: Arhan Bakan
  * 
  * BasicMove.cs
