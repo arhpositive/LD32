@@ -30,6 +30,8 @@ public class BasicEnemy : MonoBehaviour
     SpawnManager SpawnManagerScript;
     BasicMove BasicMoveScript;
 
+    // TODO YOU'RE HERE! review code, especially the order of doing things, shorten if possible, write better code
+
 	// Use this for initialization
 	void Start () 
     {

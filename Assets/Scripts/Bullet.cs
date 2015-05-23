@@ -25,13 +25,15 @@ public class Bullet : MonoBehaviour
     {
         if (other.gameObject.tag == "Enemy")
         {
+            BasicEnemy EnemyScript = other.gameObject.GetComponent<BasicEnemy>();
+
             switch(CurrentBulletType)
             {
                 case BulletType.bt_stun:
-                    other.gameObject.GetComponent<BasicEnemy>().TriggerStun();
+                    EnemyScript.TriggerStun();
                     break;
                 case BulletType.bt_speedup:
-                    other.gameObject.GetComponent<BasicEnemy>().TriggerSpeedBoost();
+                    EnemyScript.TriggerSpeedBoost();
                     break;
                 default:
                     break;
@@ -39,19 +41,23 @@ public class Bullet : MonoBehaviour
             AudioSource.PlayClipAtPoint(BulletHitClip, transform.position);
             Destroy(gameObject);
         }
-        else if (other.gameObject.tag == "Player" && !other.gameObject.GetComponent<Player>().GetIsInvulnerable() &&
-            !other.gameObject.GetComponent<Player>().GetIsDead())
+        else if (other.gameObject.tag == "Player")
         {
-            switch(CurrentBulletType)
+            Player PlayerScript = other.gameObject.GetComponent<Player>();
+
+            if (!PlayerScript.GetIsInvulnerable() && !PlayerScript.GetIsDead())
             {
-                case BulletType.bt_killer:
-                    other.gameObject.GetComponent<Player>().TriggerGettingShot();
-                    break;
-                default:
-                    break;
+                switch (CurrentBulletType)
+                {
+                    case BulletType.bt_killer:
+                        PlayerScript.TriggerGettingShot();
+                        break;
+                    default:
+                        break;
+                }
+                AudioSource.PlayClipAtPoint(BulletHitClip, transform.position);
+                Destroy(gameObject);
             }
-            AudioSource.PlayClipAtPoint(BulletHitClip, transform.position);
-            Destroy(gameObject);
         }
     }
 }

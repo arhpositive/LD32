@@ -23,24 +23,29 @@ public class Powerup : MonoBehaviour
 
     void OnTriggerStay2D(Collider2D other)
     {
-        if (other.gameObject.tag == "Player" && !other.gameObject.GetComponent<Player>().GetIsDead())
+        if (other.gameObject.tag == "Player")
         {
-            switch (PowerupType)
+            Player PlayerScript = other.gameObject.GetComponent<Player>();
+
+            if (!PlayerScript.GetIsDead())
             {
-                case PowerupType.pt_health:
-                    other.gameObject.GetComponent<Player>().TriggerHealthPickup();
-                    break;
-                case PowerupType.pt_speedup:
-                    other.gameObject.GetComponent<Player>().TriggerSpeedUpPickup();
-                    break;
-                case PowerupType.pt_research:
-                    other.gameObject.GetComponent<Player>().TriggerResearchPickup();
-                    break;
-                default:
-                    break;
+                switch (PowerupType)
+                {
+                    case PowerupType.pt_health:
+                        PlayerScript.TriggerHealthPickup();
+                        break;
+                    case PowerupType.pt_speedup:
+                        PlayerScript.TriggerSpeedUpPickup();
+                        break;
+                    case PowerupType.pt_research:
+                        PlayerScript.TriggerResearchPickup();
+                        break;
+                    default:
+                        break;
+                }
+                AudioSource.PlayClipAtPoint(GainPowerupClip, transform.position);
+                Destroy(gameObject);
             }
-            AudioSource.PlayClipAtPoint(GainPowerupClip, transform.position);
-            Destroy(gameObject);
         }
     }
 }

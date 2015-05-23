@@ -38,7 +38,7 @@ public class Player : MonoBehaviour
     public AudioClip FireSpeedUpGunClip;
     public AudioClip ExplosionClip;
 
-    RefreshEndScoreText EndGameScoreDisplay;
+    RefreshEndScoreText EndGameScoreText;
     
     float CurrentHorizontalSpeed;
     float CurrentVerticalSpeed;
@@ -63,7 +63,7 @@ public class Player : MonoBehaviour
     {
         SprRenderer = gameObject.GetComponent<SpriteRenderer>();
         ChildRenderers = gameObject.GetComponentsInChildren<SpriteRenderer>();
-        EndGameScoreDisplay = GameObject.FindGameObjectWithTag("ScoreText").GetComponent<RefreshEndScoreText>();
+        EndGameScoreText = GameObject.FindGameObjectWithTag("ScoreText").GetComponent<RefreshEndScoreText>();
     }
 
 	// Use this for initialization
@@ -222,7 +222,7 @@ public class Player : MonoBehaviour
 
         if (PlayerHealth == 0)
         {
-            EndGameScoreDisplay.SetTextVisible();
+            EndGameScoreText.SetTextVisible();
             Destroy(gameObject);
         }
         else
