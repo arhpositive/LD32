@@ -12,6 +12,7 @@ GameObject:
   - 114: {fileID: 11464180}
   - 50: {fileID: 5005374}
   - 61: {fileID: 6138754}
+  - 114: {fileID: 11406676}
   m_Layer: 0
   m_Name: healthPickupPrefab
   m_TagString: Powerup
@@ -59,6 +60,32 @@ BoxCollider2D:
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
   m_Size: {x: .200000003, y: .200000003}
+--- !u!114 &11406676
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 186326}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a4041147d56eb64ca3f49dd9b0521b8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  DoesMove: 1
+  MoveSpeed: 1
+  MoveDirX: -1
+  RandomizeMoveDirX: 0
+  RandomizeMoveDirXCoef: 0
+  MoveDirY: 0
+  RandomizeMoveDirY: 1
+  RandomizeMoveDirYCoef: .5
+  DoesRotate: 0
+  RotationSpeed: 0
+  RandomizeRotationSpeed: 0
+  RandomizeRotationSpeedCoef: 0
+  BounceOnHorizontalLimits: 1
+  DestroyOnVerticalLimits: 1
+  DestroyOnHorizontalLimits: 1
 --- !u!114 &11464180
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -70,8 +97,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b54c0d81c29a8f4188bc468dea12bd3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed_: 1
-  direction_: {x: -1, y: 0}
   powerupType_: 0
   powerupGainClip_: {fileID: 8300000, guid: ad88cb7e7d7fa8a49af79977ff10de68, type: 3}
 --- !u!212 &21205944

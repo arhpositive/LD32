@@ -18,36 +18,8 @@ public enum PowerupType
 
 public class powerupScript : MonoBehaviour 
 {
-
-    public float speed_;
-    public Vector2 direction_;
     public PowerupType powerupType_;
     public AudioClip powerupGainClip_;
-
-	// Use this for initialization
-	void Start () 
-    {
-        direction_ = new Vector2(-1.0f, Random.Range(-0.5f, 0.5f));
-        direction_.Normalize();
-	}
-	
-	// Update is called once per frame
-	void Update () 
-    {
-        transform.Translate(direction_ * speed_ * Time.deltaTime, Space.World);
-
-        if  (transform.position.y < playerScript.minVerticalMovementLimit_ && direction_.y < 0.0f || 
-            transform.position.y > playerScript.maxVerticalMovementLimit_ && direction_.y > 0.0f)
-        {
-            direction_.y = -direction_.y;
-            direction_.Normalize();
-        }
-
-        if (transform.position.x < spawnScript.horizontalExitCoord_ || transform.position.x > spawnScript.horizontalEnterCoord_)
-        {
-            Destroy(gameObject);
-        }
-	}
 
     void OnTriggerStay2D(Collider2D other)
     {
@@ -70,11 +42,5 @@ public class powerupScript : MonoBehaviour
             AudioSource.PlayClipAtPoint(powerupGainClip_, transform.position);
             Destroy(gameObject);
         }
-    }
-
-    public void setDirection(Vector2 direction)
-    {
-        direction_ = direction;
-        direction_.Normalize();
     }
 }

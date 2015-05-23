@@ -12,6 +12,7 @@ GameObject:
   - 58: {fileID: 5814146}
   - 50: {fileID: 5098280}
   - 114: {fileID: 11454824}
+  - 114: {fileID: 11485342}
   m_Layer: 8
   m_Name: stunBulletPrefab
   m_TagString: Bullet
@@ -70,10 +71,34 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8068337a984edaf42aac853db1881909, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed_: 3
-  direction_: {x: 1, y: 0}
   bulletType_: 0
   bulletHitClip_: {fileID: 8300000, guid: 936894d938984564f82df28798b05926, type: 3}
+--- !u!114 &11485342
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 151552}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a4041147d56eb64ca3f49dd9b0521b8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  DoesMove: 1
+  MoveSpeed: 2
+  MoveDirX: 1
+  RandomizeMoveDirX: 0
+  RandomizeMoveDirXCoef: 0
+  MoveDirY: 0
+  RandomizeMoveDirY: 0
+  RandomizeMoveDirYCoef: 0
+  DoesRotate: 0
+  RotationSpeed: 0
+  RandomizeRotationSpeed: 0
+  RandomizeRotationSpeedCoef: 0
+  BounceOnHorizontalLimits: 0
+  DestroyOnVerticalLimits: 1
+  DestroyOnHorizontalLimits: 1
 --- !u!212 &21222816
 SpriteRenderer:
   m_ObjectHideFlags: 1

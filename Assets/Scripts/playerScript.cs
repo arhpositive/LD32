@@ -27,11 +27,6 @@ struct Gun
 
 public class playerScript : MonoBehaviour 
 {
-    public static float minHorizontalMovementLimit_ = -0.15f;
-    public static float maxHorizontalMovementLimit_ = 3.25f;
-    public static float minVerticalMovementLimit_ = 0.45f;
-    public static float maxVerticalMovementLimit_ = 5.15f;
-
     public static int playerScore_ = 0;
 
     public GameObject explosionPrefab_;
@@ -103,7 +98,7 @@ public class playerScript : MonoBehaviour
                 }
 
                 //spawn
-                transform.position = new Vector3(0.0f, Random.Range(minVerticalMovementLimit_, maxVerticalMovementLimit_), spawnScript.spawnZCoord_);
+                transform.position = new Vector2(0.0f, Random.Range(GameConstants.MinVerticalMovementLimit, GameConstants.MaxVerticalMovementLimit));
                 isInvulnerable_ = true;
                 invulnerabilityStart_ = Time.time;
             }
@@ -187,17 +182,18 @@ public class playerScript : MonoBehaviour
         movementDir *= playerSpeedLimit_ * Time.deltaTime;
         transform.Translate(movementDir, Space.World);
 
-        if (transform.position.x < minHorizontalMovementLimit_ || transform.position.x > maxHorizontalMovementLimit_)
+        if (transform.position.x < GameConstants.MinHorizontalMovementLimit || transform.position.x > GameConstants.MaxHorizontalMovementLimit)
         {
             currentHorizontalSpeed_ = 0.0f;
         }
-        if (transform.position.y < minVerticalMovementLimit_ || transform.position.y > maxVerticalMovementLimit_)
+        if (transform.position.y < GameConstants.MinVerticalMovementLimit || transform.position.y > GameConstants.MaxVerticalMovementLimit)
         {
             currentVerticalSpeed_ = 0.0f;
         }
 
-        transform.position = new Vector3(Mathf.Clamp(transform.position.x, minHorizontalMovementLimit_, maxHorizontalMovementLimit_),
-            Mathf.Clamp(transform.position.y, minVerticalMovementLimit_, maxVerticalMovementLimit_), transform.position.z);
+        transform.position = new Vector3(Mathf.Clamp(transform.position.x, GameConstants.MinHorizontalMovementLimit, 
+            GameConstants.MaxHorizontalMovementLimit), Mathf.Clamp(transform.position.y, GameConstants.MinVerticalMovementLimit, 
+            GameConstants.MaxVerticalMovementLimit), transform.position.z);
 	}
 
     Vector2 getMoveDirFromInput()

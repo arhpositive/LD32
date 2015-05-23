@@ -9,7 +9,7 @@ GameObject:
   m_Component:
   - 4: {fileID: 484374}
   - 212: {fileID: 21213522}
-  - 114: {fileID: 11427042}
+  - 114: {fileID: 11425124}
   m_Layer: 0
   m_Name: meteor2Prefab
   m_TagString: Untagged
@@ -29,7 +29,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
---- !u!114 &11427042
+--- !u!114 &11425124
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
@@ -37,10 +37,24 @@ MonoBehaviour:
   m_GameObject: {fileID: 173280}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4310de92177dedd4687f4441c7b0a6d7, type: 3}
+  m_Script: {fileID: 11500000, guid: 7a4041147d56eb64ca3f49dd9b0521b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed_: .100000001
+  DoesMove: 1
+  MoveSpeed: .100000001
+  MoveDirX: -1
+  RandomizeMoveDirX: 0
+  RandomizeMoveDirXCoef: 0
+  MoveDirY: 0
+  RandomizeMoveDirY: 1
+  RandomizeMoveDirYCoef: 1
+  DoesRotate: 1
+  RotationSpeed: 0
+  RandomizeRotationSpeed: 1
+  RandomizeRotationSpeedCoef: 5
+  BounceOnHorizontalLimits: 0
+  DestroyOnVerticalLimits: 1
+  DestroyOnHorizontalLimits: 1
 --- !u!212 &21213522
 SpriteRenderer:
   m_ObjectHideFlags: 1

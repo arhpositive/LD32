@@ -9,7 +9,7 @@ GameObject:
   m_Component:
   - 4: {fileID: 474528}
   - 212: {fileID: 21276632}
-  - 114: {fileID: 11491136}
+  - 114: {fileID: 11468572}
   m_Layer: 0
   m_Name: starPrefab
   m_TagString: Untagged
@@ -29,7 +29,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
---- !u!114 &11491136
+--- !u!114 &11468572
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
@@ -37,10 +37,24 @@ MonoBehaviour:
   m_GameObject: {fileID: 157426}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4310de92177dedd4687f4441c7b0a6d7, type: 3}
+  m_Script: {fileID: 11500000, guid: 7a4041147d56eb64ca3f49dd9b0521b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed_: 9.99999975e-05
+  DoesMove: 1
+  MoveSpeed: 9.99999975e-05
+  MoveDirX: -1
+  RandomizeMoveDirX: 0
+  RandomizeMoveDirXCoef: 0
+  MoveDirY: 0
+  RandomizeMoveDirY: 0
+  RandomizeMoveDirYCoef: 0
+  DoesRotate: 0
+  RotationSpeed: 0
+  RandomizeRotationSpeed: 0
+  RandomizeRotationSpeedCoef: 0
+  BounceOnHorizontalLimits: 0
+  DestroyOnVerticalLimits: 1
+  DestroyOnHorizontalLimits: 1
 --- !u!212 &21276632
 SpriteRenderer:
   m_ObjectHideFlags: 1

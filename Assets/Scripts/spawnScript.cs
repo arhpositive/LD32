@@ -33,11 +33,6 @@ public class spawnScript : MonoBehaviour
     public int initStarCount_;
     public bool isGameScene_;
 
-    public static float horizontalEnterCoord_ = 8.0f;
-    public static float horizontalExitCoord_ = -1.0f;
-
-    public static float spawnZCoord_ = 0.0f;
-
     float previousWaveSpawnTime_;
     float waveSpawnInterval_;
     int waveCount_;
@@ -76,7 +71,7 @@ public class spawnScript : MonoBehaviour
         if (isGameScene_)
         {
             playerObject_ = Instantiate(playerPrefab_,
-            new Vector3(0.0f, Random.Range(playerScript.minVerticalMovementLimit_, playerScript.maxVerticalMovementLimit_), spawnZCoord_),
+            new Vector2(0.0f, Random.Range(GameConstants.MinVerticalMovementLimit, GameConstants.MaxVerticalMovementLimit)),
             Quaternion.identity) as GameObject;
 
             scriptPlayer_ = playerObject_.GetComponent<playerScript>();
@@ -128,16 +123,16 @@ public class spawnScript : MonoBehaviour
         if (Time.time - previousMeteorSpawnTime_ > meteorSpawnInterval_)
         {
             int meteorKind = Random.Range(0, meteorPrefabs_.Length);
-            Vector3 meteorPos = new Vector3(Random.Range(horizontalEnterCoord_ - 0.5f, horizontalEnterCoord_ + 0.5f), 
-                Random.Range(playerScript.minVerticalMovementLimit_ - 1.0f, playerScript.maxVerticalMovementLimit_ + 1.0f), spawnZCoord_);
+            Vector2 meteorPos = new Vector2(Random.Range(GameConstants.HorizontalMaxCoord - 1.0f, GameConstants.HorizontalMaxCoord),
+                Random.Range(GameConstants.VerticalMinCoord, GameConstants.VerticalMaxCoord));
             SpawnMeteor(meteorKind, meteorPos);
             previousMeteorSpawnTime_ = Time.time;
         }
 
         if (Time.time - previousStarSpawnTime_ > starSpawnInterval_)
         {
-            Vector3 starPos = new Vector3(Random.Range(horizontalEnterCoord_ - 0.1f, horizontalEnterCoord_ + 0.1f),
-                Random.Range(playerScript.minVerticalMovementLimit_ - 1.0f, playerScript.maxVerticalMovementLimit_ + 1.0f), spawnZCoord_);
+            Vector2 starPos = new Vector2(Random.Range(GameConstants.HorizontalMaxCoord - 0.1f, GameConstants.HorizontalMaxCoord + 0.1f),
+                Random.Range(GameConstants.MinVerticalMovementLimit - 1.0f, GameConstants.MaxVerticalMovementLimit + 1.0f));
             SpawnStar(starPos);
             previousStarSpawnTime_ = Time.time;
         }
@@ -178,7 +173,7 @@ public class spawnScript : MonoBehaviour
                 enemyKind = 0;
             }
 
-            WaveEntity entity = new WaveEntity(new Vector3(horizontalEnterCoord_ + offsets[randomOffset][i], verticalSpawnPosArray_[i], spawnZCoord_), enemyPrefabs_[enemyKind]);
+            WaveEntity entity = new WaveEntity(new Vector2(GameConstants.HorizontalMaxCoord + offsets[randomOffset][i], verticalSpawnPosArray_[i]), enemyPrefabs_[enemyKind]);
             nextWave_.Add(entity);
         }
     }
@@ -230,7 +225,7 @@ public class spawnScript : MonoBehaviour
             powerupKind = (int)PowerupType.pt_research;
         }
 
-        Vector3 powerupPos = new Vector3(horizontalEnterCoord_, Random.Range(playerScript.minVerticalMovementLimit_, playerScript.maxVerticalMovementLimit_), spawnZCoord_);
+        Vector3 powerupPos = new Vector2(GameConstants.HorizontalMaxCoord, Random.Range(GameConstants.MinVerticalMovementLimit, GameConstants.MaxVerticalMovementLimit));
         Instantiate(powerupPrefabs_[powerupKind], powerupPos, Quaternion.identity);
     }
 
@@ -239,28 +234,25 @@ public class spawnScript : MonoBehaviour
         for (int i = 0; i < initMeteorCount_; i++)
         {
             int meteorKind = Random.Range(0, meteorPrefabs_.Length);
-            Vector3 meteorPos = new Vector3(Random.Range(playerScript.minHorizontalMovementLimit_ - 0.5f, horizontalEnterCoord_ - 0.5f),
-                Random.Range(playerScript.minVerticalMovementLimit_, playerScript.maxVerticalMovementLimit_), spawnZCoord_);
+            Vector2 meteorPos = new Vector2(Random.Range(GameConstants.MinHorizontalMovementLimit - 0.5f, GameConstants.HorizontalMaxCoord - 0.5f),
+                Random.Range(GameConstants.MinVerticalMovementLimit, GameConstants.MaxVerticalMovementLimit));
             SpawnMeteor(meteorKind, meteorPos);
         }
 
         for (int i = 0; i < initStarCount_; i++)
         {
-            Vector3 starPos = new Vector3(Random.Range(playerScript.minHorizontalMovementLimit_ - 0.5f, horizontalEnterCoord_ - 0.5f),
-                Random.Range(playerScript.minVerticalMovementLimit_ - 1.0f, playerScript.maxVerticalMovementLimit_ + 1.0f), spawnZCoord_);
+            Vector2 starPos = new Vector2(Random.Range(GameConstants.MinHorizontalMovementLimit - 0.5f, GameConstants.HorizontalMaxCoord - 0.5f),
+                Random.Range(GameConstants.MinVerticalMovementLimit - 1.0f, GameConstants.MaxVerticalMovementLimit + 1.0f));
             SpawnStar(starPos);
         }
     }
 
-    void SpawnMeteor(int meteorKind, Vector3 meteorPos)
+    void SpawnMeteor(int meteorKind, Vector2 meteorPos)
     {
-        GameObject meteor = Instantiate(meteorPrefabs_[meteorKind], meteorPos, Quaternion.identity) as GameObject;
-        Vector2 direction = new Vector2(-1.0f, Random.Range(-1.0f, 1.0f));
-        direction.Normalize();
-        meteor.GetComponent<meteorScript>().setDirection(direction);
+        Instantiate(meteorPrefabs_[meteorKind], meteorPos, Quaternion.identity);
     }
 
-    void SpawnStar(Vector3 starPos)
+    void SpawnStar(Vector2 starPos)
     {
         Instantiate(starPrefab_, starPos, Quaternion.identity);
     }

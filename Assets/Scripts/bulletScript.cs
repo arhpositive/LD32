@@ -18,25 +18,8 @@ public enum BulletType
 
 public class bulletScript : MonoBehaviour 
 {
-    public float speed_;
-    public Vector2 direction_;
     public BulletType bulletType_;
     public AudioClip bulletHitClip_;
-
-	// Use this for initialization
-	void Start () {
-        direction_.Normalize();
-	}
-	
-	// Update is called once per frame
-	void Update () {
-        transform.Translate(direction_ * speed_ * Time.deltaTime, Space.World);        
-
-        if (transform.position.x < spawnScript.horizontalExitCoord_ || transform.position.x > spawnScript.horizontalEnterCoord_)
-        {
-            Destroy(gameObject);
-        }
-	}
 
     void OnTriggerStay2D(Collider2D other)
     {
@@ -70,11 +53,5 @@ public class bulletScript : MonoBehaviour
             AudioSource.PlayClipAtPoint(bulletHitClip_, transform.position);
             Destroy(gameObject);
         }
-    }
-
-    public void SetDirection(Vector2 direction)
-    {
-        direction_ = direction;
-        direction_.Normalize();
     }
 }

@@ -11,19 +11,13 @@ using System.Collections;
 
 public class basicEnemyScript : MonoBehaviour 
 {
-    public static float enemyHorizontalEnterCoord_ = 8.0f;
-    public static float enemyHorizontalExitCoord_ = -1.0f;
-
-    public float speed_;
-    public Vector2 direction_;
     public float stunDuration_;
     public float speedBoostPercentage_;
     public bool canShoot_;
     public float shootingInterval_;
     public bool randomShot_;
     public GameObject bulletPrefab_;
-    public AudioClip explosionClip_;
-    
+    public AudioClip explosionClip_;    
 
     bool isStunned_;
     float stunTime_;    
@@ -34,13 +28,15 @@ public class basicEnemyScript : MonoBehaviour
     GameObject playerObject_;
     playerScript scriptPlayer_;
     spawnScript scriptSpawn_;
+    BasicMove MoveScript;
 
     public float displacementAmount_; //used for scoring
 
 	// Use this for initialization
 	void Start () 
     {
-        direction_.Normalize();
+        MoveScript = gameObject.GetComponent<BasicMove>();
+
         isStunned_ = false;
         stunTime_ = 0.0f;
         speedBoostActive_ = false;
@@ -62,7 +58,8 @@ public class basicEnemyScript : MonoBehaviour
         {
             isStunned_ = false;
             lastShotTime_ = Time.time;
-            displacementAmount_ += stunDuration_ * speed_;
+            MoveScript.DoesMove = true;
+            displacementAmount_ += stunDuration_ * MoveScript.MoveSpeed;
         }
 
         if (!isStunned_)
@@ -74,12 +71,11 @@ public class basicEnemyScript : MonoBehaviour
 
             if (speedBoostActive_)
             {
-                displacementAmount_ -= stunDuration_ * speed_;
+                // TODO something is wrong
+                displacementAmount_ -= stunDuration_ * MoveScript.MoveSpeed;
             }
 
-            transform.Translate(direction_ * speed_ * Time.deltaTime, Space.World);
-
-            if (transform.position.x < spawnScript.horizontalExitCoord_)
+            if (transform.position.x < GameConstants.HorizontalMinCoord)
             {
                 //cash in the points
                 if (scriptPlayer_)
@@ -96,6 +92,7 @@ public class basicEnemyScript : MonoBehaviour
     {
         isStunned_ = true;
         stunTime_ = Time.time;
+        MoveScript.DoesMove = false;
         //TODO consider changing material color
     }
 
@@ -104,7 +101,7 @@ public class basicEnemyScript : MonoBehaviour
         if (!speedBoostActive_)
         {
             speedBoostActive_ = true;
-            speed_ *= speedBoostPercentage_;
+            MoveScript.MoveSpeed *= speedBoostPercentage_;
         }
         //TODO consider changing material color
     }
@@ -126,17 +123,7 @@ public class basicEnemyScript : MonoBehaviour
         {
             if (transform.GetChild(i).CompareTag("BulletStart"))
             {
-                Vector3 bulletStartPoint = transform.GetChild(i).position;
-                GameObject bullet = Instantiate(bulletPrefab_, bulletStartPoint, Quaternion.identity) as GameObject;
-
-                if (!randomShot_)
-                {
-                    bullet.GetComponent<bulletScript>().SetDirection(new Vector2(-1.0f, (i % 2 == 1 ? 0.1f : -0.1f)));
-                }
-                else
-                {
-                    bullet.GetComponent<bulletScript>().SetDirection(new Vector2(-1.0f, (Random.Range(0, 2) % 2 == 1 ? 0.05f : -0.05f)));
-                }
+                Instantiate(bulletPrefab_, transform.GetChild(i).position, Quaternion.identity);
             }            
         }
         nextShootingInterval_ = Random.Range(shootingInterval_ - 1.0f, shootingInterval_ + 1.0f) / scriptSpawn_.getDifficultyMultiplier();
