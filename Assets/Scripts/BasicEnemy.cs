@@ -16,7 +16,12 @@ public class BasicEnemy : MonoBehaviour
     public bool CanShoot;
     public float FiringInterval;
     public GameObject BulletPrefab;
-    public AudioClip ExplosionClip;    
+    public AudioClip ExplosionClip;
+
+    GameObject PlayerGameObject;
+    Player PlayerScript;
+    SpawnManager SpawnManagerScript;
+    BasicMove BasicMoveScript;
 
     bool IsStunned;
     float LastStunTime;    
@@ -25,45 +30,35 @@ public class BasicEnemy : MonoBehaviour
     float NextFiringInterval;
     float DisplacementLength; //used for scoring
 
-    GameObject PlayerGameObject;
-    Player PlayerScript;
-    SpawnManager SpawnManagerScript;
-    BasicMove BasicMoveScript;
-
-    // TODO YOU'RE HERE! review code, especially the order of doing things, shorten if possible, write better code
-
-	// Use this for initialization
 	void Start () 
     {
-        BasicMoveScript = gameObject.GetComponent<BasicMove>();
-
-        IsStunned = false;
-        LastStunTime = 0.0f;
-        SpeedBoostIsActive = false;
-        LastFireTime = Time.time;
-        DisplacementLength = 0.0f;
         PlayerGameObject = GameObject.FindGameObjectWithTag("Player");
         if (PlayerGameObject)
         {
             PlayerScript = PlayerGameObject.GetComponent<Player>();
         }
         SpawnManagerScript = Camera.main.GetComponent<SpawnManager>();
-        NextFiringInterval = (Random.Range(FiringInterval - 1.0f, FiringInterval + 1.0f) / SpawnManagerScript.GetDifficultyMultiplier()) * 0.5f;
+        BasicMoveScript = gameObject.GetComponent<BasicMove>();
+
+        IsStunned = false;
+        LastStunTime = 0.0f;
+        SpeedBoostIsActive = false;
+        LastFireTime = Time.time;
+        NextFiringInterval = (Random.Range(FiringInterval - 1.0f, FiringInterval + 1.0f) / SpawnManagerScript.DifficultyMultiplier) * 0.5f;
+        DisplacementLength = 0.0f;
 	}
 	
-	// Update is called once per frame
 	void Update () 
     {
+        // if stun timer expired
         if (IsStunned && Time.time - LastStunTime > StunDuration)
         {
-            IsStunned = false;
-            LastFireTime = Time.time;
-            BasicMoveScript.DoesMove = true;
-            DisplacementLength += StunDuration * BasicMoveScript.MoveSpeed;
+            RemoveStun();
         }
 
         if (!IsStunned)
         {
+            // if fire timer expired
             if (CanShoot && Time.time - LastFireTime > NextFiringInterval)
             {
                 FireGun();
@@ -71,8 +66,7 @@ public class BasicEnemy : MonoBehaviour
 
             if (SpeedBoostIsActive)
             {
-                // TODO something is wrong
-                DisplacementLength -= StunDuration * BasicMoveScript.MoveSpeed;
+                DisplacementLength -= Time.deltaTime * BasicMoveScript.MoveSpeed * (BasicMoveScript.SpeedCoef - 1.0f);
             }
 
             if (transform.position.x < GameConstants.HorizontalMinCoord)
@@ -93,7 +87,14 @@ public class BasicEnemy : MonoBehaviour
         IsStunned = true;
         LastStunTime = Time.time;
         BasicMoveScript.DoesMove = false;
-        //TODO consider changing material color
+    }
+
+    void RemoveStun()
+    {
+        IsStunned = false;
+        LastFireTime = Time.time;
+        BasicMoveScript.DoesMove = true;
+        DisplacementLength += StunDuration * BasicMoveScript.MoveSpeed;
     }
 
     public void TriggerSpeedBoost()
@@ -101,15 +102,14 @@ public class BasicEnemy : MonoBehaviour
         if (!SpeedBoostIsActive)
         {
             SpeedBoostIsActive = true;
-            BasicMoveScript.MoveSpeed *= SpeedBoostCoef;
+            BasicMoveScript.SpeedCoef = SpeedBoostCoef;
         }
-        //TODO consider changing material color
     }
 
     void OnTriggerStay2D(Collider2D other)
     {
-        if ((other.gameObject.tag == "Player" && !other.gameObject.GetComponent<Player>().GetIsInvulnerable() && 
-            !other.gameObject.GetComponent<Player>().GetIsDead()) || other.gameObject.tag == "Enemy")
+        if ((other.gameObject.tag == "Player" && !other.gameObject.GetComponent<Player>().IsInvulnerable && 
+            !other.gameObject.GetComponent<Player>().IsDead) || other.gameObject.tag == "Enemy")
         {
             AudioSource.PlayClipAtPoint(ExplosionClip, transform.position);
             Destroy(gameObject);
@@ -126,6 +126,6 @@ public class BasicEnemy : MonoBehaviour
                 Instantiate(BulletPrefab, transform.GetChild(i).position, Quaternion.identity);
             }            
         }
-        NextFiringInterval = Random.Range(FiringInterval - 1.0f, FiringInterval + 1.0f) / SpawnManagerScript.GetDifficultyMultiplier();
+        NextFiringInterval = Random.Range(FiringInterval - 1.0f, FiringInterval + 1.0f) / SpawnManagerScript.DifficultyMultiplier;
     }
 }

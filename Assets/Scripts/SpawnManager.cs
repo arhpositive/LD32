@@ -37,7 +37,7 @@ public class SpawnManager : MonoBehaviour
     float WaveSpawnInterval;
     int WaveCount;
 
-    float DifficultyMultiplier;
+    public float DifficultyMultiplier { get; private set; }
 
     float PreviousPowerupSpawnTime;
     float PowerupSpawnInterval;
@@ -75,7 +75,6 @@ public class SpawnManager : MonoBehaviour
         }        
     }
 
-    // Use this for initialization
     void Start()
     {
         DifficultyMultiplier = 1.0f; //the bigger the harder
@@ -95,7 +94,6 @@ public class SpawnManager : MonoBehaviour
         InitialMeteorSpawn();
     }
 
-    // Update is called once per frame
     void Update()
     {
         if (IsGameScene)
@@ -133,11 +131,6 @@ public class SpawnManager : MonoBehaviour
             SpawnStar(starPos);
             PreviousStarSpawnTime = Time.time;
         }
-    }
-
-    public float GetDifficultyMultiplier()
-    {
-        return DifficultyMultiplier;
     }
 
     void IncreaseDifficulty(float value)
@@ -184,17 +177,17 @@ public class SpawnManager : MonoBehaviour
 
         WaveCount++;
 
-        if (PreviousWavePlayerHealth != PlayerScript.GetPlayerHealth() && PlayerScript.GetPlayerHealth() == 1)
+        if (PreviousWavePlayerHealth != PlayerScript.PlayerHealth && PlayerScript.PlayerHealth == 1)
         {
             DecreaseDifficulty(0.2f);
         }
 
-        if (PlayerScript.GetPlayerHealth() > 5 || (WaveCount % 5 == 0 && PlayerScript.GetPlayerHealth() > 1))
+        if (PlayerScript.PlayerHealth > 5 || (WaveCount % 5 == 0 && PlayerScript.PlayerHealth > 1))
         {
             IncreaseDifficulty(0.2f);
         }
 
-        PreviousWavePlayerHealth = PlayerScript.GetPlayerHealth();
+        PreviousWavePlayerHealth = PlayerScript.PlayerHealth;
     }
 
     void SpawnNewPowerup()
@@ -208,7 +201,7 @@ public class SpawnManager : MonoBehaviour
         }
         else if (randomizePowerup < 35.0f)
         {
-            if (PlayerScript.GetPlayerHealth() == 1)
+            if (PlayerScript.PlayerHealth == 1)
             {
                 powerupKind = (int)PowerupType.pt_health;
             }

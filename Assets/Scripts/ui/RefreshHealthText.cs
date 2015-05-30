@@ -22,6 +22,6 @@ public class RefreshHealthText : MonoBehaviour
 	
 	void Update () 
     {
-        HealthText.text = PlayerScript.GetPlayerHealth().ToString();
+        HealthText.text = PlayerScript.PlayerHealth.ToString();
 	}
 }

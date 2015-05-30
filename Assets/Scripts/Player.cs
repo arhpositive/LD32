@@ -11,12 +11,12 @@ using System.Collections;
 
 struct Gun
 {
-    public GameObject BulletPrefab;
-    public float Cooldown;
+    public GameObject BulletPrefab { get; private set; }
+    public float Cooldown { get; private set; }
     public float LastFireTime;
     public int AmmoCount;
 
-    public Gun (GameObject bulletPrefab, float cooldown, float lastFireTime, int ammoCount)
+    public Gun (GameObject bulletPrefab, float cooldown, float lastFireTime, int ammoCount) : this()
     {
         BulletPrefab = bulletPrefab;
         Cooldown = cooldown;
@@ -43,13 +43,13 @@ public class Player : MonoBehaviour
     float CurrentHorizontalSpeed;
     float CurrentVerticalSpeed;
 
-    int PlayerHealth;
+    public int PlayerHealth { get; private set; }
 
-    bool IsDead;
+    public bool IsDead { get; private set; }
     float DeathDuration = 2.0f;
     float DeathTime;
 
-    bool IsInvulnerable;
+    public bool IsInvulnerable { get; private set; }
     float InvulnerabilityDuration = 2.0f;
     float InvulnerabilityStartTime;
     
@@ -66,7 +66,6 @@ public class Player : MonoBehaviour
         EndGameScoreText = GameObject.FindGameObjectWithTag("ScoreText").GetComponent<RefreshEndScoreText>();
     }
 
-	// Use this for initialization
 	void Start () 
     {
         PlayerScore = 0;
@@ -81,7 +80,6 @@ public class Player : MonoBehaviour
         SpeedUpGun = new Gun(SpeedUpBulletPrefab, 0.5f, 0.0f, 3);
 	}
 	
-	// Update is called once per frame
 	void Update () 
     {
         if (IsDead)
@@ -236,21 +234,6 @@ public class Player : MonoBehaviour
                 r.enabled = false;
             }
         }
-    }
-
-    public int GetPlayerHealth()
-    {
-        return PlayerHealth;
-    }
-
-    public bool GetIsInvulnerable()
-    {
-        return IsInvulnerable;
-    }
-
-    public bool GetIsDead()
-    {
-        return IsDead;
     }
 
     public void TriggerEnemyDestruction()

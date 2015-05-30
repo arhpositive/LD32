@@ -27,7 +27,7 @@ public class Powerup : MonoBehaviour
         {
             Player PlayerScript = other.gameObject.GetComponent<Player>();
 
-            if (!PlayerScript.GetIsDead())
+            if (!PlayerScript.IsDead)
             {
                 switch (PowerupType)
                 {

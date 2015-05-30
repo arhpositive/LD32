@@ -44,8 +44,8 @@ public class Bullet : MonoBehaviour
         else if (other.gameObject.tag == "Player")
         {
             Player PlayerScript = other.gameObject.GetComponent<Player>();
-
-            if (!PlayerScript.GetIsInvulnerable() && !PlayerScript.GetIsDead())
+            
+            if (!PlayerScript.IsInvulnerable && !PlayerScript.IsDead)
             {
                 switch (CurrentBulletType)
                 {

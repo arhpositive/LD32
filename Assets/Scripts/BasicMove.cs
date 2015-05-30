@@ -14,6 +14,7 @@ public class BasicMove : MonoBehaviour
 {
     public bool DoesMove;
     public float MoveSpeed;
+    public float SpeedCoef { get; set; }
     Vector2 MoveDir;
 
     [Range(-1.0f, 1.0f)]
@@ -36,10 +37,10 @@ public class BasicMove : MonoBehaviour
     public bool DestroyOnVerticalLimits;
     public bool DestroyOnHorizontalLimits;
 
-	// Use this for initialization
 	void Start () 
     {
         MoveDir = new Vector2(MoveDirX, MoveDirY);
+        SpeedCoef = 1.0f;
 
         if (RandomizeMoveDirX)
         {
@@ -62,12 +63,11 @@ public class BasicMove : MonoBehaviour
         }
 	}
 	
-	// Update is called once per frame
 	void Update () 
     {
         if (DoesMove)
         {
-            transform.Translate(MoveDir * MoveSpeed * Time.deltaTime, Space.World);
+            transform.Translate(MoveDir * MoveSpeed * SpeedCoef * Time.deltaTime, Space.World);
         }
 
         if (DoesRotate)
