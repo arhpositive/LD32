@@ -6,22 +6,24 @@
  */
 
 using UnityEngine;
-using System.Collections;
 using UnityEngine.UI;
 
-public class RefreshHealthText : MonoBehaviour 
+namespace Assets.Scripts.ui
 {
-    Text HealthText;
-    Player PlayerScript;
+    public class RefreshHealthText : MonoBehaviour
+    {
+        Text _healthText;
+        Player _playerScript;
 
-	void Start () 
-    {
-        HealthText = gameObject.GetComponent<Text>();
-        PlayerScript = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
-	}
-	
-	void Update () 
-    {
-        HealthText.text = PlayerScript.PlayerHealth.ToString();
-	}
+        void Start()
+        {
+            _healthText = gameObject.GetComponent<Text>();
+            _playerScript = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
+        }
+
+        void Update()
+        {
+            _healthText.text = _playerScript.PlayerHealth.ToString();
+        }
+    }
 }

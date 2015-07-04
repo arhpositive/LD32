@@ -16,6 +16,7 @@ GameObject:
   - 114: {fileID: 11478456}
   - 82: {fileID: 8295414}
   - 114: {fileID: 11425842}
+  - 114: {fileID: 11444820}
   m_Layer: 0
   m_Name: mainCameraPrefab
   m_TagString: MainCamera
@@ -169,6 +170,7 @@ MonoBehaviour:
   - {fileID: 186326, guid: 34c4edda1b1fbba4bb38a7f81c642d6b, type: 2}
   - {fileID: 195642, guid: 7e24ad8ee91fea748a9cf394b8bd4c47, type: 2}
   - {fileID: 107878, guid: e27706cab5b9776428cddb7dee2575de, type: 2}
+  - {fileID: 178398, guid: 9e1492490beda70419e92a554887e3b8, type: 2}
   MeteorPrefabArray:
   - {fileID: 105448, guid: 4318761234289f640a7017713d221b7b, type: 2}
   - {fileID: 173280, guid: 8dfdc579ad197d34a8f88fe5a10abd54, type: 2}
@@ -185,6 +187,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4531216ae561308459c6b4f35cc6b52f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &11444820
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 102966}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8232c773defa2134b8780f7cc10ae69c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!114 &11478456

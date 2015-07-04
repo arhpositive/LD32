@@ -6,22 +6,24 @@
  */
 
 using UnityEngine;
-using System.Collections;
 using UnityEngine.UI;
 
-public class RefreshPowerupText : MonoBehaviour
+namespace Assets.Scripts.ui
 {
-    Text PowerupText;
-    Player PlayerScript;
-
-    void Start()
+    public class RefreshPowerupText : MonoBehaviour
     {
-        PowerupText = gameObject.GetComponent<Text>();
-        PlayerScript = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
-    }
+        Text _powerupText;
+        Player _playerScript;
 
-    void Update()
-    {
-        PowerupText.text = PlayerScript.GetSpeedUpGunAmmo().ToString();
+        void Start()
+        {
+            _powerupText = gameObject.GetComponent<Text>();
+            _playerScript = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
+        }
+
+        void Update()
+        {
+            _powerupText.text = _playerScript.GetSpeedUpGunAmmo().ToString();
+        }
     }
 }

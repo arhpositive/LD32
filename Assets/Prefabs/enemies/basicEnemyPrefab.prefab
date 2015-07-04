@@ -175,7 +175,7 @@ MonoBehaviour:
   RotationSpeed: 0
   RandomizeRotationSpeed: 0
   RandomizeRotationSpeedCoef: 0
-  BounceOnHorizontalLimits: 0
+  BounceOnHorizontalLimits: 1
   DestroyOnVerticalLimits: 0
   DestroyOnHorizontalLimits: 0
 --- !u!212 &21226966

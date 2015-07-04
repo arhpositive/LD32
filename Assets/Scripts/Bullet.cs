@@ -7,56 +7,82 @@
  */
 
 using UnityEngine;
-using System.Collections;
 
-public enum BulletType
+namespace Assets.Scripts
 {
-    bt_stun,
-    bt_speedup,
-    bt_killer
-}
-
-public class Bullet : MonoBehaviour 
-{
-    public BulletType CurrentBulletType;
-    public AudioClip BulletHitClip;
-
-    void OnTriggerStay2D(Collider2D other)
+    public enum BulletType
     {
-        if (other.gameObject.tag == "Enemy")
-        {
-            BasicEnemy EnemyScript = other.gameObject.GetComponent<BasicEnemy>();
+        BtStun,
+        BtSpeedup,
+        BtKiller
+    }
 
-            switch(CurrentBulletType)
-            {
-                case BulletType.bt_stun:
-                    EnemyScript.TriggerStun();
-                    break;
-                case BulletType.bt_speedup:
-                    EnemyScript.TriggerSpeedBoost();
-                    break;
-                default:
-                    break;
-            }
-            AudioSource.PlayClipAtPoint(BulletHitClip, transform.position);
-            Destroy(gameObject);
-        }
-        else if (other.gameObject.tag == "Player")
+    public class Bullet : MonoBehaviour
+    {
+        public BulletType CurrentBulletType;
+        public AudioClip BulletHitClip;
+        bool _hasCollided;
+
+        void Start()
         {
-            Player PlayerScript = other.gameObject.GetComponent<Player>();
-            
-            if (!PlayerScript.IsInvulnerable && !PlayerScript.IsDead)
+            _hasCollided = false;
+        }
+
+        void OnTriggerStay2D(Collider2D other)
+        {
+            if (!_hasCollided)
             {
-                switch (CurrentBulletType)
+                if (other.gameObject.tag == "Enemy")
                 {
-                    case BulletType.bt_killer:
-                        PlayerScript.TriggerGettingShot();
-                        break;
-                    default:
-                        break;
+                    BasicEnemy enemyScript = other.gameObject.GetComponent<BasicEnemy>();
+
+                    switch (CurrentBulletType)
+                    {
+                        case BulletType.BtStun:
+                            enemyScript.TriggerStun();
+                            break;
+                        case BulletType.BtSpeedup:
+                            enemyScript.TriggerSpeedBoost();
+                            break;
+                    }
+                    _hasCollided = true;
+                    AudioSource.PlayClipAtPoint(BulletHitClip, transform.position);
+                    Destroy(gameObject);
                 }
-                AudioSource.PlayClipAtPoint(BulletHitClip, transform.position);
-                Destroy(gameObject);
+                else if (other.gameObject.tag == "Player")
+                {
+                    Player playerScript = other.gameObject.GetComponent<Player>();
+
+                    switch (CurrentBulletType)
+                    {
+                        case BulletType.BtKiller:
+                            bool playerGotHit = playerScript.PlayerGotHit();
+                            if (playerGotHit)
+                            {
+                                _hasCollided = true;
+                                AudioSource.PlayClipAtPoint(BulletHitClip, transform.position);
+                                Destroy(gameObject);
+                            }
+                            break;
+                    }
+                }
+                else if (other.gameObject.tag == "Shield")
+                {
+                    Player playerScript = other.gameObject.GetComponentInParent<Player>();
+
+                    switch (CurrentBulletType)
+                    {
+                        case BulletType.BtKiller:
+                            bool shieldGotHit = playerScript.ShieldGotHit();
+                            if (shieldGotHit)
+                            {
+                                _hasCollided = true;
+                                AudioSource.PlayClipAtPoint(BulletHitClip, transform.position);
+                                Destroy(gameObject);
+                            }
+                            break;
+                    }
+                }
             }
         }
     }

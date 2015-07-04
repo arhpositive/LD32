@@ -9,6 +9,7 @@ TagManager:
   - Powerup
   - BulletStart
   - ScoreText
+  - Shield
   layers:
   - Default
   - TransparentFX

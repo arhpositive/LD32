@@ -6,25 +6,27 @@
  */
 
 using UnityEngine;
-using System.Collections;
 using UnityEngine.UI;
 
-public class RefreshEndScoreText : MonoBehaviour 
+namespace Assets.Scripts.ui
 {
-    Text EndScoreText;
-
-    void Start()
+    public class RefreshEndScoreText : MonoBehaviour
     {
-        EndScoreText = gameObject.GetComponent<Text>();
-    }
+        Text _endScoreText;
 
-    void Update()
-    {
-        EndScoreText.text = "Your Score: " + Player.PlayerScore.ToString();
-    }
+        void Start()
+        {
+            _endScoreText = gameObject.GetComponent<Text>();
+        }
 
-    public void SetTextVisible()
-    {
-        EndScoreText.enabled = true;
+        void Update()
+        {
+            _endScoreText.text = "Your Score: " + Player.PlayerScore.ToString();
+        }
+
+        public void SetTextVisible()
+        {
+            _endScoreText.enabled = true;
+        }
     }
 }

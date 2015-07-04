@@ -7,17 +7,19 @@
  */
 
 using UnityEngine;
-using System.Collections;
 
-public class LoadLevel : MonoBehaviour 
+namespace Assets.Scripts
 {
-    public void LoadMenuScene()
+    public class LoadLevel : MonoBehaviour
     {
-        Application.LoadLevel(0);
-    }
+        public void LoadMenuScene()
+        {
+            Application.LoadLevel(0);
+        }
 
-    public void LoadGameScene()
-    {
-        Application.LoadLevel(1);
+        public void LoadGameScene()
+        {
+            Application.LoadLevel(1);
+        }
     }
 }

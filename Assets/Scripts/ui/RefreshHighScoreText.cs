@@ -6,20 +6,22 @@
  */
 
 using UnityEngine;
-using System.Collections;
 using UnityEngine.UI;
 
-public class RefreshHighScoreText : MonoBehaviour 
+namespace Assets.Scripts.ui
 {
-    Text HighScoreText;
-
-    void Start()
+    public class RefreshHighScoreText : MonoBehaviour
     {
-        HighScoreText = gameObject.GetComponent<Text>();
-    }
+        Text _highScoreText;
 
-    void Update()
-    {
-        HighScoreText.text = Player.PlayerScore.ToString();
+        void Start()
+        {
+            _highScoreText = gameObject.GetComponent<Text>();
+        }
+
+        void Update()
+        {
+            _highScoreText.text = Player.PlayerScore.ToString();
+        }
     }
 }

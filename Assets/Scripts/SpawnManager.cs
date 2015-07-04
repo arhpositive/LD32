@@ -7,244 +7,234 @@
  */
 
 using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
 
-struct WaveEntity
+namespace Assets.Scripts
 {
-    public Vector3 Position;
-    public GameObject WaveObject;
-
-    public WaveEntity(Vector3 position, GameObject waveObject)
+    struct WaveEntity
     {
-        Position = position;
-        WaveObject = waveObject;
-    }
-};
+        public Vector3 Position;
+        public GameObject WaveObject;
 
-public class SpawnManager : MonoBehaviour
-{
-    public GameObject PlayerPrefab;
-    public GameObject[] EnemyPrefabArray;
-    public GameObject[] PowerupPrefabArray;
-    public GameObject[] MeteorPrefabArray;
-    public GameObject StarPrefab;
-    public int InitialMeteorCount;
-    public int InitialStarCount;
-    public bool IsGameScene;
-
-    float PreviousWaveSpawnTime;
-    float WaveSpawnInterval;
-    int WaveCount;
-
-    public float DifficultyMultiplier { get; private set; }
-
-    float PreviousPowerupSpawnTime;
-    float PowerupSpawnInterval;
-
-    float PreviousMeteorSpawnTime;
-    float MeteorSpawnInterval = 1.0f;
-
-    float PreviousStarSpawnTime;
-    float StarSpawnInterval = 100.0f;
-
-    GameObject PlayerGameObject;
-    Player PlayerScript;
-
-    int PreviousWavePlayerHealth;
-
-    static float[] VerticalSpawnPositionsArray = { 0.55f, 1.45f, 2.35f, 3.25f, 4.15f, 5.05f };
-
-    static float[] HorizontalSpawnOffset1 = { -0.4f, 0.0f, 0.4f, 0.4f, 0.0f, -0.4f };
-    static float[] HorizontalSpawnOffset2 = { -0.4f, 0.4f, -0.4f, 0.4f, -0.4f, 0.4f };
-    static float[] HorizontalSpawnOffset3 = { 0.4f, 0.0f, -0.4f, -0.4f, 0.0f, 0.4f };
-    static float[] HorizontalSpawnOffset4 = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
-    float[][] HorizontalSpawnOffsets = { HorizontalSpawnOffset1, HorizontalSpawnOffset2, HorizontalSpawnOffset3, HorizontalSpawnOffset4 };
-
-    List<WaveEntity> NextWave;
-
-    void Awake()
-    {
-        if (IsGameScene)
+        public WaveEntity(Vector3 position, GameObject waveObject)
         {
-            PlayerGameObject = Instantiate(PlayerPrefab,
-            new Vector2(0.0f, Random.Range(GameConstants.MinVerticalMovementLimit, GameConstants.MaxVerticalMovementLimit)),
-            Quaternion.identity) as GameObject;
+            Position = position;
+            WaveObject = waveObject;
+        }
+    };
 
-            PlayerScript = PlayerGameObject.GetComponent<Player>();
-        }        
-    }
-
-    void Start()
+    public class SpawnManager : MonoBehaviour
     {
-        DifficultyMultiplier = 1.0f; //the bigger the harder
+        public GameObject PlayerPrefab;
+        public GameObject[] EnemyPrefabArray;
+        public GameObject[] PowerupPrefabArray;
+        public GameObject[] MeteorPrefabArray;
+        public GameObject StarPrefab;
+        public int InitialMeteorCount;
+        public int InitialStarCount;
+        public bool IsGameScene;
 
-        WaveCount = 0;
-        WaveSpawnInterval = 5.0f;
-        PreviousWaveSpawnTime = Time.time;
-        NextWave = new List<WaveEntity>();
+        float _previousWaveSpawnTime;
+        float _waveSpawnInterval;
+        int _waveCount;
 
-        PreviousWavePlayerHealth = 3; //duplication
+        DifficultyManager _difficultyManagerScript;
 
-        PowerupSpawnInterval = Random.Range(3.0f, 6.0f) * DifficultyMultiplier;
-        PreviousPowerupSpawnTime = Time.time;
-        
-        PreviousMeteorSpawnTime = Time.time;
-        PreviousStarSpawnTime = Time.time;
-        InitialMeteorSpawn();
-    }
+        float _previousPowerupSpawnTime;
+        float _powerupSpawnInterval;
 
-    void Update()
-    {
-        if (IsGameScene)
+        float _previousMeteorSpawnTime;
+        const float MeteorSpawnInterval = 1.0f;
+
+        float _previousStarSpawnTime;
+        const float StarSpawnInterval = 100.0f;
+
+        GameObject _playerGameObject;
+        Player _playerScript;
+
+        int _previousWavePlayerHealth;
+
+        readonly static float[] VerticalSpawnPositionsArray = { 0.55f, 1.45f, 2.35f, 3.25f, 4.15f, 5.05f };
+
+        readonly static float[] HorizontalSpawnOffset1 = { -0.4f, 0.0f, 0.4f, 0.4f, 0.0f, -0.4f };
+        readonly static float[] HorizontalSpawnOffset2 = { -0.4f, 0.4f, -0.4f, 0.4f, -0.4f, 0.4f };
+        readonly static float[] HorizontalSpawnOffset3 = { 0.4f, 0.0f, -0.4f, -0.4f, 0.0f, 0.4f };
+        readonly static float[] HorizontalSpawnOffset4 = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+        readonly static float[][] HorizontalSpawnOffsets = { HorizontalSpawnOffset1, HorizontalSpawnOffset2, HorizontalSpawnOffset3, HorizontalSpawnOffset4 };
+
+        List<WaveEntity> _nextWave;
+
+        void Awake()
         {
-            if (Time.time - PreviousWaveSpawnTime > WaveSpawnInterval)
+            if (IsGameScene)
             {
-                FormNewWave();
-                SpawnNewWave();
-                NextWave.Clear();
-                PreviousWaveSpawnTime = Time.time;
-                WaveSpawnInterval = Random.Range(8.0f, 10.0f) / DifficultyMultiplier;
-            }
+                _playerGameObject = Instantiate(PlayerPrefab,
+                new Vector2(0.0f, Random.Range(GameConstants.MinVerticalMovementLimit, GameConstants.MaxVerticalMovementLimit)),
+                Quaternion.identity) as GameObject;
 
-            if (Time.time - PreviousPowerupSpawnTime > PowerupSpawnInterval)
-            {
-                SpawnNewPowerup();
-                PreviousPowerupSpawnTime = Time.time;
-                PowerupSpawnInterval = Random.Range(3.0f, 6.0f) * DifficultyMultiplier;
+                _playerScript = _playerGameObject.GetComponent<Player>();
             }
         }
 
-        if (Time.time - PreviousMeteorSpawnTime > MeteorSpawnInterval)
+        void Start()
         {
-            int meteorKind = Random.Range(0, MeteorPrefabArray.Length);
-            Vector2 meteorPos = new Vector2(Random.Range(GameConstants.HorizontalMaxCoord - 1.0f, GameConstants.HorizontalMaxCoord),
-                Random.Range(GameConstants.VerticalMinCoord, GameConstants.VerticalMaxCoord));
-            SpawnMeteor(meteorKind, meteorPos);
-            PreviousMeteorSpawnTime = Time.time;
+            _difficultyManagerScript = Camera.main.GetComponent<DifficultyManager>();
+
+            _waveCount = 0;
+            _waveSpawnInterval = 5.0f;
+            _previousWaveSpawnTime = Time.time;
+            _nextWave = new List<WaveEntity>();
+
+            _previousWavePlayerHealth = 3; //duplication
+
+            _powerupSpawnInterval = Random.Range(3.0f, 6.0f);
+            _previousPowerupSpawnTime = Time.time;
+
+            _previousMeteorSpawnTime = Time.time;
+            _previousStarSpawnTime = Time.time;
+            InitialMeteorSpawn();
         }
 
-        if (Time.time - PreviousStarSpawnTime > StarSpawnInterval)
+        void Update()
         {
-            Vector2 starPos = new Vector2(Random.Range(GameConstants.HorizontalMaxCoord - 0.1f, GameConstants.HorizontalMaxCoord + 0.1f),
-                Random.Range(GameConstants.MinVerticalMovementLimit - 1.0f, GameConstants.MaxVerticalMovementLimit + 1.0f));
-            SpawnStar(starPos);
-            PreviousStarSpawnTime = Time.time;
-        }
-    }
-
-    void IncreaseDifficulty(float value)
-    {
-        DifficultyMultiplier = Mathf.Clamp(DifficultyMultiplier + value, 0.1f, 2.0f);
-    }
-
-    void DecreaseDifficulty(float value)
-    {
-        DifficultyMultiplier = Mathf.Clamp(DifficultyMultiplier - value, 0.1f, 2.0f);
-    }
-
-    void FormNewWave()
-    {
-        float advancedEnemyPercentage = (Mathf.Clamp(DifficultyMultiplier, 1.0f, 2.0f) - 1.0f) * 100.0f;
-
-        int randomOffset = Random.Range(0, HorizontalSpawnOffsets.Length);
-
-        for (int i = 0; i < VerticalSpawnPositionsArray.Length; i++)
-        {
-            float randomEnemy = Random.Range(0.0f, 100.0f);
-            int enemyKind = 0;
-
-            if (randomEnemy < advancedEnemyPercentage)
+            if (IsGameScene)
             {
-                enemyKind = 1;
+                if (Time.time - _previousWaveSpawnTime > _waveSpawnInterval)
+                {
+                    FormNewWave();
+                    SpawnNewWave();
+                    _previousWaveSpawnTime = Time.time;
+                    _waveSpawnInterval = Random.Range(8.0f, 10.0f) / _difficultyManagerScript.DifficultyMultiplier;
+                }
+
+                if (Time.time - _previousPowerupSpawnTime > _powerupSpawnInterval)
+                {
+                    SpawnNewPowerup();
+                    _previousPowerupSpawnTime = Time.time;
+                    _powerupSpawnInterval = Random.Range(3.0f, 6.0f) * _difficultyManagerScript.DifficultyMultiplier;
+                }
+            }
+
+            if (Time.time - _previousMeteorSpawnTime > MeteorSpawnInterval)
+            {
+                int meteorKind = Random.Range(0, MeteorPrefabArray.Length);
+                Vector2 meteorPos = new Vector2(Random.Range(GameConstants.HorizontalMaxCoord - 1.0f, GameConstants.HorizontalMaxCoord),
+                    Random.Range(GameConstants.VerticalMinCoord, GameConstants.VerticalMaxCoord));
+                SpawnMeteor(meteorKind, meteorPos);
+                _previousMeteorSpawnTime = Time.time;
+            }
+
+            if (Time.time - _previousStarSpawnTime > StarSpawnInterval)
+            {
+                Vector2 starPos = new Vector2(Random.Range(GameConstants.HorizontalMaxCoord - 0.1f, GameConstants.HorizontalMaxCoord + 0.1f),
+                    Random.Range(GameConstants.MinVerticalMovementLimit - 1.0f, GameConstants.MaxVerticalMovementLimit + 1.0f));
+                SpawnStar(starPos);
+                _previousStarSpawnTime = Time.time;
+            }
+        }
+
+
+
+        void FormNewWave()
+        {
+            float advancedEnemyPercentage = (Mathf.Clamp(_difficultyManagerScript.DifficultyMultiplier, 1.0f, 2.0f) - 1.0f) * 100.0f;
+
+            int randomOffset = Random.Range(0, HorizontalSpawnOffsets.Length);
+
+            for (int i = 0; i < VerticalSpawnPositionsArray.Length; i++)
+            {
+                float randomEnemy = Random.Range(0.0f, 100.0f);
+                int enemyKind = randomEnemy < advancedEnemyPercentage ? 1 : 0;
+
+                WaveEntity entity = new WaveEntity(new Vector2(GameConstants.HorizontalMaxCoord + HorizontalSpawnOffsets[randomOffset][i], VerticalSpawnPositionsArray[i]), EnemyPrefabArray[enemyKind]);
+                _nextWave.Add(entity);
+            }
+        }
+
+        void SpawnNewWave()
+        {
+            for (int i = 0; i < _nextWave.Count; i++)
+            {
+                Instantiate(_nextWave[i].WaveObject, _nextWave[i].Position, Quaternion.identity);
+            }
+
+            _waveCount++;
+
+            if (_previousWavePlayerHealth != _playerScript.PlayerHealth && _playerScript.PlayerHealth == 1)
+            {
+                _difficultyManagerScript.DecreaseDifficulty(0.2f);
+            }
+
+            if (_playerScript.PlayerHealth > 5 || (_waveCount % 5 == 0 && _playerScript.PlayerHealth > 1))
+            {
+                _difficultyManagerScript.IncreaseDifficulty(0.2f);
+            }
+
+            _previousWavePlayerHealth = _playerScript.PlayerHealth;
+            _nextWave.Clear();
+        }
+
+        void SpawnNewPowerup()
+        {
+            int powerupKind;
+            float randomizePowerup = Random.Range(0.0f, 100.0f);
+
+            if (randomizePowerup < 5.0f)
+            {
+                powerupKind = (int)PowerupType.PtHealth;
+            }
+            else if (randomizePowerup < 35.0f)
+            {
+                //TODO change this line and make it dependent upon difficulty settings
+                if (_playerScript.PlayerHealth == 1)
+                {
+                    powerupKind = (int)PowerupType.PtShield;
+                }
+                else
+                {
+                    powerupKind = (int)PowerupType.PtSpeedup;
+                }
+            }
+            else if (randomizePowerup < 50.0f)
+            {
+                powerupKind = (int)PowerupType.PtShield;
             }
             else
             {
-                enemyKind = 0;
+                powerupKind = (int)PowerupType.PtResearch;
             }
 
-            WaveEntity entity = new WaveEntity(new Vector2(GameConstants.HorizontalMaxCoord + HorizontalSpawnOffsets[randomOffset][i], VerticalSpawnPositionsArray[i]), EnemyPrefabArray[enemyKind]);
-            NextWave.Add(entity);
-        }
-    }
-
-    void SpawnNewWave()
-    {
-        for (int i = 0; i < NextWave.Count; i++)
-        {
-            Instantiate(NextWave[i].WaveObject, NextWave[i].Position, Quaternion.identity);
+            // TODO spawning powerups are dependent upon order of the array, fix
+            Vector3 powerupPos = new Vector2(GameConstants.HorizontalMaxCoord, Random.Range(GameConstants.MinVerticalMovementLimit, GameConstants.MaxVerticalMovementLimit));
+            Instantiate(PowerupPrefabArray[powerupKind], powerupPos, Quaternion.identity);
         }
 
-        WaveCount++;
-
-        if (PreviousWavePlayerHealth != PlayerScript.PlayerHealth && PlayerScript.PlayerHealth == 1)
+        void InitialMeteorSpawn()
         {
-            DecreaseDifficulty(0.2f);
-        }
-
-        if (PlayerScript.PlayerHealth > 5 || (WaveCount % 5 == 0 && PlayerScript.PlayerHealth > 1))
-        {
-            IncreaseDifficulty(0.2f);
-        }
-
-        PreviousWavePlayerHealth = PlayerScript.PlayerHealth;
-    }
-
-    void SpawnNewPowerup()
-    {
-        int powerupKind = 0;
-        float randomizePowerup = Random.Range(0.0f, 100.0f);
-
-        if (randomizePowerup < 5.0f)
-        {
-            powerupKind = (int)PowerupType.pt_health;
-        }
-        else if (randomizePowerup < 35.0f)
-        {
-            if (PlayerScript.PlayerHealth == 1)
+            for (int i = 0; i < InitialMeteorCount; i++)
             {
-                powerupKind = (int)PowerupType.pt_health;
+                int meteorKind = Random.Range(0, MeteorPrefabArray.Length);
+                Vector2 meteorPos = new Vector2(Random.Range(GameConstants.MinHorizontalMovementLimit - 0.5f, GameConstants.HorizontalMaxCoord - 0.5f),
+                    Random.Range(GameConstants.MinVerticalMovementLimit, GameConstants.MaxVerticalMovementLimit));
+                SpawnMeteor(meteorKind, meteorPos);
             }
-            else
+
+            for (int i = 0; i < InitialStarCount; i++)
             {
-                powerupKind = (int)PowerupType.pt_speedup;
-            }            
+                Vector2 starPos = new Vector2(Random.Range(GameConstants.MinHorizontalMovementLimit - 0.5f, GameConstants.HorizontalMaxCoord - 0.5f),
+                    Random.Range(GameConstants.MinVerticalMovementLimit - 1.0f, GameConstants.MaxVerticalMovementLimit + 1.0f));
+                SpawnStar(starPos);
+            }
         }
-        else
+
+        void SpawnMeteor(int meteorKind, Vector2 meteorPos)
         {
-            powerupKind = (int)PowerupType.pt_research;
+            Instantiate(MeteorPrefabArray[meteorKind], meteorPos, Quaternion.identity);
         }
 
-        // TODO spawning powerups are dependent upon order of the array, fix
-        Vector3 powerupPos = new Vector2(GameConstants.HorizontalMaxCoord, Random.Range(GameConstants.MinVerticalMovementLimit, GameConstants.MaxVerticalMovementLimit));
-        Instantiate(PowerupPrefabArray[powerupKind], powerupPos, Quaternion.identity);
-    }
-
-    void InitialMeteorSpawn()
-    {
-        for (int i = 0; i < InitialMeteorCount; i++)
+        void SpawnStar(Vector2 starPos)
         {
-            int meteorKind = Random.Range(0, MeteorPrefabArray.Length);
-            Vector2 meteorPos = new Vector2(Random.Range(GameConstants.MinHorizontalMovementLimit - 0.5f, GameConstants.HorizontalMaxCoord - 0.5f),
-                Random.Range(GameConstants.MinVerticalMovementLimit, GameConstants.MaxVerticalMovementLimit));
-            SpawnMeteor(meteorKind, meteorPos);
+            Instantiate(StarPrefab, starPos, Quaternion.identity);
         }
-
-        for (int i = 0; i < InitialStarCount; i++)
-        {
-            Vector2 starPos = new Vector2(Random.Range(GameConstants.MinHorizontalMovementLimit - 0.5f, GameConstants.HorizontalMaxCoord - 0.5f),
-                Random.Range(GameConstants.MinVerticalMovementLimit - 1.0f, GameConstants.MaxVerticalMovementLimit + 1.0f));
-            SpawnStar(starPos);
-        }
-    }
-
-    void SpawnMeteor(int meteorKind, Vector2 meteorPos)
-    {
-        Instantiate(MeteorPrefabArray[meteorKind], meteorPos, Quaternion.identity);
-    }
-
-    void SpawnStar(Vector2 starPos)
-    {
-        Instantiate(StarPrefab, starPos, Quaternion.identity);
     }
 }

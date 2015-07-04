@@ -8,97 +8,99 @@
  */
 
 using UnityEngine;
-using System.Collections;
 
-public class BasicMove : MonoBehaviour 
+namespace Assets.Scripts
 {
-    public bool DoesMove;
-    public float MoveSpeed;
-    public float SpeedCoef { get; set; }
-    Vector2 MoveDir;
-
-    [Range(-1.0f, 1.0f)]
-    public float MoveDirX;
-    public bool RandomizeMoveDirX;
-    [Range(0.0f, 1.0f)]
-    public float RandomizeMoveDirXCoef;
-    [Range(-1.0f, 1.0f)]
-    public float MoveDirY;
-    public bool RandomizeMoveDirY;
-    [Range(0.0f, 1.0f)]
-    public float RandomizeMoveDirYCoef;
-
-    public bool DoesRotate;
-    public float RotationSpeed;
-    public bool RandomizeRotationSpeed;
-    public float RandomizeRotationSpeedCoef;
-
-    public bool BounceOnHorizontalLimits;
-    public bool DestroyOnVerticalLimits;
-    public bool DestroyOnHorizontalLimits;
-
-	void Start () 
+    public class BasicMove : MonoBehaviour
     {
-        MoveDir = new Vector2(MoveDirX, MoveDirY);
-        SpeedCoef = 1.0f;
+        public bool DoesMove;
+        public float MoveSpeed;
+        public float SpeedCoef { get; set; }
+        Vector2 _moveDir;
 
-        if (RandomizeMoveDirX)
-        {
-            float range = Random.Range(0.0f, 1.0f) * RandomizeMoveDirXCoef;
-            MoveDir.x = Random.Range(-range, range);
-        }
+        [Range(-1.0f, 1.0f)]
+        public float MoveDirX;
+        public bool RandomizeMoveDirX;
+        [Range(0.0f, 1.0f)]
+        public float RandomizeMoveDirXCoef;
+        [Range(-1.0f, 1.0f)]
+        public float MoveDirY;
+        public bool RandomizeMoveDirY;
+        [Range(0.0f, 1.0f)]
+        public float RandomizeMoveDirYCoef;
 
-        if (RandomizeMoveDirY)
-        {
-            float range = Random.Range(0.0f, 1.0f) * RandomizeMoveDirYCoef;
-            MoveDir.y = Random.Range(-range, range);
-        }
+        public bool DoesRotate;
+        public float RotationSpeed;
+        public bool RandomizeRotationSpeed;
+        public float RandomizeRotationSpeedCoef;
 
-        MoveDir.Normalize();
-	
-        if (RandomizeRotationSpeed)
-        {
-            float range = Random.Range(0.0f, 1.0f) * RandomizeRotationSpeedCoef;
-            RotationSpeed = Random.Range(-range, range);
-        }
-	}
-	
-	void Update () 
-    {
-        if (DoesMove)
-        {
-            transform.Translate(MoveDir * MoveSpeed * SpeedCoef * Time.deltaTime, Space.World);
-        }
+        public bool BounceOnHorizontalLimits;
+        public bool DestroyOnVerticalLimits;
+        public bool DestroyOnHorizontalLimits;
 
-        if (DoesRotate)
+        void Start()
         {
-            transform.Rotate(Vector3.forward * RotationSpeed * Time.deltaTime, Space.World);
-        }
+            _moveDir = new Vector2(MoveDirX, MoveDirY);
+            SpeedCoef = 1.0f;
 
-        if (DestroyOnHorizontalLimits)
-        {
-            if (transform.position.x < GameConstants.HorizontalMinCoord || transform.position.x > GameConstants.HorizontalMaxCoord)
+            if (RandomizeMoveDirX)
             {
-                Destroy(gameObject);
+                float range = Random.Range(0.0f, 1.0f) * RandomizeMoveDirXCoef;
+                _moveDir.x = Random.Range(-range, range);
+            }
+
+            if (RandomizeMoveDirY)
+            {
+                float range = Random.Range(0.0f, 1.0f) * RandomizeMoveDirYCoef;
+                _moveDir.y = Random.Range(-range, range);
+            }
+
+            _moveDir.Normalize();
+
+            if (RandomizeRotationSpeed)
+            {
+                float range = Random.Range(0.0f, 1.0f) * RandomizeRotationSpeedCoef;
+                RotationSpeed = Random.Range(-range, range);
             }
         }
 
-        if (DestroyOnVerticalLimits)
+        void Update()
         {
-            if (transform.position.y < GameConstants.VerticalMinCoord || transform.position.y > GameConstants.VerticalMaxCoord)
+            if (DoesMove)
             {
-                Destroy(gameObject);
+                transform.Translate(_moveDir * MoveSpeed * SpeedCoef * Time.deltaTime, Space.World);
             }
-        }
 
-        if (BounceOnHorizontalLimits)
-        {
-            if (transform.position.y < GameConstants.MinVerticalMovementLimit && MoveDir.y < -float.Epsilon ||
-                transform.position.y > GameConstants.MaxVerticalMovementLimit && MoveDir.y > float.Epsilon)
+            if (DoesRotate)
             {
-                MoveDir.y = -MoveDir.y;
-                MoveDir.Normalize();
+                transform.Rotate(Vector3.forward * RotationSpeed * Time.deltaTime, Space.World);
+            }
+
+            if (DestroyOnHorizontalLimits)
+            {
+                if (transform.position.x < GameConstants.HorizontalMinCoord || transform.position.x > GameConstants.HorizontalMaxCoord)
+                {
+                    Destroy(gameObject);
+                }
+            }
+
+            if (DestroyOnVerticalLimits)
+            {
+                if (transform.position.y < GameConstants.VerticalMinCoord || transform.position.y > GameConstants.VerticalMaxCoord)
+                {
+                    Destroy(gameObject);
+                }
+            }
+
+            if (BounceOnHorizontalLimits)
+            {
+                if (transform.position.y < GameConstants.MinVerticalMovementLimit && _moveDir.y < -float.Epsilon ||
+                    transform.position.y > GameConstants.MaxVerticalMovementLimit && _moveDir.y > float.Epsilon)
+                {
+                    _moveDir.y = -_moveDir.y;
+                    _moveDir.Normalize();
+                }
             }
         }
-	}
+    }
 }

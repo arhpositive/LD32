@@ -7,44 +7,58 @@
  */
 
 using UnityEngine;
-using System.Collections;
 
-public enum PowerupType
+namespace Assets.Scripts
 {
-    pt_health = 0,
-    pt_speedup = 1,
-    pt_research = 2
-}
-
-public class Powerup : MonoBehaviour 
-{
-    public PowerupType PowerupType;
-    public AudioClip GainPowerupClip;
-
-    void OnTriggerStay2D(Collider2D other)
+    public enum PowerupType
     {
-        if (other.gameObject.tag == "Player")
-        {
-            Player PlayerScript = other.gameObject.GetComponent<Player>();
+        PtHealth,
+        PtSpeedup,
+        PtResearch,
+        PtShield
+    }
 
-            if (!PlayerScript.IsDead)
+    public class Powerup : MonoBehaviour
+    {
+        public PowerupType PowerupType;
+        public AudioClip GainPowerupClip;
+        bool _hasCollided;
+
+        void Start()
+        {
+            _hasCollided = false;
+        }
+
+        void OnTriggerStay2D(Collider2D other)
+        {
+            if (!_hasCollided)
             {
-                switch (PowerupType)
+                if (other.gameObject.tag == "Player")
                 {
-                    case PowerupType.pt_health:
-                        PlayerScript.TriggerHealthPickup();
-                        break;
-                    case PowerupType.pt_speedup:
-                        PlayerScript.TriggerSpeedUpPickup();
-                        break;
-                    case PowerupType.pt_research:
-                        PlayerScript.TriggerResearchPickup();
-                        break;
-                    default:
-                        break;
+                    Player playerScript = other.gameObject.GetComponent<Player>();
+
+                    if (!playerScript.IsDead)
+                    {
+                        switch (PowerupType)
+                        {
+                            case PowerupType.PtHealth:
+                                playerScript.TriggerHealthPickup();
+                                break;
+                            case PowerupType.PtSpeedup:
+                                playerScript.TriggerSpeedUpPickup();
+                                break;
+                            case PowerupType.PtResearch:
+                                playerScript.TriggerResearchPickup();
+                                break;
+                            case PowerupType.PtShield:
+                                playerScript.TriggerShieldPickup();
+                                break;
+                        }
+                        _hasCollided = true;
+                        AudioSource.PlayClipAtPoint(GainPowerupClip, transform.position);
+                        Destroy(gameObject);
+                    }
                 }
-                AudioSource.PlayClipAtPoint(GainPowerupClip, transform.position);
-                Destroy(gameObject);
             }
         }
     }
