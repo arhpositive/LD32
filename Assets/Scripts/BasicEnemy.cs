@@ -77,7 +77,7 @@ namespace Assets.Scripts
                     //cash in the points
                     if (_playerScript)
                     {
-                        _playerScript.TriggerEnemyDisplacement((int)Mathf.Abs(_displacementLength));
+                        _playerScript.TriggerEnemyDisplacement((int)(Mathf.Abs(_displacementLength) * 10.0f));
                     }
 
                     Destroy(gameObject);

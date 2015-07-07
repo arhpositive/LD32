@@ -8,6 +8,7 @@
  */
 
 using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace Assets.Scripts
 {
@@ -38,8 +39,14 @@ namespace Assets.Scripts
         public bool DestroyOnVerticalLimits;
         public bool DestroyOnHorizontalLimits;
 
+        float _minVerticalBounceLimit;
+        float _maxVerticalBounceLimit;
+
         void Awake()
         {
+            _minVerticalBounceLimit = GameConstants.MinVerticalMovementLimit;
+            _maxVerticalBounceLimit = GameConstants.MaxVerticalMovementLimit;
+
             _moveDir = new Vector2(MoveDirX, MoveDirY);
             SpeedCoef = 1.0f;
 
@@ -94,8 +101,8 @@ namespace Assets.Scripts
 
             if (BounceOnHorizontalLimits)
             {
-                if (transform.position.y < GameConstants.MinVerticalMovementLimit && _moveDir.y < -float.Epsilon ||
-                    transform.position.y > GameConstants.MaxVerticalMovementLimit && _moveDir.y > float.Epsilon)
+                if (transform.position.y < _minVerticalBounceLimit && _moveDir.y < -float.Epsilon ||
+                    transform.position.y > _maxVerticalBounceLimit && _moveDir.y > float.Epsilon)
                 {
                     _moveDir.y = -_moveDir.y;
                     _moveDir.Normalize();
@@ -106,6 +113,15 @@ namespace Assets.Scripts
         public void SetMoveDir(Vector2 newMoveDir)
         {
             _moveDir = newMoveDir;
+        }
+
+        public void SetBounceLimits(float minLimit, float maxLimit)
+        {
+            Assert.IsTrue(minLimit >= GameConstants.MinVerticalMovementLimit);
+            Assert.IsTrue(maxLimit <= GameConstants.MaxVerticalMovementLimit);
+
+            _minVerticalBounceLimit = minLimit;
+            _maxVerticalBounceLimit = maxLimit;
         }
     }
 }

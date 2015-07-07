@@ -68,6 +68,7 @@ Camera:
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: .0219999999
+  m_StereoMirrorMode: 0
 --- !u!81 &8143180
 AudioListener:
   m_ObjectHideFlags: 1
@@ -175,8 +176,8 @@ MonoBehaviour:
   - {fileID: 105448, guid: 4318761234289f640a7017713d221b7b, type: 2}
   - {fileID: 173280, guid: 8dfdc579ad197d34a8f88fe5a10abd54, type: 2}
   StarPrefab: {fileID: 157426, guid: c5f313e4e03d12a4ba060b73e0120301, type: 2}
-  InitialMeteorCount: 20
-  InitialStarCount: 200
+  InitialMeteorCount: 30
+  InitialStarCount: 300
   IsGameScene: 1
 --- !u!114 &11425842
 MonoBehaviour:

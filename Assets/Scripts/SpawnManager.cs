@@ -16,11 +16,13 @@ namespace Assets.Scripts
     {
         public Vector2 Position;
         public Vector2 MoveDir;
+        public bool IsWiggling;
 
-        public WaveEntity(Vector2 position, Vector2 moveDir)
+        public WaveEntity(Vector2 position, Vector2 moveDir, bool isWiggling)
         {
             Position = position;
             MoveDir = moveDir;
+            IsWiggling = isWiggling;
         }
     };
 
@@ -31,7 +33,7 @@ namespace Assets.Scripts
         public GameObject[] PowerupPrefabArray;
         public GameObject[] MeteorPrefabArray;
         public GameObject StarPrefab;
-        public int InitialMeteorCount;
+        public int InitialMeteorCount; //TODO calculate ideal meteor and star count for having a seamless sky
         public int InitialStarCount;
         public bool IsGameScene;
 
@@ -169,60 +171,72 @@ namespace Assets.Scripts
             // 1 straight formation, straight movement
             List<WaveEntity> waveEntities = new List<WaveEntity>
             {
-                new WaveEntity(GetNewEnemyCoordinates(3, 0), Vector2.left),
-                new WaveEntity(GetNewEnemyCoordinates(3, 1), Vector2.left),
-                new WaveEntity(GetNewEnemyCoordinates(3, 2), Vector2.left),
-                new WaveEntity(GetNewEnemyCoordinates(3, 3), Vector2.left),
-                new WaveEntity(GetNewEnemyCoordinates(3, 4), Vector2.left),
-                new WaveEntity(GetNewEnemyCoordinates(3, 5), Vector2.left)
+                new WaveEntity(GetNewEnemyCoordinates(3, 0), Vector2.left, false),
+                new WaveEntity(GetNewEnemyCoordinates(3, 1), Vector2.left, false),
+                new WaveEntity(GetNewEnemyCoordinates(3, 2), Vector2.left, false),
+                new WaveEntity(GetNewEnemyCoordinates(3, 3), Vector2.left, false),
+                new WaveEntity(GetNewEnemyCoordinates(3, 4), Vector2.left, false),
+                new WaveEntity(GetNewEnemyCoordinates(3, 5), Vector2.left, false)
             };
             _pregeneratedWaves.Add(waveEntities);
 
             // 2 concave formation, straight movement
             List<WaveEntity> waveEntities2 = new List<WaveEntity>
             {
-                new WaveEntity(GetNewEnemyCoordinates(2, 0), Vector2.left),
-                new WaveEntity(GetNewEnemyCoordinates(3, 1), Vector2.left),
-                new WaveEntity(GetNewEnemyCoordinates(4, 2), Vector2.left),
-                new WaveEntity(GetNewEnemyCoordinates(4, 3), Vector2.left),
-                new WaveEntity(GetNewEnemyCoordinates(3, 4), Vector2.left),
-                new WaveEntity(GetNewEnemyCoordinates(2, 5), Vector2.left)
+                new WaveEntity(GetNewEnemyCoordinates(2, 0), Vector2.left, false),
+                new WaveEntity(GetNewEnemyCoordinates(3, 1), Vector2.left, false),
+                new WaveEntity(GetNewEnemyCoordinates(4, 2), Vector2.left, false),
+                new WaveEntity(GetNewEnemyCoordinates(4, 3), Vector2.left, false),
+                new WaveEntity(GetNewEnemyCoordinates(3, 4), Vector2.left, false),
+                new WaveEntity(GetNewEnemyCoordinates(2, 5), Vector2.left, false)
             };
             _pregeneratedWaves.Add(waveEntities2);
 
             // 3 convex formation, straight movement
             List<WaveEntity> waveEntities3 = new List<WaveEntity>
             {
-                new WaveEntity(GetNewEnemyCoordinates(4, 0), Vector2.left),
-                new WaveEntity(GetNewEnemyCoordinates(3, 1), Vector2.left),
-                new WaveEntity(GetNewEnemyCoordinates(2, 2), Vector2.left),
-                new WaveEntity(GetNewEnemyCoordinates(2, 3), Vector2.left),
-                new WaveEntity(GetNewEnemyCoordinates(3, 4), Vector2.left),
-                new WaveEntity(GetNewEnemyCoordinates(4, 5), Vector2.left)
+                new WaveEntity(GetNewEnemyCoordinates(4, 0), Vector2.left, false),
+                new WaveEntity(GetNewEnemyCoordinates(3, 1), Vector2.left, false),
+                new WaveEntity(GetNewEnemyCoordinates(2, 2), Vector2.left, false),
+                new WaveEntity(GetNewEnemyCoordinates(2, 3), Vector2.left, false),
+                new WaveEntity(GetNewEnemyCoordinates(3, 4), Vector2.left, false),
+                new WaveEntity(GetNewEnemyCoordinates(4, 5), Vector2.left, false)
             };
             _pregeneratedWaves.Add(waveEntities3);
 
             // 4 skewed formation, straight movement
             List<WaveEntity> waveEntities4 = new List<WaveEntity>
             {
-                new WaveEntity(GetNewEnemyCoordinates(2, 0), Vector2.left),
-                new WaveEntity(GetNewEnemyCoordinates(3, 1), Vector2.left),
-                new WaveEntity(GetNewEnemyCoordinates(2, 2), Vector2.left),
-                new WaveEntity(GetNewEnemyCoordinates(3, 3), Vector2.left),
-                new WaveEntity(GetNewEnemyCoordinates(2, 4), Vector2.left),
-                new WaveEntity(GetNewEnemyCoordinates(3, 5), Vector2.left)
+                new WaveEntity(GetNewEnemyCoordinates(2, 0), Vector2.left, false),
+                new WaveEntity(GetNewEnemyCoordinates(3, 1), Vector2.left, false),
+                new WaveEntity(GetNewEnemyCoordinates(2, 2), Vector2.left, false),
+                new WaveEntity(GetNewEnemyCoordinates(3, 3), Vector2.left, false),
+                new WaveEntity(GetNewEnemyCoordinates(2, 4), Vector2.left, false),
+                new WaveEntity(GetNewEnemyCoordinates(3, 5), Vector2.left, false)
             };
             _pregeneratedWaves.Add(waveEntities4);
 
             // 5 skewed formation, cross movement
             List<WaveEntity> waveEntities5 = new List<WaveEntity>
             {
-                new WaveEntity(GetNewEnemyCoordinates(0, 0), leftAndDown),
-                new WaveEntity(GetNewEnemyCoordinates(4, 1), leftAndDown),
-                new WaveEntity(GetNewEnemyCoordinates(6, 4), leftAndUp),
-                new WaveEntity(GetNewEnemyCoordinates(2, 5), leftAndUp)
+                new WaveEntity(GetNewEnemyCoordinates(0, 0), leftAndDown, false),
+                new WaveEntity(GetNewEnemyCoordinates(4, 1), leftAndDown, false),
+                new WaveEntity(GetNewEnemyCoordinates(6, 4), leftAndUp, false),
+                new WaveEntity(GetNewEnemyCoordinates(2, 5), leftAndUp, false)
             };
             _pregeneratedWaves.Add(waveEntities5);
+
+            //6 skewed formation, wiggling movement
+            List<WaveEntity> waveEntities6 = new List<WaveEntity>
+            {
+                new WaveEntity(GetNewEnemyCoordinates(2, 0), leftAndDown, true),
+                new WaveEntity(GetNewEnemyCoordinates(3, 1), leftAndUp, true),
+                new WaveEntity(GetNewEnemyCoordinates(2, 2), leftAndDown, true),
+                new WaveEntity(GetNewEnemyCoordinates(3, 3), leftAndUp, true),
+                new WaveEntity(GetNewEnemyCoordinates(2, 4), leftAndDown, true),
+                new WaveEntity(GetNewEnemyCoordinates(3, 5), leftAndUp, true)
+            };
+            _pregeneratedWaves.Add(waveEntities6);
         }
 
         void SpawnNewWave()
@@ -238,7 +252,13 @@ namespace Assets.Scripts
 
                 GameObject enemy = Instantiate(EnemyPrefabArray[enemyKind], entities[i].Position, Quaternion.identity) as GameObject;
                 Assert.IsNotNull(enemy);
-                enemy.GetComponent<BasicMove>().SetMoveDir(entities[i].MoveDir);
+                BasicMove basicMoveScript = enemy.GetComponent<BasicMove>();
+
+                if (entities[i].IsWiggling)
+                {
+                    basicMoveScript.SetBounceLimits(entities[i].Position.y - 0.1f, entities[i].Position.y + 0.1f);
+                }
+                basicMoveScript.SetMoveDir(entities[i].MoveDir);
             }
             _waveCount++;
         }

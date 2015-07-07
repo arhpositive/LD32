@@ -357,6 +357,14 @@ Prefab:
       propertyPath: MoveSpeed
       value: 1.20000005
       objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: MinVerticalBounceLimit
+      value: .449999988
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: MaxVerticalBounceLimit
+      value: 5.1500001
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}
   m_RootGameObject: {fileID: 190498}
