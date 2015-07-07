@@ -158,6 +158,7 @@ Transform:
   m_RootOrder: 2
 --- !u!50 &5035830
 Rigidbody2D:
+  serializedVersion: 2
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
@@ -166,13 +167,14 @@ Rigidbody2D:
   m_LinearDrag: 0
   m_AngularDrag: .0500000007
   m_GravityScale: 1
-  m_FixedAngle: 0
   m_IsKinematic: 1
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
+  m_Constraints: 0
 --- !u!50 &5060936
 Rigidbody2D:
+  serializedVersion: 2
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
@@ -181,11 +183,11 @@ Rigidbody2D:
   m_LinearDrag: 0
   m_AngularDrag: .0500000007
   m_GravityScale: 1
-  m_FixedAngle: 0
   m_IsKinematic: 1
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
+  m_Constraints: 0
 --- !u!61 &6103242
 BoxCollider2D:
   m_ObjectHideFlags: 1
@@ -341,7 +343,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   StunBulletPrefab: {fileID: 151552, guid: c01a9ecebecac134facbcd4665a1a13d, type: 2}
   SpeedUpBulletPrefab: {fileID: 181600, guid: 40481044129877d4a8fb8bc8e9f3acc3, type: 2}
-  PlayerSpeedLimit: 4
+  PlayerSpeedLimit: 3
   PlayerAcceleration: .100000001
   FireStunGunClip: {fileID: 8300000, guid: d8dbd1a7727573844b51d2e5e2fe2fed, type: 3}
   FireSpeedUpGunClip: {fileID: 8300000, guid: e4fd3e08cf0dc614d98186276bddbf7d, type: 3}
@@ -456,7 +458,11 @@ Prefab:
   serializedVersion: 2
   m_Modification:
     m_TransformParent: {fileID: 0}
-    m_Modifications: []
+    m_Modifications:
+    - target: {fileID: 0}
+      propertyPath: PlayerSpeedLimit
+      value: 3
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}
   m_RootGameObject: {fileID: 114074}

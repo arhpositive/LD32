@@ -7,19 +7,20 @@
  */
 
 using UnityEngine;
+using UnityEngine.Assertions;
 using System.Collections.Generic;
 
 namespace Assets.Scripts
 {
     struct WaveEntity
     {
-        public Vector3 Position;
-        public GameObject WaveObject;
+        public Vector2 Position;
+        public Vector2 MoveDir;
 
-        public WaveEntity(Vector3 position, GameObject waveObject)
+        public WaveEntity(Vector2 position, Vector2 moveDir)
         {
             Position = position;
-            WaveObject = waveObject;
+            MoveDir = moveDir;
         }
     };
 
@@ -54,26 +55,27 @@ namespace Assets.Scripts
 
         int _previousWavePlayerHealth;
 
-        readonly static float[] VerticalSpawnPositionsArray = { 0.55f, 1.45f, 2.35f, 3.25f, 4.15f, 5.05f };
+        List<List<WaveEntity>> _pregeneratedWaves;
+        Vector2[] _enemyCoordinates;
 
-        readonly static float[] HorizontalSpawnOffset1 = { -0.4f, 0.0f, 0.4f, 0.4f, 0.0f, -0.4f };
-        readonly static float[] HorizontalSpawnOffset2 = { -0.4f, 0.4f, -0.4f, 0.4f, -0.4f, 0.4f };
-        readonly static float[] HorizontalSpawnOffset3 = { 0.4f, 0.0f, -0.4f, -0.4f, 0.0f, 0.4f };
-        readonly static float[] HorizontalSpawnOffset4 = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
-        readonly static float[][] HorizontalSpawnOffsets = { HorizontalSpawnOffset1, HorizontalSpawnOffset2, HorizontalSpawnOffset3, HorizontalSpawnOffset4 };
-
-        List<WaveEntity> _nextWave;
+        const float HMaxCoord = GameConstants.HorizontalMaxCoord;
+        readonly float[] _hArr = { HMaxCoord - 0.9f, HMaxCoord - 0.6f, HMaxCoord - 0.3f, 
+                                     HMaxCoord, HMaxCoord + 0.3f, HMaxCoord + 0.6f, HMaxCoord + 0.9f };
+        readonly float[] _vArr = { 0.55f, 1.45f, 2.35f, 3.25f, 4.15f, 5.05f };
 
         void Awake()
         {
-            if (IsGameScene)
-            {
-                _playerGameObject = Instantiate(PlayerPrefab,
-                new Vector2(0.0f, Random.Range(GameConstants.MinVerticalMovementLimit, GameConstants.MaxVerticalMovementLimit)),
-                Quaternion.identity) as GameObject;
+	        if (!IsGameScene)
+	        {
+		        return;
+	        }
 
-                _playerScript = _playerGameObject.GetComponent<Player>();
-            }
+	        _playerGameObject = Instantiate(PlayerPrefab,
+		        new Vector2(0.0f, Random.Range(GameConstants.MinVerticalMovementLimit, GameConstants.MaxVerticalMovementLimit)),
+		        Quaternion.identity) as GameObject;
+
+            Assert.IsNotNull(_playerGameObject);
+            _playerScript = _playerGameObject.GetComponent<Player>();
         }
 
         void Start()
@@ -83,16 +85,20 @@ namespace Assets.Scripts
             _waveCount = 0;
             _waveSpawnInterval = 5.0f;
             _previousWaveSpawnTime = Time.time;
-            _nextWave = new List<WaveEntity>();
+            _pregeneratedWaves = new List<List<WaveEntity>>();
 
-            _previousWavePlayerHealth = 3; //duplication
+            PregenerateEnemyCoordinates();
+            PregeneratePossibleWaves();
+
+            _previousWavePlayerHealth = GameConstants.PlayerInitialHealth;
 
             _powerupSpawnInterval = Random.Range(3.0f, 6.0f);
             _previousPowerupSpawnTime = Time.time;
 
             _previousMeteorSpawnTime = Time.time;
             _previousStarSpawnTime = Time.time;
-            InitialMeteorSpawn();
+
+            InitialMeteorAndStarSpawn();
         }
 
         void Update()
@@ -101,8 +107,8 @@ namespace Assets.Scripts
             {
                 if (Time.time - _previousWaveSpawnTime > _waveSpawnInterval)
                 {
-                    FormNewWave();
                     SpawnNewWave();
+                    AdjustDifficultyAfterWave();
                     _previousWaveSpawnTime = Time.time;
                     _waveSpawnInterval = Random.Range(8.0f, 10.0f) / _difficultyManagerScript.DifficultyMultiplier;
                 }
@@ -133,45 +139,108 @@ namespace Assets.Scripts
             }
         }
 
-
-
-        void FormNewWave()
+        void PregenerateEnemyCoordinates()
         {
-            float advancedEnemyPercentage = (Mathf.Clamp(_difficultyManagerScript.DifficultyMultiplier, 1.0f, 2.0f) - 1.0f) * 100.0f;
+            _enemyCoordinates = new Vector2[_hArr.Length * _vArr.Length];
 
-            int randomOffset = Random.Range(0, HorizontalSpawnOffsets.Length);
-
-            for (int i = 0; i < VerticalSpawnPositionsArray.Length; i++)
+            for (int x = 0; x < _hArr.Length; ++x)
             {
-                float randomEnemy = Random.Range(0.0f, 100.0f);
-                int enemyKind = randomEnemy < advancedEnemyPercentage ? 1 : 0;
-
-                WaveEntity entity = new WaveEntity(new Vector2(GameConstants.HorizontalMaxCoord + HorizontalSpawnOffsets[randomOffset][i], VerticalSpawnPositionsArray[i]), EnemyPrefabArray[enemyKind]);
-                _nextWave.Add(entity);
+                for (int y = 0; y < _vArr.Length; ++y)
+                {
+                    int index = y + _vArr.Length * x;
+                    _enemyCoordinates[index].x = _hArr[x];
+                    _enemyCoordinates[index].y = _vArr[y];
+                }
             }
+        }
+
+        Vector2 GetNewEnemyCoordinates(int x, int y)
+        {
+            return _enemyCoordinates[y + _vArr.Length * x];
+        }
+
+        void PregeneratePossibleWaves()
+        {
+            Vector2 leftAndDown = new Vector2(-1.0f, -0.5f);
+            leftAndDown.Normalize();
+            Vector2 leftAndUp = new Vector2(-1.0f, 0.5f);
+            leftAndUp.Normalize();
+
+            // 1 straight formation, straight movement
+            List<WaveEntity> waveEntities = new List<WaveEntity>
+            {
+                new WaveEntity(GetNewEnemyCoordinates(3, 0), Vector2.left),
+                new WaveEntity(GetNewEnemyCoordinates(3, 1), Vector2.left),
+                new WaveEntity(GetNewEnemyCoordinates(3, 2), Vector2.left),
+                new WaveEntity(GetNewEnemyCoordinates(3, 3), Vector2.left),
+                new WaveEntity(GetNewEnemyCoordinates(3, 4), Vector2.left),
+                new WaveEntity(GetNewEnemyCoordinates(3, 5), Vector2.left)
+            };
+            _pregeneratedWaves.Add(waveEntities);
+
+            // 2 concave formation, straight movement
+            List<WaveEntity> waveEntities2 = new List<WaveEntity>
+            {
+                new WaveEntity(GetNewEnemyCoordinates(2, 0), Vector2.left),
+                new WaveEntity(GetNewEnemyCoordinates(3, 1), Vector2.left),
+                new WaveEntity(GetNewEnemyCoordinates(4, 2), Vector2.left),
+                new WaveEntity(GetNewEnemyCoordinates(4, 3), Vector2.left),
+                new WaveEntity(GetNewEnemyCoordinates(3, 4), Vector2.left),
+                new WaveEntity(GetNewEnemyCoordinates(2, 5), Vector2.left)
+            };
+            _pregeneratedWaves.Add(waveEntities2);
+
+            // 3 convex formation, straight movement
+            List<WaveEntity> waveEntities3 = new List<WaveEntity>
+            {
+                new WaveEntity(GetNewEnemyCoordinates(4, 0), Vector2.left),
+                new WaveEntity(GetNewEnemyCoordinates(3, 1), Vector2.left),
+                new WaveEntity(GetNewEnemyCoordinates(2, 2), Vector2.left),
+                new WaveEntity(GetNewEnemyCoordinates(2, 3), Vector2.left),
+                new WaveEntity(GetNewEnemyCoordinates(3, 4), Vector2.left),
+                new WaveEntity(GetNewEnemyCoordinates(4, 5), Vector2.left)
+            };
+            _pregeneratedWaves.Add(waveEntities3);
+
+            // 4 skewed formation, straight movement
+            List<WaveEntity> waveEntities4 = new List<WaveEntity>
+            {
+                new WaveEntity(GetNewEnemyCoordinates(2, 0), Vector2.left),
+                new WaveEntity(GetNewEnemyCoordinates(3, 1), Vector2.left),
+                new WaveEntity(GetNewEnemyCoordinates(2, 2), Vector2.left),
+                new WaveEntity(GetNewEnemyCoordinates(3, 3), Vector2.left),
+                new WaveEntity(GetNewEnemyCoordinates(2, 4), Vector2.left),
+                new WaveEntity(GetNewEnemyCoordinates(3, 5), Vector2.left)
+            };
+            _pregeneratedWaves.Add(waveEntities4);
+
+            // 5 skewed formation, cross movement
+            List<WaveEntity> waveEntities5 = new List<WaveEntity>
+            {
+                new WaveEntity(GetNewEnemyCoordinates(0, 0), leftAndDown),
+                new WaveEntity(GetNewEnemyCoordinates(4, 1), leftAndDown),
+                new WaveEntity(GetNewEnemyCoordinates(6, 4), leftAndUp),
+                new WaveEntity(GetNewEnemyCoordinates(2, 5), leftAndUp)
+            };
+            _pregeneratedWaves.Add(waveEntities5);
         }
 
         void SpawnNewWave()
         {
-            for (int i = 0; i < _nextWave.Count; i++)
-            {
-                Instantiate(_nextWave[i].WaveObject, _nextWave[i].Position, Quaternion.identity);
-            }
+            float advancedEnemyPercentage = (Mathf.Clamp(_difficultyManagerScript.DifficultyMultiplier, 1.0f, 2.0f) - 1.0f) * 100.0f;
 
+            int randomWaveIndex = Random.Range(0, _pregeneratedWaves.Count);
+            List<WaveEntity> entities = _pregeneratedWaves[randomWaveIndex];
+            for (int i = 0; i < entities.Count; i++)
+            {
+                float randomEnemy = Random.Range(0.0f, 100.0f);
+                int enemyKind = randomEnemy < advancedEnemyPercentage ? 1 : 0;
+
+                GameObject enemy = Instantiate(EnemyPrefabArray[enemyKind], entities[i].Position, Quaternion.identity) as GameObject;
+                Assert.IsNotNull(enemy);
+                enemy.GetComponent<BasicMove>().SetMoveDir(entities[i].MoveDir);
+            }
             _waveCount++;
-
-            if (_previousWavePlayerHealth != _playerScript.PlayerHealth && _playerScript.PlayerHealth == 1)
-            {
-                _difficultyManagerScript.DecreaseDifficulty(0.2f);
-            }
-
-            if (_playerScript.PlayerHealth > 5 || (_waveCount % 5 == 0 && _playerScript.PlayerHealth > 1))
-            {
-                _difficultyManagerScript.IncreaseDifficulty(0.2f);
-            }
-
-            _previousWavePlayerHealth = _playerScript.PlayerHealth;
-            _nextWave.Clear();
         }
 
         void SpawnNewPowerup()
@@ -185,15 +254,7 @@ namespace Assets.Scripts
             }
             else if (randomizePowerup < 35.0f)
             {
-                //TODO change this line and make it dependent upon difficulty settings
-                if (_playerScript.PlayerHealth == 1)
-                {
-                    powerupKind = (int)PowerupType.PtShield;
-                }
-                else
-                {
-                    powerupKind = (int)PowerupType.PtSpeedup;
-                }
+                powerupKind = (int)PowerupType.PtSpeedup;
             }
             else if (randomizePowerup < 50.0f)
             {
@@ -209,7 +270,7 @@ namespace Assets.Scripts
             Instantiate(PowerupPrefabArray[powerupKind], powerupPos, Quaternion.identity);
         }
 
-        void InitialMeteorSpawn()
+        void InitialMeteorAndStarSpawn()
         {
             for (int i = 0; i < InitialMeteorCount; i++)
             {
@@ -236,5 +297,20 @@ namespace Assets.Scripts
         {
             Instantiate(StarPrefab, starPos, Quaternion.identity);
         }
+
+	    void AdjustDifficultyAfterWave()
+	    {
+            if (_previousWavePlayerHealth != _playerScript.PlayerHealth && _playerScript.PlayerHealth == 1)
+            {
+                _difficultyManagerScript.DecreaseDifficulty(0.2f);
+            }
+
+            if (_playerScript.PlayerHealth > 5 || (_waveCount % 5 == 0 && _playerScript.PlayerHealth > 1))
+            {
+                _difficultyManagerScript.IncreaseDifficulty(0.2f);
+            }
+
+            _previousWavePlayerHealth = _playerScript.PlayerHealth;
+	    }
     }
 }

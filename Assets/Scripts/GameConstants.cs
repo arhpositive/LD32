@@ -18,5 +18,6 @@ namespace Assets.Scripts
         public const float MaxHorizontalMovementLimit = 3.25f;
         public const float MinVerticalMovementLimit = 0.45f;
         public const float MaxVerticalMovementLimit = 5.15f;
+	    public const int PlayerInitialHealth = 3;
     }
 }

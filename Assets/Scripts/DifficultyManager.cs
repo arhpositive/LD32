@@ -16,12 +16,13 @@ namespace Assets.Scripts
 
         void Start()
         {
-            DifficultyMultiplier = 1.0f; //the bigger the harder
+            // higher difficulty multiplier equals a more challenging game
+            DifficultyMultiplier = 1.0f;
         }
 
         void Update()
         {
-
+            // TODO do regular checks about gameplay here and adjust difficulty
         }
 
         public void IncreaseDifficulty(float value)

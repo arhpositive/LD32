@@ -75,7 +75,7 @@ namespace Assets.Scripts
         void Start()
         {
             PlayerScore = 0;
-            PlayerHealth = 3;
+            PlayerHealth = GameConstants.PlayerInitialHealth;
             IsDead = false;
             IsShielded = false;
             IsInvulnerable = true;

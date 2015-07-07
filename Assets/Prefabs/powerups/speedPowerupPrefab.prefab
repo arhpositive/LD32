@@ -34,6 +34,7 @@ Transform:
   m_RootOrder: 0
 --- !u!50 &5035764
 Rigidbody2D:
+  serializedVersion: 2
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
@@ -42,11 +43,11 @@ Rigidbody2D:
   m_LinearDrag: 0
   m_AngularDrag: .0500000007
   m_GravityScale: 1
-  m_FixedAngle: 0
   m_IsKinematic: 1
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
+  m_Constraints: 0
 --- !u!61 &6163940
 BoxCollider2D:
   m_ObjectHideFlags: 1
@@ -73,7 +74,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   DoesMove: 1
   MoveSpeed: 1
-  MoveDirX: 0
+  MoveDirX: -1
   RandomizeMoveDirX: 0
   RandomizeMoveDirXCoef: 0
   MoveDirY: 0
@@ -131,7 +132,11 @@ Prefab:
   serializedVersion: 2
   m_Modification:
     m_TransformParent: {fileID: 0}
-    m_Modifications: []
+    m_Modifications:
+    - target: {fileID: 0}
+      propertyPath: MoveDirX
+      value: -1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}
   m_RootGameObject: {fileID: 195642}

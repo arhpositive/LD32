@@ -137,6 +137,12 @@ namespace Assets.Scripts
                         Destroy(gameObject);
                     }
                 }
+                else if (other.gameObject.tag == "Enemy")
+                {
+                    _hasCollided = true;
+                    AudioSource.PlayClipAtPoint(ExplosionClip, transform.position);
+                    Destroy(gameObject);
+                }
             }
         }
 

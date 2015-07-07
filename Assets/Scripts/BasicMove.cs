@@ -38,7 +38,7 @@ namespace Assets.Scripts
         public bool DestroyOnVerticalLimits;
         public bool DestroyOnHorizontalLimits;
 
-        void Start()
+        void Awake()
         {
             _moveDir = new Vector2(MoveDirX, MoveDirY);
             SpeedCoef = 1.0f;
@@ -101,6 +101,11 @@ namespace Assets.Scripts
                     _moveDir.Normalize();
                 }
             }
+        }
+
+        public void SetMoveDir(Vector2 newMoveDir)
+        {
+            _moveDir = newMoveDir;
         }
     }
 }
