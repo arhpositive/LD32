@@ -262,10 +262,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 598f9d8bab72cb8429ce6d0ee424d4b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  StunDuration: .100000001
-  SpeedBoostCoef: 1.29999995
+  StunDuration: .159999996
+  SpeedBoostCoef: 1.39999998
   CanShoot: 1
-  FiringInterval: 3
+  MinFiringInterval: 5
   BulletPrefab: {fileID: 104536, guid: efb3702b3f1e6b140ae6e81f3396926b, type: 2}
   ExplosionClip: {fileID: 8300000, guid: 2c95fdf00a27c874cb6cf05c7be45376, type: 3}
 --- !u!212 &21203258
@@ -364,6 +364,18 @@ Prefab:
     - target: {fileID: 0}
       propertyPath: MaxVerticalBounceLimit
       value: 5.1500001
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: MinFiringInterval
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: StunDuration
+      value: .159999996
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: SpeedBoostCoef
+      value: 1.39999998
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}

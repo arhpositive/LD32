@@ -58,9 +58,9 @@ CircleCollider2D:
   m_Material: {fileID: 0}
   m_IsTrigger: 1
   m_UsedByEffector: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: -.00999999978, y: -.00999999978}
   serializedVersion: 2
-  m_Radius: .129999995
+  m_Radius: .109999999
 --- !u!114 &11416334
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -72,8 +72,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b54c0d81c29a8f4188bc468dea12bd3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PowerupType: 2
-  GainPowerupClip: {fileID: 8300000, guid: ad88cb7e7d7fa8a49af79977ff10de68, type: 3}
+  PowerupType: 4
+  GainPowerupClip: {fileID: 8300000, guid: 936894d938984564f82df28798b05926, type: 3}
 --- !u!114 &11421144
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -124,7 +124,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 8a434d993ea5b394c883f45f6a02b824, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 7a4b01700d905b547b85ed9de4a61a95, type: 3}
   m_Color: {r: 1, g: .647058845, b: 0, a: 1}
 --- !u!1001 &100100000
 Prefab:
@@ -145,6 +145,19 @@ Prefab:
       propertyPath: m_Color.b
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: PowerupType
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: GainPowerupClip
+      value: 
+      objectReference: {fileID: 8300000, guid: 936894d938984564f82df28798b05926, type: 3}
+    - target: {fileID: 0}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 7a4b01700d905b547b85ed9de4a61a95,
+        type: 3}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}
   m_RootGameObject: {fileID: 113784}

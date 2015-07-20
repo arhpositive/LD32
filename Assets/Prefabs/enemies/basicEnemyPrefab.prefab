@@ -150,7 +150,7 @@ MonoBehaviour:
   StunDuration: .200000003
   SpeedBoostCoef: 1.5
   CanShoot: 1
-  FiringInterval: 4
+  MinFiringInterval: 3
   BulletPrefab: {fileID: 104536, guid: efb3702b3f1e6b140ae6e81f3396926b, type: 2}
   ExplosionClip: {fileID: 8300000, guid: 2c95fdf00a27c874cb6cf05c7be45376, type: 3}
 --- !u!114 &11483228
@@ -241,6 +241,10 @@ Prefab:
     - target: {fileID: 0}
       propertyPath: MoveSpeed
       value: 1.20000005
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: MinFiringInterval
+      value: 3
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}
