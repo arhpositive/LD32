@@ -15,7 +15,9 @@ namespace Assets.Scripts
         PtHealth,
         PtSpeedup,
         PtResearch,
-        PtShield
+        PtShield,
+        PtBomb,
+        PtCount
     }
 
     public class Powerup : MonoBehaviour
@@ -39,6 +41,7 @@ namespace Assets.Scripts
 
                     if (!playerScript.IsDead)
                     {
+                        bool gotPickedUp = true;
                         switch (PowerupType)
                         {
                             case PowerupType.PtHealth:
@@ -53,10 +56,17 @@ namespace Assets.Scripts
                             case PowerupType.PtShield:
                                 playerScript.TriggerShieldPickup();
                                 break;
+                            case PowerupType.PtBomb:
+                                gotPickedUp = playerScript.PlayerGotHit();
+                                break;
                         }
-                        _hasCollided = true;
-                        AudioSource.PlayClipAtPoint(GainPowerupClip, transform.position);
-                        Destroy(gameObject);
+
+                        if (gotPickedUp)
+                        {
+                            _hasCollided = true;
+                            AudioSource.PlayClipAtPoint(GainPowerupClip, transform.position);
+                            Destroy(gameObject);
+                        }
                     }
                 }
             }

@@ -17,7 +17,7 @@ namespace Assets.Scripts
         void Start()
         {
             // higher difficulty multiplier equals a more challenging game
-            DifficultyMultiplier = 1.0f;
+            DifficultyMultiplier = 2.0f;
         }
 
         void Update()

@@ -9,6 +9,7 @@
 using UnityEngine;
 using UnityEngine.Assertions;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Assets.Scripts
 {
@@ -85,7 +86,7 @@ namespace Assets.Scripts
             _difficultyManagerScript = Camera.main.GetComponent<DifficultyManager>();
 
             _waveCount = 0;
-            _waveSpawnInterval = 5.0f;
+            _waveSpawnInterval = 4.0f;
             _previousWaveSpawnTime = Time.time;
             _pregeneratedWaves = new List<List<WaveEntity>>();
 
@@ -112,7 +113,7 @@ namespace Assets.Scripts
                     SpawnNewWave();
                     AdjustDifficultyAfterWave();
                     _previousWaveSpawnTime = Time.time;
-                    _waveSpawnInterval = Random.Range(8.0f, 10.0f) / _difficultyManagerScript.DifficultyMultiplier;
+                    _waveSpawnInterval = Random.Range(7.0f, 10.0f) / _difficultyManagerScript.DifficultyMultiplier;
                 }
 
                 if (Time.time - _previousPowerupSpawnTime > _powerupSpawnInterval)
@@ -237,6 +238,21 @@ namespace Assets.Scripts
                 new WaveEntity(GetNewEnemyCoordinates(3, 5), leftAndUp, true)
             };
             _pregeneratedWaves.Add(waveEntities6);
+
+            //7 skewed triple formation, wiggling singles, very hard!
+            List<WaveEntity> waveEntities7 = new List<WaveEntity>
+            {
+                new WaveEntity(GetNewEnemyCoordinates(0, 0), Vector2.left, false),
+                new WaveEntity(GetNewEnemyCoordinates(6, 0), Vector2.left, false),
+                new WaveEntity(GetNewEnemyCoordinates(2, 1), leftAndDown, true),
+                new WaveEntity(GetNewEnemyCoordinates(0, 2), Vector2.left, false),
+                new WaveEntity(GetNewEnemyCoordinates(6, 2), Vector2.left, false),
+                new WaveEntity(GetNewEnemyCoordinates(2, 3), leftAndUp, true),
+                new WaveEntity(GetNewEnemyCoordinates(0, 4), Vector2.left, false),
+                new WaveEntity(GetNewEnemyCoordinates(6, 4), Vector2.left, false),
+                new WaveEntity(GetNewEnemyCoordinates(2, 5), leftAndDown, true)
+            };
+            _pregeneratedWaves.Add(waveEntities7);
         }
 
         void SpawnNewWave()
@@ -265,29 +281,51 @@ namespace Assets.Scripts
 
         void SpawnNewPowerup()
         {
-            int powerupKind;
+            PowerupType powerupType;
             float randomizePowerup = Random.Range(0.0f, 100.0f);
 
             if (randomizePowerup < 5.0f)
             {
-                powerupKind = (int)PowerupType.PtHealth;
+                powerupType = PowerupType.PtHealth;
             }
             else if (randomizePowerup < 35.0f)
             {
-                powerupKind = (int)PowerupType.PtSpeedup;
+                powerupType = PowerupType.PtSpeedup;
             }
             else if (randomizePowerup < 50.0f)
             {
-                powerupKind = (int)PowerupType.PtShield;
+                powerupType = PowerupType.PtShield;
+            }
+            else if (randomizePowerup < 90.0f)
+            {
+                powerupType = PowerupType.PtBomb;
             }
             else
             {
-                powerupKind = (int)PowerupType.PtResearch;
+                powerupType = PowerupType.PtResearch;
             }
 
-            // TODO spawning powerups are dependent upon order of the array, fix
+            SpawnPowerupFromType(powerupType);
+
+        }
+
+        void SpawnPowerupFromType(PowerupType powerupType)
+        {
+            int powerupCount = PowerupPrefabArray.Length;
+            Assert.AreEqual(powerupCount, (int)PowerupType.PtCount);
+
+            int i = 0;
+            while (i < powerupCount)
+            {
+                if (PowerupPrefabArray[i].GetComponent<Powerup>().PowerupType == powerupType)
+                {
+                    break;
+                }
+                ++i;
+            }
+
             Vector3 powerupPos = new Vector2(GameConstants.HorizontalMaxCoord, Random.Range(GameConstants.MinVerticalMovementLimit, GameConstants.MaxVerticalMovementLimit));
-            Instantiate(PowerupPrefabArray[powerupKind], powerupPos, Quaternion.identity);
+            Instantiate(PowerupPrefabArray[i], powerupPos, Quaternion.identity);
         }
 
         void InitialMeteorAndStarSpawn()

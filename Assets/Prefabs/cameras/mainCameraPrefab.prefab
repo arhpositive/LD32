@@ -172,6 +172,7 @@ MonoBehaviour:
   - {fileID: 195642, guid: 7e24ad8ee91fea748a9cf394b8bd4c47, type: 2}
   - {fileID: 107878, guid: e27706cab5b9776428cddb7dee2575de, type: 2}
   - {fileID: 178398, guid: 9e1492490beda70419e92a554887e3b8, type: 2}
+  - {fileID: 113784, guid: a461906a5484a2e48b374b9d9d771f02, type: 2}
   MeteorPrefabArray:
   - {fileID: 105448, guid: 4318761234289f640a7017713d221b7b, type: 2}
   - {fileID: 173280, guid: 8dfdc579ad197d34a8f88fe5a10abd54, type: 2}
@@ -228,7 +229,15 @@ Prefab:
   serializedVersion: 2
   m_Modification:
     m_TransformParent: {fileID: 0}
-    m_Modifications: []
+    m_Modifications:
+    - target: {fileID: 0}
+      propertyPath: PowerupPrefabArray.Array.size
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: PowerupPrefabArray.Array.data[4]
+      value: 
+      objectReference: {fileID: 113784, guid: a461906a5484a2e48b374b9d9d771f02, type: 2}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}
   m_RootGameObject: {fileID: 102966}

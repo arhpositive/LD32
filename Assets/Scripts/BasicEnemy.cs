@@ -15,7 +15,7 @@ namespace Assets.Scripts
         public float StunDuration;
         public float SpeedBoostCoef;
         public bool CanShoot;
-        public float FiringInterval;
+        public float MinFiringInterval;
         public GameObject BulletPrefab;
         public AudioClip ExplosionClip;
 
@@ -47,7 +47,7 @@ namespace Assets.Scripts
             _lastStunTime = 0.0f;
             _speedBoostIsActive = false;
             _lastFireTime = Time.time;
-            _nextFiringInterval = (Random.Range(FiringInterval - 1.0f, FiringInterval + 1.0f) / _difficultyManagerScript.DifficultyMultiplier) * 0.5f;
+            _nextFiringInterval = Random.Range(MinFiringInterval, 2 * MinFiringInterval) / Mathf.Sqrt(_difficultyManagerScript.DifficultyMultiplier);
             _displacementLength = 0.0f;
         }
 
@@ -156,7 +156,8 @@ namespace Assets.Scripts
                     Instantiate(BulletPrefab, transform.GetChild(i).position, Quaternion.identity);
                 }
             }
-            _nextFiringInterval = Random.Range(FiringInterval - 1.0f, FiringInterval + 1.0f) / _difficultyManagerScript.DifficultyMultiplier;
+            float randomIntervalCoef = Random.Range(MinFiringInterval, 3 * MinFiringInterval);
+            _nextFiringInterval = randomIntervalCoef / Mathf.Sqrt(_difficultyManagerScript.DifficultyMultiplier);
         }
     }
 }
