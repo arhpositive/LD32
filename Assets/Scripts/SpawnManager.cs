@@ -9,7 +9,6 @@
 using UnityEngine;
 using UnityEngine.Assertions;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Assets.Scripts
 {
@@ -40,7 +39,6 @@ namespace Assets.Scripts
 
         float _previousWaveSpawnTime;
         float _waveSpawnInterval;
-        int _waveCount;
 
         DifficultyManager _difficultyManagerScript;
 
@@ -52,11 +50,6 @@ namespace Assets.Scripts
 
         float _previousStarSpawnTime;
         const float StarSpawnInterval = 100.0f;
-
-        GameObject _playerGameObject;
-        Player _playerScript;
-
-        int _previousWavePlayerHealth;
 
         List<List<WaveEntity>> _pregeneratedWaves;
         Vector2[] _enemyCoordinates;
@@ -73,29 +66,23 @@ namespace Assets.Scripts
 		        return;
 	        }
 
-	        _playerGameObject = Instantiate(PlayerPrefab,
+	        Instantiate(PlayerPrefab,
 		        new Vector2(0.0f, Random.Range(GameConstants.MinVerticalMovementLimit, GameConstants.MaxVerticalMovementLimit)),
-		        Quaternion.identity) as GameObject;
-
-            Assert.IsNotNull(_playerGameObject);
-            _playerScript = _playerGameObject.GetComponent<Player>();
+		        Quaternion.identity);
         }
 
         void Start()
         {
             _difficultyManagerScript = Camera.main.GetComponent<DifficultyManager>();
 
-            _waveCount = 0;
-            _waveSpawnInterval = 4.0f;
+            _waveSpawnInterval = GameConstants.WaveSpawnBaseInterval;
             _previousWaveSpawnTime = Time.time;
             _pregeneratedWaves = new List<List<WaveEntity>>();
 
             PregenerateEnemyCoordinates();
             PregeneratePossibleWaves();
 
-            _previousWavePlayerHealth = GameConstants.PlayerInitialHealth;
-
-            _powerupSpawnInterval = Random.Range(3.0f, 6.0f);
+            _powerupSpawnInterval = GameConstants.PowerupSpawnBaseInterval;
             _previousPowerupSpawnTime = Time.time;
 
             _previousMeteorSpawnTime = Time.time;
@@ -111,16 +98,17 @@ namespace Assets.Scripts
                 if (Time.time - _previousWaveSpawnTime > _waveSpawnInterval)
                 {
                     SpawnNewWave();
-                    AdjustDifficultyAfterWave();
                     _previousWaveSpawnTime = Time.time;
-                    _waveSpawnInterval = Random.Range(7.0f, 10.0f) / _difficultyManagerScript.DifficultyMultiplier;
+                    float randomIntervalCoef = Random.Range(GameConstants.WaveSpawnBaseInterval, GameConstants.WaveSpawnBaseInterval * 2);
+                    _waveSpawnInterval = randomIntervalCoef / Mathf.Sqrt(_difficultyManagerScript.DifficultyMultiplier);
                 }
 
                 if (Time.time - _previousPowerupSpawnTime > _powerupSpawnInterval)
                 {
                     SpawnNewPowerup();
                     _previousPowerupSpawnTime = Time.time;
-                    _powerupSpawnInterval = Random.Range(3.0f, 6.0f) * _difficultyManagerScript.DifficultyMultiplier;
+                    float randomIntervalCoef = Random.Range(GameConstants.PowerupSpawnBaseInterval, GameConstants.PowerupSpawnBaseInterval * 2);
+                    _powerupSpawnInterval = randomIntervalCoef * Mathf.Sqrt(_difficultyManagerScript.DifficultyMultiplier);
                 }
             }
 
@@ -276,7 +264,6 @@ namespace Assets.Scripts
                 }
                 basicMoveScript.SetMoveDir(entities[i].MoveDir);
             }
-            _waveCount++;
         }
 
         void SpawnNewPowerup()
@@ -355,20 +342,5 @@ namespace Assets.Scripts
         {
             Instantiate(StarPrefab, starPos, Quaternion.identity);
         }
-
-	    void AdjustDifficultyAfterWave()
-	    {
-            if (_previousWavePlayerHealth != _playerScript.PlayerHealth && _playerScript.PlayerHealth == 1)
-            {
-                _difficultyManagerScript.DecreaseDifficulty(0.2f);
-            }
-
-            if (_playerScript.PlayerHealth > 5 || (_waveCount % 5 == 0 && _playerScript.PlayerHealth > 1))
-            {
-                _difficultyManagerScript.IncreaseDifficulty(0.2f);
-            }
-
-            _previousWavePlayerHealth = _playerScript.PlayerHealth;
-	    }
     }
 }

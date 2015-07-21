@@ -7,6 +7,7 @@
  */
 
 using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace Assets.Scripts
 {
@@ -115,9 +116,8 @@ namespace Assets.Scripts
             {
                 if (other.gameObject.tag == "Player")
                 {
-                    Player playerScript = other.gameObject.GetComponent<Player>();
-
-                    bool playerGotHit = playerScript.PlayerGotHit();
+                    Assert.IsNotNull(_playerScript);
+                    bool playerGotHit = _playerScript.PlayerGotHit();
                     if (playerGotHit)
                     {
                         _hasCollided = true;
@@ -127,9 +127,8 @@ namespace Assets.Scripts
                 }
                 else if (other.gameObject.tag == "Shield")
                 {
-                    Player playerScript = other.gameObject.GetComponentInParent<Player>();
-
-                    bool shieldGotHit = playerScript.ShieldGotHit();
+                    Assert.IsNotNull(_playerScript);
+                    bool shieldGotHit = _playerScript.ShieldGotHit();
                     if (shieldGotHit)
                     {
                         _hasCollided = true;

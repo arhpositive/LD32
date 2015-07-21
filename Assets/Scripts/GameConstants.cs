@@ -19,5 +19,7 @@ namespace Assets.Scripts
         public const float MinVerticalMovementLimit = 0.45f;
         public const float MaxVerticalMovementLimit = 5.15f;
 	    public const int PlayerInitialHealth = 3;
+        public const float WaveSpawnBaseInterval = 5.0f;
+        public const float PowerupSpawnBaseInterval = 3.0f;
     }
 }
