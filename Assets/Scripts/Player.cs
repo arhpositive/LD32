@@ -101,23 +101,25 @@ namespace Assets.Scripts
         {
             if (IsDead)
             {
-                if (Time.time - _deathTime > DeathDuration)
-                {
-                    //rise from dead
-                    IsDead = false;
-                    _spriteRenderer.enabled = true;
-                    SetChildRenderers(true);
-
-                    //spawn
-                    transform.position = new Vector2(0.0f, Random.Range(GameConstants.MinVerticalMovementLimit,
-                        GameConstants.MaxVerticalMovementLimit));
-                    IsInvulnerable = true;
-                    _invulnerabilityStartTime = Time.time;
-                }
-                else
+                if (Time.time - _deathTime <= DeathDuration)
                 {
                     return;
                 }
+
+                EventLogger.PrintToLog("Player Respawns");
+
+                //rise from dead
+                IsDead = false;
+                _spriteRenderer.enabled = true;
+                SetChildRenderers(true);
+
+                EventLogger.PrintToLog("Invulnerability Start");
+
+                //spawn
+                transform.position = new Vector2(0.0f, Random.Range(GameConstants.MinVerticalMovementLimit,
+                    GameConstants.MaxVerticalMovementLimit));
+                IsInvulnerable = true;
+                _invulnerabilityStartTime = Time.time;
             }
 
             //invulnerability
@@ -136,8 +138,10 @@ namespace Assets.Scripts
             }
 
             //end of invulnerability
-            if (Time.time - _invulnerabilityStartTime > InvulnerabilityDuration)
+            if (Time.time - _invulnerabilityStartTime > InvulnerabilityDuration && IsInvulnerable)
             {
+                EventLogger.PrintToLog("Invulnerability End");
+
                 IsInvulnerable = false;
                 _spriteRenderer.enabled = true;
                 SetChildRenderers(true);
@@ -224,29 +228,29 @@ namespace Assets.Scripts
                 // bullet goes right through player
                 return false;
             }
+
+            PlayerHealth--;
+
+            if (PlayerHealth == 0)
+            {
+                EventLogger.PrintToLog("Player Dies: Game Over");
+                _endGameScoreText.SetTextVisible();
+                Destroy(gameObject);
+            }
             else
             {
-                PlayerHealth--;
-
-                if (PlayerHealth == 0)
+                EventLogger.PrintToLog("Player Loses Health");
+                if (IsShielded)
                 {
-                    _endGameScoreText.SetTextVisible();
-                    Destroy(gameObject);
+                    ShieldGotHit();
                 }
-                else
-                {
-                    if (IsShielded)
-                    {
-                        ShieldGotHit();
-                    }
-                    AudioSource.PlayClipAtPoint(ExplosionClip, transform.position);
-                    _deathTime = Time.time;
-                    IsDead = true;
-                    _spriteRenderer.enabled = false;
-                    SetChildRenderers(false);
-                }
-                return true;
+                AudioSource.PlayClipAtPoint(ExplosionClip, transform.position);
+                _deathTime = Time.time;
+                IsDead = true;
+                _spriteRenderer.enabled = false;
+                SetChildRenderers(false);
             }
+            return true;
         }
 
         public bool ShieldGotHit()
@@ -255,6 +259,8 @@ namespace Assets.Scripts
             {
                 return false;
             }
+
+            EventLogger.PrintToLog("Player Loses Shield");
 
             IsShielded = false;
             _playerShield.SetActive(false);
@@ -273,21 +279,25 @@ namespace Assets.Scripts
 
         public void TriggerHealthPickup()
         {
+            EventLogger.PrintToLog("Player Gains Health");
             PlayerHealth++;
         }
 
         public void TriggerSpeedUpPickup()
         {
+            EventLogger.PrintToLog("Player Gains Speedup Powerup");
             _speedUpGun.AmmoCount++;
         }
 
         public void TriggerResearchPickup()
         {
+            EventLogger.PrintToLog("Player Gains Research Powerup");
             PlayerScore += 50;
         }
 
         public void TriggerShieldPickup()
         {
+            EventLogger.PrintToLog("Player Gains Shield");
             if (!IsShielded)
             {
                 IsShielded = true;

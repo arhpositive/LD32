@@ -245,6 +245,8 @@ namespace Assets.Scripts
 
         void SpawnNewWave()
         {
+            EventLogger.PrintToLog("New Wave Spawn");
+
             float advancedEnemyPercentage = (Mathf.Clamp(_difficultyManagerScript.DifficultyMultiplier, 1.0f, 2.0f) - 1.0f) * 100.0f;
 
             int randomWaveIndex = Random.Range(0, _pregeneratedWaves.Count);
@@ -268,6 +270,8 @@ namespace Assets.Scripts
 
         void SpawnNewPowerup()
         {
+            EventLogger.PrintToLog("New Powerup Spawn");
+
             PowerupType powerupType;
             float randomizePowerup = Random.Range(0.0f, 100.0f);
 

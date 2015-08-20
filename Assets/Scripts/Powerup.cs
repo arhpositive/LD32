@@ -58,6 +58,10 @@ namespace Assets.Scripts
                                 break;
                             case PowerupType.PtBomb:
                                 gotPickedUp = playerScript.PlayerGotHit();
+                                if (gotPickedUp)
+                                {
+                                    EventLogger.PrintToLog("Bomb Collides v Player");
+                                }
                                 break;
                         }
 

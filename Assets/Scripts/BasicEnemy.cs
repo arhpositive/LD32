@@ -78,7 +78,9 @@ namespace Assets.Scripts
                     //cash in the points
                     if (_playerScript)
                     {
-                        _playerScript.TriggerEnemyDisplacement((int)(Mathf.Abs(_displacementLength) * 10.0f));
+                        int scoreAddition = (int) (Mathf.Abs(_displacementLength) * 10.0f);
+                        EventLogger.PrintToLog("Enemy Scored: " + scoreAddition);
+                        _playerScript.TriggerEnemyDisplacement(scoreAddition);
                     }
 
                     Destroy(gameObject);
@@ -103,6 +105,7 @@ namespace Assets.Scripts
 
         public void TriggerSpeedBoost()
         {
+            EventLogger.PrintToLog("Enemy Gains Speedup");
             if (!_speedBoostIsActive)
             {
                 _speedBoostIsActive = true;
@@ -112,36 +115,41 @@ namespace Assets.Scripts
 
         void OnTriggerStay2D(Collider2D other)
         {
-            if (!_hasCollided)
+            if (_hasCollided)
             {
-                if (other.gameObject.tag == "Player")
+                return;
+            }
+
+            if (other.gameObject.tag == "Player")
+            {
+                Assert.IsNotNull(_playerScript);
+                bool playerGotHit = _playerScript.PlayerGotHit();
+                if (playerGotHit)
                 {
-                    Assert.IsNotNull(_playerScript);
-                    bool playerGotHit = _playerScript.PlayerGotHit();
-                    if (playerGotHit)
-                    {
-                        _hasCollided = true;
-                        AudioSource.PlayClipAtPoint(ExplosionClip, transform.position);
-                        Destroy(gameObject);
-                    }
-                }
-                else if (other.gameObject.tag == "Shield")
-                {
-                    Assert.IsNotNull(_playerScript);
-                    bool shieldGotHit = _playerScript.ShieldGotHit();
-                    if (shieldGotHit)
-                    {
-                        _hasCollided = true;
-                        AudioSource.PlayClipAtPoint(ExplosionClip, transform.position);
-                        Destroy(gameObject);
-                    }
-                }
-                else if (other.gameObject.tag == "Enemy")
-                {
+                    EventLogger.PrintToLog("Enemy Collision v Player");
                     _hasCollided = true;
                     AudioSource.PlayClipAtPoint(ExplosionClip, transform.position);
                     Destroy(gameObject);
                 }
+            }
+            else if (other.gameObject.tag == "Shield")
+            {
+                Assert.IsNotNull(_playerScript);
+                bool shieldGotHit = _playerScript.ShieldGotHit();
+                if (shieldGotHit)
+                {
+                    EventLogger.PrintToLog("Enemy Collision v Shield");
+                    _hasCollided = true;
+                    AudioSource.PlayClipAtPoint(ExplosionClip, transform.position);
+                    Destroy(gameObject);
+                }
+            }
+            else if (other.gameObject.tag == "Enemy")
+            {
+                EventLogger.PrintToLog("Enemy Collision v Enemy");
+                _hasCollided = true;
+                AudioSource.PlayClipAtPoint(ExplosionClip, transform.position);
+                Destroy(gameObject);
             }
         }
 

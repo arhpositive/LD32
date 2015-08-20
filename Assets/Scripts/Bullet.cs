@@ -60,12 +60,13 @@ namespace Assets.Scripts
 		        {
 			        case BulletType.BtKiller:
 				        bool playerGotHit = playerScript.PlayerGotHit();
-				        if (playerGotHit)
-				        {
-					        _hasCollided = true;
-					        AudioSource.PlayClipAtPoint(BulletHitClip, transform.position);
-					        Destroy(gameObject);
-				        }
+		                if (playerGotHit)
+		                {
+                            EventLogger.PrintToLog("Bullet Collision v Player");
+		                    _hasCollided = true;
+		                    AudioSource.PlayClipAtPoint(BulletHitClip, transform.position);
+		                    Destroy(gameObject);
+		                }
 				        break;
 		        }
 	        }
@@ -79,6 +80,7 @@ namespace Assets.Scripts
 				        bool shieldGotHit = playerScript.ShieldGotHit();
 				        if (shieldGotHit)
 				        {
+                            EventLogger.PrintToLog("Bullet Collision v Shield");
 					        _hasCollided = true;
 					        AudioSource.PlayClipAtPoint(BulletHitClip, transform.position);
 					        Destroy(gameObject);
