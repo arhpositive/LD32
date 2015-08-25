@@ -23,6 +23,9 @@ namespace Assets.Scripts
     public class Powerup : MonoBehaviour
     {
         public PowerupType PowerupType;
+        [Range(0.0f, 1.0f)]
+        public float PowerupOccurence;
+        public bool IsNegativePowerup;
         public AudioClip GainPowerupClip;
         bool _hasCollided;
 

@@ -213,7 +213,7 @@ namespace Assets.Scripts
                 new WaveEntity(GetNewEnemyCoordinates(6, 4), leftAndUp, false),
                 new WaveEntity(GetNewEnemyCoordinates(2, 5), leftAndUp, false)
             };
-            _pregeneratedWaves.Add(waveEntities5);
+            //_pregeneratedWaves.Add(waveEntities5);
 
             //6 skewed formation, wiggling movement
             List<WaveEntity> waveEntities6 = new List<WaveEntity>
@@ -225,7 +225,7 @@ namespace Assets.Scripts
                 new WaveEntity(GetNewEnemyCoordinates(2, 4), leftAndDown, true),
                 new WaveEntity(GetNewEnemyCoordinates(3, 5), leftAndUp, true)
             };
-            _pregeneratedWaves.Add(waveEntities6);
+            //_pregeneratedWaves.Add(waveEntities6);
 
             //7 skewed triple formation, wiggling singles, very hard!
             List<WaveEntity> waveEntities7 = new List<WaveEntity>
@@ -240,7 +240,7 @@ namespace Assets.Scripts
                 new WaveEntity(GetNewEnemyCoordinates(6, 4), Vector2.left, false),
                 new WaveEntity(GetNewEnemyCoordinates(2, 5), leftAndDown, true)
             };
-            _pregeneratedWaves.Add(waveEntities7);
+            //_pregeneratedWaves.Add(waveEntities7);
         }
 
         void SpawnNewWave()
@@ -270,53 +270,46 @@ namespace Assets.Scripts
 
         void SpawnNewPowerup()
         {
-            PowerupType powerupType;
-            float randomizePowerup = Random.Range(0.0f, 100.0f);
+            // TODO NEXT you're here, revise this code piece and 
+            // TODO give reasonable calculated numbers to all difficulty levels for powerups
 
-            // TODO NEXT adjust powerup occurence based on difficulty
+            float currentDifficulty = _difficultyManagerScript.DifficultyMultiplier;
 
-            if (randomizePowerup < 5.0f)
-            {
-                powerupType = PowerupType.PtHealth;
-            }
-            else if (randomizePowerup < 35.0f)
-            {
-                powerupType = PowerupType.PtSpeedup;
-            }
-            else if (randomizePowerup < 50.0f)
-            {
-                powerupType = PowerupType.PtShield;
-            }
-            else if (randomizePowerup < 90.0f)
-            {
-                powerupType = PowerupType.PtBomb;
-            }
-            else
-            {
-                powerupType = PowerupType.PtResearch;
-            }
-            EventLogger.PrintToLog("New Powerup Spawn " + powerupType.ToString("G"));
-            SpawnPowerupFromType(powerupType);
-
-        }
-
-        void SpawnPowerupFromType(PowerupType powerupType)
-        {
             int powerupCount = PowerupPrefabArray.Length;
-            Assert.AreEqual(powerupCount, (int)PowerupType.PtCount);
 
-            int i = 0;
-            while (i < powerupCount)
+            float[] occurenceArray = new float[powerupCount];
+            float totalOccurence = 0.0f;
+
+            for (int i = 0; i < powerupCount; ++i)
             {
-                if (PowerupPrefabArray[i].GetComponent<Powerup>().PowerupType == powerupType)
+                Powerup powerupScript = PowerupPrefabArray[i].GetComponent<Powerup>();
+                if (powerupScript.IsNegativePowerup)
+                {
+                    occurenceArray[i] = powerupScript.PowerupOccurence * currentDifficulty;
+                }
+                else
+                {
+                    occurenceArray[i] = powerupScript.PowerupOccurence / currentDifficulty;
+                }
+                totalOccurence += occurenceArray[i];
+            }
+
+            float randomOccurence = Random.Range(0.0f, totalOccurence);
+            float currentOccurence = 0.0f;
+
+            int j = 0;
+            while (j < powerupCount)
+            {
+                currentOccurence += occurenceArray[j];
+                if (randomOccurence < currentOccurence)
                 {
                     break;
                 }
-                ++i;
+                ++j;
             }
-
-            Vector3 powerupPos = new Vector2(GameConstants.HorizontalMaxCoord, Random.Range(GameConstants.MinVerticalMovementLimit, GameConstants.MaxVerticalMovementLimit));
-            Instantiate(PowerupPrefabArray[i], powerupPos, Quaternion.identity);
+            Vector3 powerupPos = new Vector2(GameConstants.HorizontalMaxCoord, 
+                Random.Range(GameConstants.MinVerticalMovementLimit, GameConstants.MaxVerticalMovementLimit));
+            Instantiate(PowerupPrefabArray[j], powerupPos, Quaternion.identity);
         }
 
         void InitialMeteorAndStarSpawn()
