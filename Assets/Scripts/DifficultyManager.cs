@@ -91,12 +91,14 @@ namespace Assets.Scripts
 
         public void IncreaseDifficulty(float value)
         {
-            DifficultyMultiplier = Mathf.Clamp(DifficultyMultiplier + value, 0.1f, 2.0f);
+            DifficultyMultiplier = Mathf.Clamp(DifficultyMultiplier + value, 
+                GameConstants.MinDifficultyMultiplier, GameConstants.MaxDifficultyMultiplier);
         }
 
         public void DecreaseDifficulty(float value)
         {
-            DifficultyMultiplier = Mathf.Clamp(DifficultyMultiplier - value, 0.1f, 2.0f);
+            DifficultyMultiplier = Mathf.Clamp(DifficultyMultiplier - value,
+                GameConstants.MinDifficultyMultiplier, GameConstants.MaxDifficultyMultiplier);
         }
     }
 }

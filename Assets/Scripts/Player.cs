@@ -45,6 +45,7 @@ namespace Assets.Scripts
         public bool IsDead { get; private set; }
         public bool IsInvulnerable { get; private set; }
         public bool IsShielded { get; private set; }
+        public float PlayerAccuracy { get; private set; }
 
         RefreshEndScoreText _endGameScoreText;
 
@@ -52,6 +53,9 @@ namespace Assets.Scripts
 
         float _currentHorizontalSpeed;
         float _currentVerticalSpeed;
+        
+        int _hitBulletCount;
+        int _shotBulletCount;
 
         const float DeathDuration = 2.0f;
         float _deathTime;
@@ -82,6 +86,10 @@ namespace Assets.Scripts
             _invulnerabilityStartTime = Time.time;
             _currentHorizontalSpeed = 0.0f;
             _currentVerticalSpeed = 0.0f;
+
+            PlayerAccuracy = 0.0f;
+            _hitBulletCount = 0;
+            _shotBulletCount = 0;
 
             _stunGun = new Gun(StunBulletPrefab, 0.3f, 0.0f, -1);
             _speedUpGun = new Gun(SpeedUpBulletPrefab, 0.5f, 0.0f, 3);
@@ -265,6 +273,17 @@ namespace Assets.Scripts
             IsShielded = false;
             _playerShield.SetActive(false);
             return true;
+        }
+
+        public void OnBulletDestruction(bool bulletHitEnemy)
+        {
+            _shotBulletCount++;
+            if (bulletHitEnemy)
+            {
+                _hitBulletCount++;
+            }
+
+            PlayerAccuracy = (float)_hitBulletCount / _shotBulletCount;
         }
 
         public void TriggerEnemyDestruction()

@@ -270,10 +270,10 @@ namespace Assets.Scripts
 
         void SpawnNewPowerup()
         {
-            EventLogger.PrintToLog("New Powerup Spawn");
-
             PowerupType powerupType;
             float randomizePowerup = Random.Range(0.0f, 100.0f);
+
+            // TODO NEXT adjust powerup occurence based on difficulty
 
             if (randomizePowerup < 5.0f)
             {
@@ -295,7 +295,7 @@ namespace Assets.Scripts
             {
                 powerupType = PowerupType.PtResearch;
             }
-
+            EventLogger.PrintToLog("New Powerup Spawn " + powerupType.ToString("G"));
             SpawnPowerupFromType(powerupType);
 
         }

@@ -21,11 +21,16 @@ namespace Assets.Scripts
     {
         public BulletType CurrentBulletType;
         public AudioClip BulletHitClip;
+        public bool ShotByPlayer;
         bool _hasCollided;
+        bool _destroyedByCollision;
+        Player _playerScript;
 
         void Start()
         {
             _hasCollided = false;
+            _destroyedByCollision = false;
+            _playerScript = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
         }
 
         void OnTriggerStay2D(Collider2D other)
@@ -49,17 +54,16 @@ namespace Assets.Scripts
 				        break;
 		        }
 		        _hasCollided = true;
+	            _destroyedByCollision = true;
 		        AudioSource.PlayClipAtPoint(BulletHitClip, transform.position);
 		        Destroy(gameObject);
 	        }
 	        else if (other.gameObject.tag == "Player")
 	        {
-		        Player playerScript = other.gameObject.GetComponent<Player>();
-
 		        switch (CurrentBulletType)
 		        {
 			        case BulletType.BtKiller:
-				        bool playerGotHit = playerScript.PlayerGotHit();
+				        bool playerGotHit = _playerScript.PlayerGotHit();
 		                if (playerGotHit)
 		                {
                             EventLogger.PrintToLog("Bullet Collision v Player");
@@ -88,6 +92,12 @@ namespace Assets.Scripts
 				        break;
 		        }
 	        }
+        }
+
+        void OnDestroy()
+        {
+            if (ShotByPlayer)
+                _playerScript.OnBulletDestruction(_destroyedByCollision);
         }
     }
 }

@@ -100,6 +100,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CurrentBulletType: 1
   BulletHitClip: {fileID: 8300000, guid: 7959efd52304e6d44a066a7e9d620062, type: 3}
+  ShotByPlayer: 1
 --- !u!212 &21296554
 SpriteRenderer:
   m_ObjectHideFlags: 1
@@ -136,6 +137,10 @@ Prefab:
     - target: {fileID: 0}
       propertyPath: MoveSpeed
       value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: ShotByPlayer
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}

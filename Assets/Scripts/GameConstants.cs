@@ -21,5 +21,7 @@ namespace Assets.Scripts
 	    public const int PlayerInitialHealth = 3;
         public const float WaveSpawnBaseInterval = 5.0f;
         public const float PowerupSpawnBaseInterval = 3.0f;
+        public const float MinDifficultyMultiplier = 0.1f;
+        public const float MaxDifficultyMultiplier = 2.0f;
     }
 }
