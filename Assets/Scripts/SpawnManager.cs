@@ -36,6 +36,8 @@ namespace Assets.Scripts
         public int InitialMeteorCount; //TODO calculate ideal meteor and star count for having a seamless sky
         public int InitialStarCount;
         public bool IsGameScene;
+        public float WaveSpawnBaseInterval;
+        public float PowerupSpawnBaseInterval;
 
         float _previousWaveSpawnTime;
         float _waveSpawnInterval;
@@ -75,14 +77,14 @@ namespace Assets.Scripts
         {
             _difficultyManagerScript = Camera.main.GetComponent<DifficultyManager>();
 
-            _waveSpawnInterval = GameConstants.WaveSpawnBaseInterval;
+            _waveSpawnInterval = WaveSpawnBaseInterval;
             _previousWaveSpawnTime = Time.time;
             _pregeneratedWaves = new List<List<WaveEntity>>();
 
             PregenerateEnemyCoordinates();
             PregeneratePossibleWaves();
 
-            _powerupSpawnInterval = GameConstants.PowerupSpawnBaseInterval;
+            _powerupSpawnInterval = PowerupSpawnBaseInterval;
             _previousPowerupSpawnTime = Time.time;
 
             _previousMeteorSpawnTime = Time.time;
@@ -99,7 +101,7 @@ namespace Assets.Scripts
                 {
                     SpawnNewWave();
                     _previousWaveSpawnTime = Time.time;
-                    float randomIntervalCoef = Random.Range(GameConstants.WaveSpawnBaseInterval, GameConstants.WaveSpawnBaseInterval * 2);
+                    float randomIntervalCoef = Random.Range(WaveSpawnBaseInterval, WaveSpawnBaseInterval * 2);
                     _waveSpawnInterval = randomIntervalCoef / Mathf.Sqrt(_difficultyManagerScript.DifficultyMultiplier);
                 }
 
@@ -107,7 +109,7 @@ namespace Assets.Scripts
                 {
                     SpawnNewPowerup();
                     _previousPowerupSpawnTime = Time.time;
-                    float randomIntervalCoef = Random.Range(GameConstants.PowerupSpawnBaseInterval, GameConstants.PowerupSpawnBaseInterval * 2);
+                    float randomIntervalCoef = Random.Range(PowerupSpawnBaseInterval, PowerupSpawnBaseInterval * 2);
                     _powerupSpawnInterval = randomIntervalCoef * Mathf.Sqrt(_difficultyManagerScript.DifficultyMultiplier);
                 }
             }
@@ -204,7 +206,7 @@ namespace Assets.Scripts
                 new WaveEntity(GetNewEnemyCoordinates(3, 5), Vector2.left, false)
             };
             _pregeneratedWaves.Add(waveEntities4);
-
+            /*
             // 5 skewed formation, cross movement
             List<WaveEntity> waveEntities5 = new List<WaveEntity>
             {
@@ -213,7 +215,7 @@ namespace Assets.Scripts
                 new WaveEntity(GetNewEnemyCoordinates(6, 4), leftAndUp, false),
                 new WaveEntity(GetNewEnemyCoordinates(2, 5), leftAndUp, false)
             };
-            //_pregeneratedWaves.Add(waveEntities5);
+            _pregeneratedWaves.Add(waveEntities5);
 
             //6 skewed formation, wiggling movement
             List<WaveEntity> waveEntities6 = new List<WaveEntity>
@@ -225,7 +227,7 @@ namespace Assets.Scripts
                 new WaveEntity(GetNewEnemyCoordinates(2, 4), leftAndDown, true),
                 new WaveEntity(GetNewEnemyCoordinates(3, 5), leftAndUp, true)
             };
-            //_pregeneratedWaves.Add(waveEntities6);
+            _pregeneratedWaves.Add(waveEntities6);
 
             //7 skewed triple formation, wiggling singles, very hard!
             List<WaveEntity> waveEntities7 = new List<WaveEntity>
@@ -240,14 +242,19 @@ namespace Assets.Scripts
                 new WaveEntity(GetNewEnemyCoordinates(6, 4), Vector2.left, false),
                 new WaveEntity(GetNewEnemyCoordinates(2, 5), leftAndDown, true)
             };
-            //_pregeneratedWaves.Add(waveEntities7);
+            _pregeneratedWaves.Add(waveEntities7);
+             */
         }
 
         void SpawnNewWave()
         {
             EventLogger.PrintToLog("New Wave Spawn");
+            
+            float difficultyInterval = GameConstants.MaxDifficultyMultiplier - GameConstants.MinDifficultyMultiplier;
 
-            float advancedEnemyPercentage = (Mathf.Clamp(_difficultyManagerScript.DifficultyMultiplier, 1.0f, 2.0f) - 1.0f) * 100.0f;
+            float advancedEnemyPercentage = 
+                ((_difficultyManagerScript.DifficultyMultiplier - GameConstants.MinDifficultyMultiplier) / 
+                difficultyInterval) * 100.0f;
 
             int randomWaveIndex = Random.Range(0, _pregeneratedWaves.Count);
             List<WaveEntity> entities = _pregeneratedWaves[randomWaveIndex];
@@ -270,9 +277,6 @@ namespace Assets.Scripts
 
         void SpawnNewPowerup()
         {
-            // TODO NEXT you're here, revise this code piece and 
-            // TODO give reasonable calculated numbers to all difficulty levels for powerups
-
             float currentDifficulty = _difficultyManagerScript.DifficultyMultiplier;
 
             int powerupCount = PowerupPrefabArray.Length;

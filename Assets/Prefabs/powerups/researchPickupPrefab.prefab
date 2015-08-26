@@ -99,7 +99,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   PowerupType: 2
-  PowerupOccurence: 1
+  PowerupOccurence: 5
   IsNegativePowerup: 0
   GainPowerupClip: {fileID: 8300000, guid: ad88cb7e7d7fa8a49af79977ff10de68, type: 3}
 --- !u!212 &21296114
@@ -137,7 +137,7 @@ Prefab:
     m_Modifications:
     - target: {fileID: 0}
       propertyPath: PowerupOccurence
-      value: 1
+      value: 5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}

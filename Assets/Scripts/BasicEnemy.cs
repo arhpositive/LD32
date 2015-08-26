@@ -48,7 +48,7 @@ namespace Assets.Scripts
             _lastStunTime = 0.0f;
             _speedBoostIsActive = false;
             _lastFireTime = Time.time;
-            _nextFiringInterval = Random.Range(MinFiringInterval, 2 * MinFiringInterval) / Mathf.Sqrt(_difficultyManagerScript.DifficultyMultiplier);
+            SetNextFiringInterval();
             _displacementLength = 0.0f;
         }
 
@@ -163,7 +163,12 @@ namespace Assets.Scripts
                     Instantiate(BulletPrefab, transform.GetChild(i).position, Quaternion.identity);
                 }
             }
-            float randomIntervalCoef = Random.Range(MinFiringInterval, 3 * MinFiringInterval);
+            SetNextFiringInterval();
+        }
+
+        void SetNextFiringInterval()
+        {
+            float randomIntervalCoef = Random.Range(MinFiringInterval, 2 * MinFiringInterval);
             _nextFiringInterval = randomIntervalCoef / Mathf.Sqrt(_difficultyManagerScript.DifficultyMultiplier);
         }
     }

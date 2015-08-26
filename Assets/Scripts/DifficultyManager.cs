@@ -16,6 +16,7 @@ namespace Assets.Scripts
 
         float _lastDifficultyAdjustmentTime;
         const float DifficultyAdjustmentInterval = 5.0f;
+        const float DifficultyCoefficient = 1.2f;
 
         GameObject _playerGameObject;
         Player _playerScript;
@@ -23,15 +24,11 @@ namespace Assets.Scripts
         int _adjustmentStepCount;
 
         int _previousWavePlayerHealth;
-        int _previousWavePlayerScore;
-
-        float _totalPlayerHealthDiff;
-        float _totalPlayerScoreDiff;
 
         void Start()
         {
             // higher difficulty multiplier equals a more challenging game
-            DifficultyMultiplier = 1.0f;
+            DifficultyMultiplier = 1.44f;
             _lastDifficultyAdjustmentTime = Time.time;
 
             _playerGameObject = GameObject.FindGameObjectWithTag("Player");
@@ -43,10 +40,6 @@ namespace Assets.Scripts
             _adjustmentStepCount = 0;
 
             _previousWavePlayerHealth = GameConstants.PlayerInitialHealth;
-            _previousWavePlayerScore = 0;
-
-            _totalPlayerHealthDiff = 0.0f;
-            _totalPlayerScoreDiff = 0.0f;
         }
 
         void Update()
@@ -54,51 +47,45 @@ namespace Assets.Scripts
             if (Time.time - _lastDifficultyAdjustmentTime > DifficultyAdjustmentInterval)
             {
                 _adjustmentStepCount++;
-
-                //float scoreDiffSinceLastAdjustment = (Player.PlayerScore - _previousWavePlayerScore);
                 float hpDiffSinceLastAdjustment = (_playerScript.PlayerHealth - _previousWavePlayerHealth);
-
-                //print("Score Diff Since Adjustment: " + scoreDiffSinceLastAdjustment);
-                //print("HP Diff Since Adjustment: " + hpDiffSinceLastAdjustment);
-
-                //_totalPlayerScoreDiff += scoreDiffSinceLastAdjustment;
-                //_totalPlayerHealthDiff += hpDiffSinceLastAdjustment;
-
-                //print("Avg Score Difference: " + (_totalPlayerScoreDiff / _adjustmentStepCount));
-                //print("Avg Health Difference: " + (_totalPlayerHealthDiff / _adjustmentStepCount));
 
                 if (hpDiffSinceLastAdjustment < 0.0f)
                 {
                     // player lost hp during last 5 seconds, drop difficulty
-                    
-                    DecreaseDifficulty(0.2f);
-                    EventLogger.PrintToLog("Difficulty Decreased: " + DifficultyMultiplier);
+                    DecreaseDifficulty();
                 }
                 else if (_adjustmentStepCount % 6 == 0 && _playerScript.PlayerHealth > 1)
                 {
                     // increase difficulty every 30 seconds if player is not struggling
-                    
-                    IncreaseDifficulty(0.2f);
-                    EventLogger.PrintToLog("Difficulty Increased: " + DifficultyMultiplier);
+                    IncreaseDifficulty();
                 }
 
                 _previousWavePlayerHealth = _playerScript.PlayerHealth;
-                //_previousWavePlayerScore = Player.PlayerScore;
 
                 _lastDifficultyAdjustmentTime = Time.time;
             }
         }
 
-        public void IncreaseDifficulty(float value)
+        public void IncreaseDifficulty()
         {
-            DifficultyMultiplier = Mathf.Clamp(DifficultyMultiplier + value, 
-                GameConstants.MinDifficultyMultiplier, GameConstants.MaxDifficultyMultiplier);
+            float newDifficultyMultiplier = DifficultyMultiplier * DifficultyCoefficient;
+
+            if (newDifficultyMultiplier <= GameConstants.MaxDifficultyMultiplier)
+            {
+                DifficultyMultiplier = newDifficultyMultiplier;
+                EventLogger.PrintToLog("Difficulty Increased: " + DifficultyMultiplier);
+            }
         }
 
-        public void DecreaseDifficulty(float value)
+        public void DecreaseDifficulty()
         {
-            DifficultyMultiplier = Mathf.Clamp(DifficultyMultiplier - value,
-                GameConstants.MinDifficultyMultiplier, GameConstants.MaxDifficultyMultiplier);
+            float newDifficultyMultiplier = DifficultyMultiplier / DifficultyCoefficient;
+
+            if (newDifficultyMultiplier >= GameConstants.MinDifficultyMultiplier)
+            {
+                DifficultyMultiplier = newDifficultyMultiplier;
+                EventLogger.PrintToLog("Difficulty Decreased: " + DifficultyMultiplier);
+            }
         }
     }
 }

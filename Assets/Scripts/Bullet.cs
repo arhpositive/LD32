@@ -30,7 +30,11 @@ namespace Assets.Scripts
         {
             _hasCollided = false;
             _destroyedByCollision = false;
-            _playerScript = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
+            GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
+            if (playerObject)
+            {
+                _playerScript = playerObject.GetComponent<Player>();   
+            }
         }
 
         void OnTriggerStay2D(Collider2D other)
@@ -97,7 +101,9 @@ namespace Assets.Scripts
         void OnDestroy()
         {
             if (ShotByPlayer)
+            {
                 _playerScript.OnBulletDestruction(_destroyedByCollision);
+            }
         }
     }
 }
