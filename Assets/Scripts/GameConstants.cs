@@ -21,5 +21,6 @@ namespace Assets.Scripts
 	    public const int PlayerInitialHealth = 3;
         public const float MinDifficultyMultiplier = 0.33f;
         public const float MaxDifficultyMultiplier = 3.0f;
+        public const float JoystickDeadZoneCoef = 0.19f;
     }
 }

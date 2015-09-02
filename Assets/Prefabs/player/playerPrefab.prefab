@@ -341,6 +341,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f2bc28f901bf394e8ca6d666938a2cb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  UseTouchControls: 1
   StunBulletPrefab: {fileID: 151552, guid: c01a9ecebecac134facbcd4665a1a13d, type: 2}
   SpeedUpBulletPrefab: {fileID: 181600, guid: 40481044129877d4a8fb8bc8e9f3acc3, type: 2}
   PlayerSpeedLimit: 3
@@ -462,6 +463,10 @@ Prefab:
     - target: {fileID: 0}
       propertyPath: PlayerSpeedLimit
       value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: UseTouchControls
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}

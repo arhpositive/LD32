@@ -28,7 +28,7 @@ namespace Assets.Scripts
         void Start()
         {
             // higher difficulty multiplier equals a more challenging game
-            DifficultyMultiplier = 1.44f;
+            DifficultyMultiplier = 1.0f;
             _lastDifficultyAdjustmentTime = Time.time;
 
             _playerGameObject = GameObject.FindGameObjectWithTag("Player");

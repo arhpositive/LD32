@@ -7,6 +7,7 @@
  */
 
 using UnityEngine;
+using CnControls;
 using Assets.Scripts.ui;
 
 namespace Assets.Scripts
@@ -31,6 +32,8 @@ namespace Assets.Scripts
     public class Player : MonoBehaviour
     {
         public static int PlayerScore = 0;
+
+        public bool UseTouchControls;
 
         public GameObject StunBulletPrefab;
         public GameObject SpeedUpBulletPrefab;
@@ -156,11 +159,25 @@ namespace Assets.Scripts
             }
 
             //shooting
-            if (Input.GetKey(KeyCode.Space) && Time.time - _stunGun.LastFireTime > _stunGun.Cooldown)
+            bool fireInputGiven = false;
+            bool speedUpInputGiven = false;
+
+            if (UseTouchControls)
+            {
+                fireInputGiven = CnInputManager.GetButton("TouchFire");
+                speedUpInputGiven = CnInputManager.GetButton("TouchSpeedUp");
+            }
+            else
+            {
+                fireInputGiven = Input.GetKey(KeyCode.Space);
+                speedUpInputGiven = Input.GetKey(KeyCode.C);
+            }
+
+            if (fireInputGiven && Time.time - _stunGun.LastFireTime > _stunGun.Cooldown)
             {
                 FireStunGun();
             }
-            else if (Input.GetKey(KeyCode.C) &&
+            else if (speedUpInputGiven &&
                 Time.time - _speedUpGun.LastFireTime > _speedUpGun.Cooldown &&
                 _speedUpGun.AmmoCount > 0)
             {
@@ -168,37 +185,71 @@ namespace Assets.Scripts
                 //TODO consider giving info on why player can't shoot
                 //TODO consider displaying cooldown on ui
             }
+            DoMovement();
+        }
 
+        Vector2 GetMoveDirFromInput()
+        {
+            float horizontalMoveDir;
+            float verticalMoveDir;
+            if (UseTouchControls)
+            {
+                horizontalMoveDir = CnInputManager.GetAxis("Horizontal");
+                horizontalMoveDir = Mathf.Abs(horizontalMoveDir) < GameConstants.JoystickDeadZoneCoef ? 
+                    0.0f : Mathf.Sign(horizontalMoveDir);
+
+                verticalMoveDir = CnInputManager.GetAxis("Vertical");
+                verticalMoveDir = Mathf.Abs(verticalMoveDir) < GameConstants.JoystickDeadZoneCoef ?
+                    0.0f : Mathf.Sign(verticalMoveDir);
+            }
+            else
+            {
+                horizontalMoveDir = Input.GetAxisRaw("Horizontal");
+                verticalMoveDir = Input.GetAxisRaw("Vertical"); 
+            }
+
+            print("H: " + horizontalMoveDir + " V: " + verticalMoveDir);
+            Vector2 moveDir = new Vector2(horizontalMoveDir, verticalMoveDir);
+            moveDir.Normalize();
+
+            return moveDir;
+        }
+
+        void DoMovement()
+        {
             //movement
             Vector2 inputDir = GetMoveDirFromInput();
 
-            if (inputDir.x > Mathf.Epsilon && _currentHorizontalSpeed >= 0.0f)
-            {
-                _currentHorizontalSpeed = Mathf.Clamp(_currentHorizontalSpeed + PlayerAcceleration, 0.0f, 1.0f);
-            }
-            else if (inputDir.x < -Mathf.Epsilon && _currentHorizontalSpeed <= 0.0f)
-            {
-                _currentHorizontalSpeed = Mathf.Clamp(_currentHorizontalSpeed - PlayerAcceleration, -1.0f, 0.0f);
-            }
-            else
-            {
-                _currentHorizontalSpeed = 0.0f;
-            }
 
-            if (inputDir.y > Mathf.Epsilon && _currentVerticalSpeed >= 0.0f)
-            {
-                _currentVerticalSpeed = Mathf.Clamp(_currentVerticalSpeed + PlayerAcceleration, 0.0f, 1.0f);
-            }
-            else if (inputDir.y < -Mathf.Epsilon && _currentVerticalSpeed <= 0.0f)
-            {
-                _currentVerticalSpeed = Mathf.Clamp(_currentVerticalSpeed - PlayerAcceleration, -1.0f, 0.0f);
-            }
-            else
-            {
-                _currentVerticalSpeed = 0.0f;
-            }
+            //TODO change movement to a simpler method
 
-            Vector2 movementDir = Vector2.ClampMagnitude(new Vector2(_currentHorizontalSpeed, _currentVerticalSpeed), 1.0f);
+            //if (inputDir.x > Mathf.Epsilon && _currentHorizontalSpeed >= 0.0f)
+            //{
+            //    _currentHorizontalSpeed = Mathf.Clamp(_currentHorizontalSpeed + PlayerAcceleration, 0.0f, 1.0f);
+            //}
+            //else if (inputDir.x < -Mathf.Epsilon && _currentHorizontalSpeed <= 0.0f)
+            //{
+            //    _currentHorizontalSpeed = Mathf.Clamp(_currentHorizontalSpeed - PlayerAcceleration, -1.0f, 0.0f);
+            //}
+            //else
+            //{
+            //    _currentHorizontalSpeed = 0.0f;
+            //}
+
+            //if (inputDir.y > Mathf.Epsilon && _currentVerticalSpeed >= 0.0f)
+            //{
+            //    _currentVerticalSpeed = Mathf.Clamp(_currentVerticalSpeed + PlayerAcceleration, 0.0f, 1.0f);
+            //}
+            //else if (inputDir.y < -Mathf.Epsilon && _currentVerticalSpeed <= 0.0f)
+            //{
+            //    _currentVerticalSpeed = Mathf.Clamp(_currentVerticalSpeed - PlayerAcceleration, -1.0f, 0.0f);
+            //}
+            //else
+            //{
+            //    _currentVerticalSpeed = 0.0f;
+            //}
+
+            Vector2 movementDir = Vector2.ClampMagnitude(/*new Vector2(_currentHorizontalSpeed, _currentVerticalSpeed)*/inputDir, 1.0f);
             movementDir *= PlayerSpeedLimit * Time.deltaTime;
             transform.Translate(movementDir, Space.World);
 
@@ -216,17 +267,6 @@ namespace Assets.Scripts
             transform.position = new Vector3(Mathf.Clamp(transform.position.x, GameConstants.MinHorizontalMovementLimit,
                 GameConstants.MaxHorizontalMovementLimit), Mathf.Clamp(transform.position.y, GameConstants.MinVerticalMovementLimit,
                 GameConstants.MaxVerticalMovementLimit), transform.position.z);
-        }
-
-        Vector2 GetMoveDirFromInput()
-        {
-            float horizontalMoveDir = Input.GetAxisRaw("Horizontal");
-            float verticalMoveDir = Input.GetAxisRaw("Vertical");
-
-            Vector2 moveDir = new Vector2(horizontalMoveDir, verticalMoveDir);
-            moveDir.Normalize();
-
-            return moveDir;
         }
 
         public bool PlayerGotHit()
