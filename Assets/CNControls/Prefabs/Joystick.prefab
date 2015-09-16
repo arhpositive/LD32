@@ -67,10 +67,10 @@ MonoBehaviour:
   HorizontalAxisName: Horizontal
   VerticalAxisName: Vertical
   HideOnRelease: 0
-  MoveBase: 1
+  MoveBase: 0
   SnapsToFinger: 1
   JoystickMoveAxis: 3
-  PPtr<Object>: {fileID: 11480696}
+  Base: {fileID: 11480696}
   Stick: {fileID: 11489796}
   TouchZone: {fileID: 22450750}
 --- !u!114 &11480696
@@ -86,6 +86,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 2100000, guid: 514faabbc55086c478fd39f80e4a5003, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: .196078435}
+  m_RaycastTarget: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
+      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_Sprite: {fileID: 21300000, guid: b29ef1894836dc440b43ab036ca764cb, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
@@ -107,6 +113,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 0}
+  m_RaycastTarget: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
+      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_Sprite: {fileID: 0}
   m_Type: 0
   m_PreserveAspect: 0
@@ -128,6 +140,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 2100000, guid: 514faabbc55086c478fd39f80e4a5003, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: .196078435}
+  m_RaycastTarget: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
+      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_Sprite: {fileID: 21300000, guid: 4bc4df1939d750840a6c849a32296205, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
