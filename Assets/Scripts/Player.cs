@@ -53,9 +53,6 @@ namespace Assets.Scripts
         RefreshEndScoreText _endGameScoreText;
 
         GameObject _playerShield;
-
-        float _currentHorizontalSpeed;
-        float _currentVerticalSpeed;
         
         int _hitBulletCount;
         int _shotBulletCount;
@@ -87,8 +84,6 @@ namespace Assets.Scripts
             IsShielded = false;
             IsInvulnerable = true;
             _invulnerabilityStartTime = Time.time;
-            _currentHorizontalSpeed = 0.0f;
-            _currentVerticalSpeed = 0.0f;
 
             PlayerAccuracy = 0.0f;
             _hitBulletCount = 0;
@@ -208,10 +203,8 @@ namespace Assets.Scripts
                 verticalMoveDir = Input.GetAxisRaw("Vertical"); 
             }
 
-            print("H: " + horizontalMoveDir + " V: " + verticalMoveDir);
             Vector2 moveDir = new Vector2(horizontalMoveDir, verticalMoveDir);
             moveDir.Normalize();
-
             return moveDir;
         }
 
@@ -220,49 +213,9 @@ namespace Assets.Scripts
             //movement
             Vector2 inputDir = GetMoveDirFromInput();
 
-
-            //TODO change movement to a simpler method
-
-            //if (inputDir.x > Mathf.Epsilon && _currentHorizontalSpeed >= 0.0f)
-            //{
-            //    _currentHorizontalSpeed = Mathf.Clamp(_currentHorizontalSpeed + PlayerAcceleration, 0.0f, 1.0f);
-            //}
-            //else if (inputDir.x < -Mathf.Epsilon && _currentHorizontalSpeed <= 0.0f)
-            //{
-            //    _currentHorizontalSpeed = Mathf.Clamp(_currentHorizontalSpeed - PlayerAcceleration, -1.0f, 0.0f);
-            //}
-            //else
-            //{
-            //    _currentHorizontalSpeed = 0.0f;
-            //}
-
-            //if (inputDir.y > Mathf.Epsilon && _currentVerticalSpeed >= 0.0f)
-            //{
-            //    _currentVerticalSpeed = Mathf.Clamp(_currentVerticalSpeed + PlayerAcceleration, 0.0f, 1.0f);
-            //}
-            //else if (inputDir.y < -Mathf.Epsilon && _currentVerticalSpeed <= 0.0f)
-            //{
-            //    _currentVerticalSpeed = Mathf.Clamp(_currentVerticalSpeed - PlayerAcceleration, -1.0f, 0.0f);
-            //}
-            //else
-            //{
-            //    _currentVerticalSpeed = 0.0f;
-            //}
-
-            Vector2 movementDir = Vector2.ClampMagnitude(/*new Vector2(_currentHorizontalSpeed, _currentVerticalSpeed)*/inputDir, 1.0f);
+            Vector2 movementDir = Vector2.ClampMagnitude(inputDir, 1.0f);
             movementDir *= PlayerSpeedLimit * Time.deltaTime;
             transform.Translate(movementDir, Space.World);
-
-            if (transform.position.x < GameConstants.MinHorizontalMovementLimit ||
-                transform.position.x > GameConstants.MaxHorizontalMovementLimit)
-            {
-                _currentHorizontalSpeed = 0.0f;
-            }
-            if (transform.position.y < GameConstants.MinVerticalMovementLimit ||
-                transform.position.y > GameConstants.MaxVerticalMovementLimit)
-            {
-                _currentVerticalSpeed = 0.0f;
-            }
 
             transform.position = new Vector3(Mathf.Clamp(transform.position.x, GameConstants.MinHorizontalMovementLimit,
                 GameConstants.MaxHorizontalMovementLimit), Mathf.Clamp(transform.position.y, GameConstants.MinVerticalMovementLimit,
