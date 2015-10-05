@@ -75,7 +75,7 @@ MonoBehaviour:
   PowerupType: 3
   PowerupOccurence: 1
   IsNegativePowerup: 0
-  GainPowerupClip: {fileID: 8300000, guid: ad88cb7e7d7fa8a49af79977ff10de68, type: 3}
+  GainPowerupClip: {fileID: 8300000, guid: 306e33ec7571fdd4db51c1ea3c97ad02, type: 3}
 --- !u!114 &11440438
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -139,6 +139,10 @@ Prefab:
       propertyPath: PowerupOccurence
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: GainPowerupClip
+      value: 
+      objectReference: {fileID: 8300000, guid: 306e33ec7571fdd4db51c1ea3c97ad02, type: 3}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}
   m_RootGameObject: {fileID: 178398}

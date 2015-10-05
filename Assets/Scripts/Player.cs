@@ -314,7 +314,6 @@ namespace Assets.Scripts
             {
                 IsShielded = true;
                 _playerShield.SetActive(true);
-                //TODO play shield sound effect
             }
             else
             {

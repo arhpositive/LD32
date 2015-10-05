@@ -33,11 +33,12 @@ namespace Assets.Scripts
         public GameObject[] PowerupPrefabArray;
         public GameObject[] MeteorPrefabArray;
         public GameObject StarPrefab;
-        public int InitialMeteorCount; //TODO calculate ideal meteor and star count for having a seamless sky
-        public int InitialStarCount;
         public bool IsGameScene;
         public float WaveSpawnBaseInterval;
         public float PowerupSpawnBaseInterval;
+
+        int _initialMeteorCount;
+        int _initialStarCount;
 
         float _previousWaveSpawnTime;
         float _waveSpawnInterval;
@@ -51,7 +52,7 @@ namespace Assets.Scripts
         const float MeteorSpawnInterval = 1.0f;
 
         float _previousStarSpawnTime;
-        const float StarSpawnInterval = 100.0f;
+        const float StarSpawnInterval = MeteorSpawnInterval / GameConstants.StarToMeteorRatio;
 
         List<List<WaveEntity>> _pregeneratedWaves;
         Vector2[] _enemyCoordinates;
@@ -76,6 +77,9 @@ namespace Assets.Scripts
         void Start()
         {
             _difficultyManagerScript = Camera.main.GetComponent<DifficultyManager>();
+
+            _initialMeteorCount = 30;
+            _initialStarCount = _initialMeteorCount * GameConstants.StarToMeteorRatio;
 
             _waveSpawnInterval = WaveSpawnBaseInterval;
             _previousWaveSpawnTime = Time.time;
@@ -318,7 +322,7 @@ namespace Assets.Scripts
 
         void InitialMeteorAndStarSpawn()
         {
-            for (int i = 0; i < InitialMeteorCount; i++)
+            for (int i = 0; i < _initialMeteorCount; i++)
             {
                 int meteorKind = Random.Range(0, MeteorPrefabArray.Length);
                 Vector2 meteorPos = new Vector2(Random.Range(GameConstants.MinHorizontalMovementLimit - 0.5f, GameConstants.HorizontalMaxCoord - 0.5f),
@@ -326,7 +330,7 @@ namespace Assets.Scripts
                 SpawnMeteor(meteorKind, meteorPos);
             }
 
-            for (int i = 0; i < InitialStarCount; i++)
+            for (int i = 0; i < _initialStarCount; i++)
             {
                 Vector2 starPos = new Vector2(Random.Range(GameConstants.MinHorizontalMovementLimit - 0.5f, GameConstants.HorizontalMaxCoord - 0.5f),
                     Random.Range(GameConstants.MinVerticalMovementLimit - 1.0f, GameConstants.MaxVerticalMovementLimit + 1.0f));
