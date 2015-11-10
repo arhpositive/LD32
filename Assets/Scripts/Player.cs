@@ -9,6 +9,7 @@
 using UnityEngine;
 using CnControls;
 using Assets.Scripts.ui;
+using UnityEngine.Assertions;
 
 namespace Assets.Scripts
 {
@@ -18,14 +19,15 @@ namespace Assets.Scripts
         public float Cooldown { get; private set; }
         public float LastFireTime;
         public int AmmoCount;
+        public GameObject LastBullet;
 
-        public Gun(GameObject bulletPrefab, float cooldown, float lastFireTime, int ammoCount)
+        public Gun(GameObject bulletPrefab, float cooldown, int ammoCount)
             : this()
         {
             BulletPrefab = bulletPrefab;
             Cooldown = cooldown;
-            LastFireTime = lastFireTime;
             AmmoCount = ammoCount;
+            LastFireTime = 0.0f;
         }
     }
 
@@ -37,11 +39,12 @@ namespace Assets.Scripts
 
         public GameObject StunBulletPrefab;
         public GameObject SpeedUpBulletPrefab;
+        public GameObject TeleportBulletPrefab; //TODO get teleport bullet gfx
         public float PlayerSpeedLimit;
-        public float PlayerAcceleration;
 
         public AudioClip FireStunGunClip;
         public AudioClip FireSpeedUpGunClip;
+        public AudioClip FireTeleportGunClip; //TODO get teleport bullet sfx
         public AudioClip ExplosionClip;
 
         public int PlayerHealth { get; private set; }
@@ -68,6 +71,7 @@ namespace Assets.Scripts
 
         Gun _stunGun;
         Gun _speedUpGun;
+        Gun _teleportGun;
 
         void Awake()
         {
@@ -89,8 +93,9 @@ namespace Assets.Scripts
             _hitBulletCount = 0;
             _shotBulletCount = 0;
 
-            _stunGun = new Gun(StunBulletPrefab, 0.3f, 0.0f, -1);
-            _speedUpGun = new Gun(SpeedUpBulletPrefab, 0.5f, 0.0f, 3);
+            _stunGun = new Gun(StunBulletPrefab, 0.3f, -1);
+            _speedUpGun = new Gun(SpeedUpBulletPrefab, 0.5f, 3);
+            _teleportGun = new Gun(TeleportBulletPrefab, 1.0f, 10);
 
             //find shield object in children
             foreach (Transform tr in transform)
@@ -156,30 +161,48 @@ namespace Assets.Scripts
             //shooting
             bool fireInputGiven = false;
             bool speedUpInputGiven = false;
+            bool teleportInputGiven = false; //teleport device will teleport our ship to wherever the beacon is
 
             if (UseTouchControls)
             {
                 fireInputGiven = CnInputManager.GetButton("TouchFire");
-                speedUpInputGiven = CnInputManager.GetButton("TouchSpeedUp");
+                speedUpInputGiven = CnInputManager.GetButtonDown("TouchSpeedUp");
+                teleportInputGiven = false; //TODO touch control for third weapon
             }
             else
             {
-                fireInputGiven = Input.GetKey(KeyCode.Space);
-                speedUpInputGiven = Input.GetKey(KeyCode.C);
+                fireInputGiven = Input.GetKey(KeyCode.Z);
+                speedUpInputGiven = Input.GetKeyDown(KeyCode.X);
+                teleportInputGiven = Input.GetKeyDown(KeyCode.C);
             }
 
             if (fireInputGiven && Time.time - _stunGun.LastFireTime > _stunGun.Cooldown)
             {
                 FireStunGun();
             }
-            else if (speedUpInputGiven &&
+
+            if (speedUpInputGiven &&
                 Time.time - _speedUpGun.LastFireTime > _speedUpGun.Cooldown &&
                 _speedUpGun.AmmoCount > 0)
             {
                 FireSpeedUpGun();
-                //TODO consider giving info on why player can't shoot
-                //TODO consider displaying cooldown on ui
+                //TODO display weapon cooldowns on UI
+                //cooldown can be represented by a bar filling up on the area that shows the weapon type
             }
+
+            if (teleportInputGiven)
+            {
+                if (_teleportGun.LastBullet)
+                {
+                    TriggerTeleportBullet();
+                }
+                else if (Time.time - _teleportGun.LastFireTime > _teleportGun.Cooldown &&
+                         _teleportGun.AmmoCount > 0)
+                {
+                    FireTeleportGun();
+                }
+            }
+
             DoMovement();
         }
 
@@ -326,6 +349,11 @@ namespace Assets.Scripts
             return _speedUpGun.AmmoCount;
         }
 
+        public int GetTeleportGunAmmo()
+        {
+            return _teleportGun.AmmoCount;
+        }
+
         void SetChildRenderers(bool value)
         {
             foreach (SpriteRenderer r in _childRenderers)
@@ -350,7 +378,7 @@ namespace Assets.Scripts
 
             for (int i = 0; i < transform.childCount; i++)
             {
-                if (transform.GetChild(i).CompareTag("BulletStart"))
+                if (transform.GetChild(i).CompareTag("BulletStart")) //TODO experiment with multiple gun slots
                 {
                     Vector3 bulletStartPoint = transform.GetChild(i).position;
                     Instantiate(_stunGun.BulletPrefab, bulletStartPoint, Quaternion.identity);
@@ -372,6 +400,35 @@ namespace Assets.Scripts
                     _speedUpGun.AmmoCount--;
                     AudioSource.PlayClipAtPoint(FireSpeedUpGunClip, bulletStartPoint);
                 }
+            }
+        }
+
+        void FireTeleportGun()
+        {
+            _teleportGun.LastFireTime = Time.time;
+            for (int i = 0; i < transform.childCount; i++)
+            {
+                if (transform.GetChild(i).CompareTag("BulletStart"))
+                {
+                    Vector3 bulletStartPoint = transform.GetChild(i).position;
+                    _teleportGun.LastBullet =
+                        Instantiate(_teleportGun.BulletPrefab, bulletStartPoint, Quaternion.identity) as GameObject;
+                    _teleportGun.AmmoCount--;
+                    AudioSource.PlayClipAtPoint(FireTeleportGunClip, bulletStartPoint);
+                }
+            }
+        }
+
+        void TriggerTeleportBullet()
+        {
+            if (_teleportGun.LastBullet)
+            {
+                transform.position = _teleportGun.LastBullet.transform.position;
+                Destroy(_teleportGun.LastBullet.gameObject);
+                _teleportGun.LastBullet = null;
+
+                //TODO teleport bullet should not exceed half of the gameplay area, handle delicately
+                //TODO add teleport bullet powerup
             }
         }
     }

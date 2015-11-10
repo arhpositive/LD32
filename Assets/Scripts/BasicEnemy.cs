@@ -146,6 +146,11 @@ namespace Assets.Scripts
             }
             else if (other.gameObject.tag == "Enemy")
             {
+                if (_playerScript) 
+                {
+                    //player might not be alive, game might have ended, do not score negative points in this case
+                    _playerScript.TriggerEnemyDestruction();
+                }
                 EventLogger.PrintToLog("Enemy Collision v Enemy");
                 _hasCollided = true;
                 AudioSource.PlayClipAtPoint(ExplosionClip, transform.position);

@@ -14,6 +14,7 @@ namespace Assets.Scripts
     {
         BtStun,
         BtSpeedup,
+        BtTeleport,
         BtKiller
     }
 
@@ -33,7 +34,7 @@ namespace Assets.Scripts
             GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
             if (playerObject)
             {
-                _playerScript = playerObject.GetComponent<Player>();   
+                _playerScript = playerObject.GetComponent<Player>();
             }
         }
 
@@ -102,6 +103,7 @@ namespace Assets.Scripts
         {
             if (ShotByPlayer)
             {
+                //TODO will these statistics updates be feasible for detonating bullets?
                 _playerScript.OnBulletDestruction(_destroyedByCollision);
             }
         }

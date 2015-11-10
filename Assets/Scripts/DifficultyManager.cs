@@ -54,7 +54,8 @@ namespace Assets.Scripts
                     // player lost hp during last 5 seconds, drop difficulty
                     DecreaseDifficulty();
                 }
-                else if (_adjustmentStepCount % 6 == 0 && _playerScript.PlayerHealth > 1)
+
+                if (_adjustmentStepCount % 6 == 0 && _playerScript.PlayerHealth > 1)
                 {
                     // increase difficulty every 30 seconds if player is not struggling
                     IncreaseDifficulty();
