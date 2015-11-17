@@ -86,6 +86,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CurrentBulletType: 2
   BulletHitClip: {fileID: 8300000, guid: 936894d938984564f82df28798b05926, type: 3}
+  ShotByPlayer: 0
 --- !u!114 &11478172
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -111,7 +112,8 @@ MonoBehaviour:
   RandomizeRotationSpeedCoef: 0
   BounceOnHorizontalLimits: 0
   DestroyOnVerticalLimits: 1
-  DestroyOnHorizontalLimits: 1
+  DestroyOnHorizontalLimits: 0
+  DestroyOnEarlyHorizontalLimits: 1
 --- !u!212 &21204176
 SpriteRenderer:
   m_ObjectHideFlags: 1
@@ -148,6 +150,14 @@ Prefab:
     - target: {fileID: 0}
       propertyPath: MoveSpeed
       value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: DestroyOnEarlyHorizontalLimits
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: DestroyOnHorizontalLimits
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}

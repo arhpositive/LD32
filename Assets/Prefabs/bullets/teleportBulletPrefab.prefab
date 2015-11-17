@@ -12,7 +12,6 @@ GameObject:
   - 58: {fileID: 5877522}
   - 50: {fileID: 5036396}
   - 114: {fileID: 11488132}
-  - 114: {fileID: 11423972}
   m_Layer: 8
   m_Name: teleportBulletPrefab
   m_TagString: Bullet
@@ -61,23 +60,6 @@ CircleCollider2D:
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
   m_Radius: .0500000007
---- !u!114 &11423972
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 166356}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8b92d900d650bdc4985585ac5e2cb0d6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  CurrentBulletType: 2
-  BulletHitClip: {fileID: 8300000, guid: d8dbd1a7727573844b51d2e5e2fe2fed, type: 3}
-  ShotByPlayer: 1
-  _hasCollided: 0
-  _destroyedByCollision: 0
-  _playerScript: {fileID: 0}
 --- !u!114 &11488132
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -103,7 +85,8 @@ MonoBehaviour:
   RandomizeRotationSpeedCoef: 0
   BounceOnHorizontalLimits: 0
   DestroyOnVerticalLimits: 1
-  DestroyOnHorizontalLimits: 1
+  DestroyOnHorizontalLimits: 0
+  DestroyOnEarlyHorizontalLimits: 1
 --- !u!212 &21206536
 SpriteRenderer:
   m_ObjectHideFlags: 1
@@ -128,7 +111,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingOrder: 2
-  m_Sprite: {fileID: 21300000, guid: 43962687726b87e49a2cf69960a2b842, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 7b38472b8bb7d1640bd7a467f7331581, type: 3}
   m_Color: {r: 0, g: 1, b: 1, a: 1}
 --- !u!1001 &100100000
 Prefab:
@@ -153,6 +136,19 @@ Prefab:
       propertyPath: MoveSpeed
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: DestroyOnEarlyHorizontalLimits
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: DestroyOnHorizontalLimits
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 7b38472b8bb7d1640bd7a467f7331581,
+        type: 3}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}
   m_RootGameObject: {fileID: 166356}

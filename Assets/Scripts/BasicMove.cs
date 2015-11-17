@@ -38,6 +38,7 @@ namespace Assets.Scripts
         public bool BounceOnHorizontalLimits;
         public bool DestroyOnVerticalLimits;
         public bool DestroyOnHorizontalLimits;
+        public bool DestroyOnEarlyHorizontalLimits;
 
         float _minVerticalBounceLimit;
         float _maxVerticalBounceLimit;
@@ -83,7 +84,14 @@ namespace Assets.Scripts
                 transform.Rotate(Vector3.forward * RotationSpeed * Time.deltaTime, Space.World);
             }
 
-            if (DestroyOnHorizontalLimits)
+            if (DestroyOnEarlyHorizontalLimits)
+            {
+                if (transform.position.x < GameConstants.HorizontalMinCoord || transform.position.x > GameConstants.HorizontalEarlyMaxCoord)
+                {
+                    Destroy(gameObject);
+                }
+            }
+            else if (DestroyOnHorizontalLimits)
             {
                 if (transform.position.x < GameConstants.HorizontalMinCoord || transform.position.x > GameConstants.HorizontalMaxCoord)
                 {

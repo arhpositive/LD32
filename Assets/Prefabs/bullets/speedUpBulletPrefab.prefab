@@ -86,7 +86,8 @@ MonoBehaviour:
   RandomizeRotationSpeedCoef: 0
   BounceOnHorizontalLimits: 0
   DestroyOnVerticalLimits: 1
-  DestroyOnHorizontalLimits: 1
+  DestroyOnHorizontalLimits: 0
+  DestroyOnEarlyHorizontalLimits: 1
 --- !u!114 &11460860
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -141,6 +142,14 @@ Prefab:
     - target: {fileID: 0}
       propertyPath: ShotByPlayer
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: DestroyOnEarlyHorizontalLimits
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: DestroyOnHorizontalLimits
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}

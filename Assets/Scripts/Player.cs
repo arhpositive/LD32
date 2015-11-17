@@ -9,7 +9,6 @@
 using UnityEngine;
 using CnControls;
 using Assets.Scripts.ui;
-using UnityEngine.Assertions;
 
 namespace Assets.Scripts
 {
@@ -39,7 +38,7 @@ namespace Assets.Scripts
 
         public GameObject StunBulletPrefab;
         public GameObject SpeedUpBulletPrefab;
-        public GameObject TeleportBulletPrefab; //TODO get teleport bullet gfx
+        public GameObject TeleportBulletPrefab;
         public float PlayerSpeedLimit;
 
         public AudioClip FireStunGunClip;
@@ -95,7 +94,7 @@ namespace Assets.Scripts
 
             _stunGun = new Gun(StunBulletPrefab, 0.3f, -1);
             _speedUpGun = new Gun(SpeedUpBulletPrefab, 0.5f, 3);
-            _teleportGun = new Gun(TeleportBulletPrefab, 1.0f, 10);
+            _teleportGun = new Gun(TeleportBulletPrefab, 1.0f, 0);
 
             //find shield object in children
             foreach (Transform tr in transform)
@@ -127,7 +126,7 @@ namespace Assets.Scripts
                 EventLogger.PrintToLog("Invulnerability Start");
 
                 //spawn
-                transform.position = new Vector2(0.0f, Random.Range(GameConstants.MinVerticalMovementLimit,
+                transform.position = new Vector2(0.0f, UnityEngine.Random.Range(GameConstants.MinVerticalMovementLimit,
                     GameConstants.MaxVerticalMovementLimit));
                 IsInvulnerable = true;
                 _invulnerabilityStartTime = Time.time;
@@ -344,6 +343,12 @@ namespace Assets.Scripts
             }
         }
 
+        public void TriggerTeleportPickup()
+        {
+            EventLogger.PrintToLog("Player Gains Teleport Powerup");
+            _teleportGun.AmmoCount++;
+        }
+
         public int GetSpeedUpGunAmmo()
         {
             return _speedUpGun.AmmoCount;
@@ -426,9 +431,6 @@ namespace Assets.Scripts
                 transform.position = _teleportGun.LastBullet.transform.position;
                 Destroy(_teleportGun.LastBullet.gameObject);
                 _teleportGun.LastBullet = null;
-
-                //TODO teleport bullet should not exceed half of the gameplay area, handle delicately
-                //TODO add teleport bullet powerup
             }
         }
     }

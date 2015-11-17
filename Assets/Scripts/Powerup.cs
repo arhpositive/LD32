@@ -16,6 +16,7 @@ namespace Assets.Scripts
         PtSpeedup,
         PtResearch,
         PtShield,
+        PtTeleport,
         PtBomb,
         PtCount
     }
@@ -58,6 +59,9 @@ namespace Assets.Scripts
                                 break;
                             case PowerupType.PtShield:
                                 playerScript.TriggerShieldPickup();
+                                break;
+                            case PowerupType.PtTeleport:
+                                playerScript.TriggerTeleportPickup();
                                 break;
                             case PowerupType.PtBomb:
                                 gotPickedUp = playerScript.PlayerGotHit();

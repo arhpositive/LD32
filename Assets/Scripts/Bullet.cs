@@ -103,7 +103,6 @@ namespace Assets.Scripts
         {
             if (ShotByPlayer)
             {
-                //TODO will these statistics updates be feasible for detonating bullets?
                 _playerScript.OnBulletDestruction(_destroyedByCollision);
             }
         }
