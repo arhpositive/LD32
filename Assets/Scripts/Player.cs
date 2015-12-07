@@ -43,7 +43,7 @@ namespace Assets.Scripts
 
         public AudioClip FireStunGunClip;
         public AudioClip FireSpeedUpGunClip;
-        public AudioClip FireTeleportGunClip; //TODO get teleport bullet sfx
+        public AudioClip FireTeleportGunClip;
         public AudioClip ExplosionClip;
 
         public int PlayerHealth { get; private set; }
@@ -94,7 +94,7 @@ namespace Assets.Scripts
 
             _stunGun = new Gun(StunBulletPrefab, 0.3f, -1);
             _speedUpGun = new Gun(SpeedUpBulletPrefab, 0.5f, 3);
-            _teleportGun = new Gun(TeleportBulletPrefab, 1.0f, 0);
+            _teleportGun = new Gun(TeleportBulletPrefab, 1.0f, 10);
 
             //find shield object in children
             foreach (Transform tr in transform)
@@ -428,6 +428,7 @@ namespace Assets.Scripts
         {
             if (_teleportGun.LastBullet)
             {
+                EventLogger.PrintToLog("Player Triggers Teleport");
                 transform.position = _teleportGun.LastBullet.transform.position;
                 Destroy(_teleportGun.LastBullet.gameObject);
                 _teleportGun.LastBullet = null;

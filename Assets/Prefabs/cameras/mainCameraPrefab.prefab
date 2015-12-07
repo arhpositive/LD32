@@ -64,6 +64,7 @@ Camera:
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
+  m_TargetEye: 3
   m_HDR: 0
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
@@ -91,6 +92,7 @@ AudioSource:
   m_Pitch: 1
   Loop: 0
   Mute: 0
+  Spatialize: 0
   Priority: 128
   DopplerLevel: 1
   MinDistance: 1
@@ -177,11 +179,14 @@ MonoBehaviour:
   - {fileID: 105448, guid: 4318761234289f640a7017713d221b7b, type: 2}
   - {fileID: 173280, guid: 8dfdc579ad197d34a8f88fe5a10abd54, type: 2}
   StarPrefab: {fileID: 157426, guid: c5f313e4e03d12a4ba060b73e0120301, type: 2}
-  InitialMeteorCount: 30
-  InitialStarCount: 300
   IsGameScene: 1
-  WaveSpawnBaseInterval: 5
+  MinWaveSpawnIntervalCoef: 5
+  MaxWaveSpawnIntervalCoef: 10
   PowerupSpawnBaseInterval: 3
+  enemyMinVertDist: .5
+  enemyMaxVertDist: .899999976
+  enemyMinHorzDist: .200000003
+  enemyMaxHorzDist: .899999976
 --- !u!114 &11425842
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -247,6 +252,30 @@ Prefab:
     - target: {fileID: 0}
       propertyPath: PowerupSpawnBaseInterval
       value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: enemyMinVertDist
+      value: .5
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: enemyMaxVertDist
+      value: .899999976
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: enemyMinHorzDist
+      value: .200000003
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: enemyMaxHorzDist
+      value: .899999976
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: MinWaveSpawnIntervalCoef
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: MaxWaveSpawnIntervalCoef
+      value: 10
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}

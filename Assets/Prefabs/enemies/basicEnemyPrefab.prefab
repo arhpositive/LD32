@@ -179,6 +179,7 @@ MonoBehaviour:
   BounceOnHorizontalLimits: 1
   DestroyOnVerticalLimits: 0
   DestroyOnHorizontalLimits: 0
+  DestroyOnEarlyHorizontalLimits: 0
 --- !u!212 &21226966
 SpriteRenderer:
   m_ObjectHideFlags: 1
@@ -245,6 +246,10 @@ Prefab:
     - target: {fileID: 0}
       propertyPath: MinFiringInterval
       value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: m_LocalPosition.y
+      value: 5.05000019
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}

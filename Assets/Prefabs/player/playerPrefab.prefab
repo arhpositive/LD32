@@ -348,7 +348,7 @@ MonoBehaviour:
   PlayerSpeedLimit: 3
   FireStunGunClip: {fileID: 8300000, guid: d8dbd1a7727573844b51d2e5e2fe2fed, type: 3}
   FireSpeedUpGunClip: {fileID: 8300000, guid: e4fd3e08cf0dc614d98186276bddbf7d, type: 3}
-  FireTeleportGunClip: {fileID: 8300000, guid: d8dbd1a7727573844b51d2e5e2fe2fed, type: 3}
+  FireTeleportGunClip: {fileID: 8300000, guid: a743c04785a2f4e44a4798184c7beaa6, type: 3}
   ExplosionClip: {fileID: 8300000, guid: 2c95fdf00a27c874cb6cf05c7be45376, type: 3}
 --- !u!212 &21208630
 SpriteRenderer:
@@ -476,7 +476,7 @@ Prefab:
     - target: {fileID: 0}
       propertyPath: FireTeleportGunClip
       value: 
-      objectReference: {fileID: 8300000, guid: d8dbd1a7727573844b51d2e5e2fe2fed, type: 3}
+      objectReference: {fileID: 8300000, guid: a743c04785a2f4e44a4798184c7beaa6, type: 3}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}
   m_RootGameObject: {fileID: 114074}

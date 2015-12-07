@@ -101,7 +101,11 @@ namespace Assets.Scripts
 
         void OnDestroy()
         {
-            if (ShotByPlayer)
+            if (CurrentBulletType == BulletType.BtTeleport)
+            {
+                AudioSource.PlayClipAtPoint(BulletHitClip, transform.position);
+            }
+            else if (ShotByPlayer)
             {
                 _playerScript.OnBulletDestruction(_destroyedByCollision);
             }
