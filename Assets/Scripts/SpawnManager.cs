@@ -27,6 +27,18 @@ namespace Assets.Scripts
         }
     };
 
+    struct Formation
+    {
+        public List<WaveEntity> WaveEntities { get; private set; }
+        public int HorizontalShipSpan { get; private set; }
+
+        public Formation(List<WaveEntity> waveEntities, int horizontalShipSpan)
+        {
+            WaveEntities = waveEntities;
+            HorizontalShipSpan = horizontalShipSpan;
+        }
+    }
+
     public class SpawnManager : MonoBehaviour
     {
         public GameObject PlayerPrefab;
@@ -48,7 +60,6 @@ namespace Assets.Scripts
 
         float _previousWaveSpawnTime;
         float _waveSpawnInterval;
-        float _minSpawnInterval;
 
         DifficultyManager _difficultyManagerScript;
 
@@ -61,10 +72,8 @@ namespace Assets.Scripts
         float _previousStarSpawnTime;
         const float StarSpawnInterval = MeteorSpawnInterval / GameConstants.StarToMeteorRatio;
 
-        List<List<WaveEntity>> _pregeneratedWaves;
-
-        const float HMinCoord = GameConstants.HorizontalMaxCoord - 1.0f; //TODO determine hmin hmax properly
-        const float HMaxCoord = GameConstants.HorizontalMaxCoord + 1.0f;
+        List<Formation> _formations;
+        
         const float HSpawnCoord = GameConstants.HorizontalMaxCoord;
         const float VMinCoord = GameConstants.MinVerticalMovementLimit;
         const float VMaxCoord = GameConstants.MaxVerticalMovementLimit;
@@ -87,15 +96,11 @@ namespace Assets.Scripts
 
             _initialMeteorCount = 30;
             _initialStarCount = _initialMeteorCount * GameConstants.StarToMeteorRatio;
-
-            _minSpawnInterval = MinWaveSpawnIntervalCoef/Mathf.Sqrt(GameConstants.MaxDifficultyMultiplier);
+            
             _waveSpawnInterval = MinWaveSpawnIntervalCoef;
             _previousWaveSpawnTime = Time.time;
-            _pregeneratedWaves = new List<List<WaveEntity>>();
-
-            //TODO you need to create enemy waves in a less strict pattern than what it currently is
-
-            //PregenerateEnemyCoordinates();
+            _formations = new List<Formation>();
+            
             PregeneratePossibleWaves();
 
             _powerupSpawnInterval = PowerupSpawnBaseInterval;
@@ -114,10 +119,8 @@ namespace Assets.Scripts
                 if (Time.time - _previousWaveSpawnTime > _waveSpawnInterval)
                 {
                     _previousWaveSpawnTime = Time.time;
-                    //float randomIntervalCoef = Random.Range(MinWaveSpawnIntervalCoef, MaxWaveSpawnIntervalCoef);
-                    //_waveSpawnInterval = randomIntervalCoef / Mathf.Sqrt(_difficultyManagerScript.DifficultyMultiplier);
-                    //TODO fix horizontal differences and make sure no wave collides with others, even in fastest setting
-                    _waveSpawnInterval = _minSpawnInterval;
+                    float randomIntervalCoef = Random.Range(MinWaveSpawnIntervalCoef, MaxWaveSpawnIntervalCoef);
+                    _waveSpawnInterval = randomIntervalCoef / Mathf.Sqrt(_difficultyManagerScript.DifficultyMultiplier);
                     //spawn new wave uses new _waveSpawnInterval to calculate spawn horizontal position, do not change the order here!
                     SpawnNewWave();
                 }
@@ -149,35 +152,12 @@ namespace Assets.Scripts
             }
         }
 
-        //void PregenerateEnemyCoordinates()
-        //{
-        //    _enemyCoordinates = new Vector2[_hArr.Length * _vArr.Length];
-
-        //    for (int x = 0; x < _hArr.Length; ++x)
-        //    {
-        //        for (int y = 0; y < _vArr.Length; ++y)
-        //        {
-        //            int index = y + _vArr.Length * x;
-        //            _enemyCoordinates[index].x = _hArr[x];
-        //            _enemyCoordinates[index].y = _vArr[y];
-        //        }
-        //    }
-        //}
-
-        //Vector2 GetNewEnemyCoordinates(int x, int y)
-        //{
-        //    return _enemyCoordinates[y + _vArr.Length * x];
-        //}
-
         void PregeneratePossibleWaves()
         {
-            // TODO waves will only have a starting point, a vec2, which is randomly determined, 
-            // this point will mark first aircraft and the rest of the team will be following the first aircraft in terms of coordinates
-            
-
             // TODO later, include different movement patterns, might involve waypoints, etc.
             // waypoint system could make the wave change movement direction after a given amount of time.
             // be careful about randomizing too much as it will make us lose control over certain difficulty features
+
             Vector2 leftAndDown = new Vector2(-1.0f, -0.5f);
             leftAndDown.Normalize();
             Vector2 leftAndUp = new Vector2(-1.0f, 0.5f);
@@ -202,7 +182,7 @@ namespace Assets.Scripts
                 new WaveEntity(new Vector2(0, 8), Vector2.left),
                 new WaveEntity(new Vector2(0, 9), Vector2.left)
             };
-            _pregeneratedWaves.Add(straightLine);
+            _formations.Add(new Formation(straightLine, 0));
 
             List<WaveEntity> echelonLine = new List<WaveEntity>()
             {
@@ -223,7 +203,7 @@ namespace Assets.Scripts
                 new WaveEntity(new Vector2(0, 8), Vector2.left),
                 new WaveEntity(new Vector2(1, 9), Vector2.left)
             };
-            _pregeneratedWaves.Add(echelonLine);
+            _formations.Add(new Formation(echelonLine, 1));
 
             List<WaveEntity> forwardsWedge = new List<WaveEntity>
             {
@@ -244,8 +224,8 @@ namespace Assets.Scripts
                 new WaveEntity(new Vector2(0, 4), Vector2.left),
                 new WaveEntity(new Vector2(0, 5), Vector2.left)
             };
-            _pregeneratedWaves.Add(forwardsWedge);
-
+            _formations.Add(new Formation(forwardsWedge, 4));
+            
             List<WaveEntity> backwardsWedge = new List<WaveEntity>
             {
                 //  1
@@ -265,7 +245,7 @@ namespace Assets.Scripts
                 new WaveEntity(new Vector2(4, 4), Vector2.left),
                 new WaveEntity(new Vector2(4, 5), Vector2.left)
             };
-            _pregeneratedWaves.Add(backwardsWedge);
+            _formations.Add(new Formation(backwardsWedge, 4));
 
             List<WaveEntity> phalanx = new List<WaveEntity>
             {
@@ -285,14 +265,7 @@ namespace Assets.Scripts
                 new WaveEntity(new Vector2(0, 4), Vector2.left),
                 new WaveEntity(new Vector2(1, 4), Vector2.left)
             };
-            //_pregeneratedWaves.Add(phalanx); //TODO adjust min spawn interval accordingly for phalanx to work
-
-
-            // TODO once we decide how many enemies we'll spawn this wave
-            // we'll copy a sublist of wave entities begining from 0 and ending in formation size
-            // we'll sort the new list by vector y value
-            // this'll give us the new formation
-
+            //_formations.Add(new Formation(phalanx, 1)); //TODO adjust min spawn interval accordingly for phalanx to work
         }
 
         //Generate new waves and spawn them on scene
@@ -301,16 +274,23 @@ namespace Assets.Scripts
             EventLogger.PrintToLog("New Wave Spawn");
 
             // 1. determine number of enemies
-            
+
             //TODO low difficulty = wider spread & less enemies
             //TODO high difficulty = shorter spread & more enemies
-            
+
             //based on spread, determine max number of enemies vertically
             //determine number of enemies, low number is fixed (tied to max. spread aswell), high number is calculated based on spread
             //based on number of enemies and spread, starting point has a min and max vertically, randomize between constraints
 
-            float nextWaveHorizontalDistance = _waveSpawnInterval*1.2f; //TODO replace magic number with enemy speed
-            float maxEnemyHorizontalDist = (nextWaveHorizontalDistance - enemyMaxHorzDist) /4; //TODO replace magic numbers
+            int randomWaveIndex = Random.Range(0, _formations.Count);
+
+            //TODO NEXT replace magic numbers
+            float nextWaveHorizontalDistance = _waveSpawnInterval*1.2f; //TODO take enemy speed for 1.2f
+            float maxEnemyHorizontalDist = nextWaveHorizontalDistance - enemyMaxHorzDist;
+            if (_formations[randomWaveIndex].HorizontalShipSpan > 1)
+            {
+                maxEnemyHorizontalDist /= _formations[randomWaveIndex].HorizontalShipSpan;
+            }
             maxEnemyHorizontalDist = Mathf.Clamp(maxEnemyHorizontalDist, enemyMinHorzDist, enemyMaxHorzDist);
             print(maxEnemyHorizontalDist);
 
@@ -319,12 +299,11 @@ namespace Assets.Scripts
             float enemyHorizontalDist = Random.Range(enemyMinHorzDist, maxEnemyHorizontalDist);
 
             //II. Determine Number of Enemies
-            int randomWaveIndex = Random.Range(0, _pregeneratedWaves.Count);
             float verticalMovementLength = GameConstants.MaxVerticalMovementLimit - GameConstants.MinVerticalMovementLimit;
 
             //TODO these counts only make sense for single line formations, phalanx formation breaks these rules
             int verticalIntervalCount = Mathf.FloorToInt(verticalMovementLength/enemyVerticalDist);
-            int enemyMaxCount = Mathf.Min(1 + verticalIntervalCount, _pregeneratedWaves[randomWaveIndex].Count);
+            int enemyMaxCount = Mathf.Min(1 + verticalIntervalCount, _formations[randomWaveIndex].WaveEntities.Count);
             int enemyMinCount = Mathf.Max(2, enemyMaxCount - 6);
             int enemyCount = Random.Range(enemyMinCount, enemyMaxCount);
             float maxVerticalStartCoord = VMaxCoord - ((enemyCount - 1) * enemyVerticalDist);
@@ -333,7 +312,7 @@ namespace Assets.Scripts
             List<WaveEntity> selectedFormationEntities = new List<WaveEntity>();
             for (int i = 0; i < enemyCount; ++i)
             {
-                selectedFormationEntities.Add(_pregeneratedWaves[randomWaveIndex][i]);
+                selectedFormationEntities.Add(_formations[randomWaveIndex].WaveEntities[i]);
             }
             selectedFormationEntities.Sort(FormationComparison);
 
