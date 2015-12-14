@@ -52,6 +52,8 @@ namespace Assets.Scripts
         public bool IsShielded { get; private set; }
         public float PlayerAccuracy { get; private set; }
 
+        public const int PlayerInitialHealth = 3;
+
         RefreshEndScoreText _endGameScoreText;
 
         GameObject _playerShield;
@@ -82,7 +84,7 @@ namespace Assets.Scripts
         void Start()
         {
             PlayerScore = 0;
-            PlayerHealth = GameConstants.PlayerInitialHealth;
+            PlayerHealth = PlayerInitialHealth;
             IsDead = false;
             IsShielded = false;
             IsInvulnerable = true;
@@ -126,7 +128,7 @@ namespace Assets.Scripts
                 EventLogger.PrintToLog("Invulnerability Start");
 
                 //spawn
-                transform.position = new Vector2(0.0f, UnityEngine.Random.Range(GameConstants.MinVerticalMovementLimit,
+                transform.position = new Vector2(0.0f, Random.Range(GameConstants.MinVerticalMovementLimit,
                     GameConstants.MaxVerticalMovementLimit));
                 IsInvulnerable = true;
                 _invulnerabilityStartTime = Time.time;
@@ -158,15 +160,15 @@ namespace Assets.Scripts
             }
 
             //shooting
-            bool fireInputGiven = false;
-            bool speedUpInputGiven = false;
-            bool teleportInputGiven = false; //teleport device will teleport our ship to wherever the beacon is
+            bool fireInputGiven;
+            bool speedUpInputGiven;
+            bool teleportInputGiven; //teleport device will teleport our ship to wherever the beacon is
 
             if (UseTouchControls)
             {
                 fireInputGiven = CnInputManager.GetButton("TouchFire");
                 speedUpInputGiven = CnInputManager.GetButtonDown("TouchSpeedUp");
-                teleportInputGiven = false; //TODO touch control for third weapon
+                teleportInputGiven = false; //TODO LATER touch control for third weapon
             }
             else
             {
@@ -185,7 +187,7 @@ namespace Assets.Scripts
                 _speedUpGun.AmmoCount > 0)
             {
                 FireSpeedUpGun();
-                //TODO display weapon cooldowns on UI
+                //TODO LATER display weapon cooldowns on UI
                 //cooldown can be represented by a bar filling up on the area that shows the weapon type
             }
 
@@ -383,7 +385,7 @@ namespace Assets.Scripts
 
             for (int i = 0; i < transform.childCount; i++)
             {
-                if (transform.GetChild(i).CompareTag("BulletStart")) //TODO experiment with multiple gun slots
+                if (transform.GetChild(i).CompareTag("BulletStart")) //TODO LATER experiment with multiple gun slots
                 {
                     Vector3 bulletStartPoint = transform.GetChild(i).position;
                     Instantiate(_stunGun.BulletPrefab, bulletStartPoint, Quaternion.identity);
@@ -430,6 +432,8 @@ namespace Assets.Scripts
             {
                 EventLogger.PrintToLog("Player Triggers Teleport");
                 transform.position = _teleportGun.LastBullet.transform.position;
+                AudioSource.PlayClipAtPoint(_teleportGun.LastBullet.GetComponent<Bullet>().BulletHitClip, transform.position);
+                
                 Destroy(_teleportGun.LastBullet.gameObject);
                 _teleportGun.LastBullet = null;
             }

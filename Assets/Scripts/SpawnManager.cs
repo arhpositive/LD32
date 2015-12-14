@@ -10,7 +10,6 @@ using System;
 using UnityEngine;
 using UnityEngine.Assertions;
 using System.Collections.Generic;
-using UnityEditor;
 using Random = UnityEngine.Random;
 
 namespace Assets.Scripts
@@ -50,10 +49,10 @@ namespace Assets.Scripts
         public float MinWaveSpawnIntervalCoef;
         public float MaxWaveSpawnIntervalCoef;
         public float PowerupSpawnBaseInterval;
-        public float enemyMinVertDist;
-        public float enemyMaxVertDist;
-        public float enemyMinHorzDist;
-        public float enemyMaxHorzDist;
+        public float EnemyMinVertDist;
+        public float EnemyMaxVertDist;
+        public float EnemyMinHorzDist;
+        public float EnemyMaxHorzDist;
 
         int _initialMeteorCount;
         int _initialStarCount;
@@ -66,11 +65,12 @@ namespace Assets.Scripts
         float _previousPowerupSpawnTime;
         float _powerupSpawnInterval;
 
+        //TODO NEXT for every star and meteor destroyed, just spawn another one, remove all timers and intervals
         float _previousMeteorSpawnTime;
         const float MeteorSpawnInterval = 1.0f;
 
         float _previousStarSpawnTime;
-        const float StarSpawnInterval = MeteorSpawnInterval / GameConstants.StarToMeteorRatio;
+        const float StarSpawnInterval = MeteorSpawnInterval * GameConstants.StarToMeteorRatio; 
 
         List<Formation> _formations;
         
@@ -145,7 +145,7 @@ namespace Assets.Scripts
 
             if (Time.time - _previousStarSpawnTime > StarSpawnInterval)
             {
-                Vector2 starPos = new Vector2(Random.Range(GameConstants.HorizontalMaxCoord - 0.1f, GameConstants.HorizontalMaxCoord + 0.1f),
+                Vector2 starPos = new Vector2(Random.Range(GameConstants.HorizontalMaxCoord - 0.1f, GameConstants.HorizontalMaxCoord),
                     Random.Range(GameConstants.MinVerticalMovementLimit - 1.0f, GameConstants.MaxVerticalMovementLimit + 1.0f));
                 SpawnStar(starPos);
                 _previousStarSpawnTime = Time.time;
@@ -154,7 +154,7 @@ namespace Assets.Scripts
 
         void PregeneratePossibleWaves()
         {
-            // TODO later, include different movement patterns, might involve waypoints, etc.
+            // TODO LATER include different movement patterns, might involve waypoints, etc.
             // waypoint system could make the wave change movement direction after a given amount of time.
             // be careful about randomizing too much as it will make us lose control over certain difficulty features
 
@@ -283,20 +283,19 @@ namespace Assets.Scripts
             //based on number of enemies and spread, starting point has a min and max vertically, randomize between constraints
 
             int randomWaveIndex = Random.Range(0, _formations.Count);
-
-            //TODO NEXT replace magic numbers
-            float nextWaveHorizontalDistance = _waveSpawnInterval*1.2f; //TODO take enemy speed for 1.2f
-            float maxEnemyHorizontalDist = nextWaveHorizontalDistance - enemyMaxHorzDist;
+            
+            float nextWaveHorizontalDistance = _waveSpawnInterval * BasicEnemy.MoveSpeed;
+            float maxEnemyHorizontalDist = nextWaveHorizontalDistance - EnemyMaxHorzDist;
             if (_formations[randomWaveIndex].HorizontalShipSpan > 1)
             {
                 maxEnemyHorizontalDist /= _formations[randomWaveIndex].HorizontalShipSpan;
             }
-            maxEnemyHorizontalDist = Mathf.Clamp(maxEnemyHorizontalDist, enemyMinHorzDist, enemyMaxHorzDist);
+            maxEnemyHorizontalDist = Mathf.Clamp(maxEnemyHorizontalDist, EnemyMinHorzDist, EnemyMaxHorzDist);
             print(maxEnemyHorizontalDist);
 
             //I. Determine Spread
-            float enemyVerticalDist = Random.Range(enemyMinVertDist, enemyMaxVertDist);
-            float enemyHorizontalDist = Random.Range(enemyMinHorzDist, maxEnemyHorizontalDist);
+            float enemyVerticalDist = Random.Range(EnemyMinVertDist, EnemyMaxVertDist);
+            float enemyHorizontalDist = Random.Range(EnemyMinHorzDist, maxEnemyHorizontalDist);
 
             //II. Determine Number of Enemies
             float verticalMovementLength = GameConstants.MaxVerticalMovementLimit - GameConstants.MinVerticalMovementLimit;
@@ -436,7 +435,6 @@ namespace Assets.Scripts
 
         void SpawnStar(Vector2 starPos)
         {
-            //TODO stars have trouble moving
             Instantiate(StarPrefab, starPos, Quaternion.identity);
         }
     }

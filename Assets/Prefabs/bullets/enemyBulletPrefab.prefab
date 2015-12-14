@@ -84,7 +84,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8068337a984edaf42aac853db1881909, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  CurrentBulletType: 2
+  CurrentBulletType: 3
   BulletHitClip: {fileID: 8300000, guid: 936894d938984564f82df28798b05926, type: 3}
   ShotByPlayer: 0
 --- !u!114 &11478172
@@ -158,6 +158,10 @@ Prefab:
     - target: {fileID: 0}
       propertyPath: DestroyOnHorizontalLimits
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: CurrentBulletType
+      value: 3
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}

@@ -20,6 +20,8 @@ namespace Assets.Scripts
         public GameObject BulletPrefab;
         public AudioClip ExplosionClip;
 
+        public const float MoveSpeed = 1.2f;
+
         GameObject _playerGameObject;
         Player _playerScript;
         DifficultyManager _difficultyManagerScript;
@@ -42,6 +44,7 @@ namespace Assets.Scripts
             }
             _difficultyManagerScript = Camera.main.GetComponent<DifficultyManager>();
             _basicMoveScript = gameObject.GetComponent<BasicMove>();
+            _basicMoveScript.MoveSpeed = MoveSpeed;
 
             _hasCollided = false;
             _isStunned = false;

@@ -183,10 +183,10 @@ MonoBehaviour:
   MinWaveSpawnIntervalCoef: 5
   MaxWaveSpawnIntervalCoef: 10
   PowerupSpawnBaseInterval: 3
-  enemyMinVertDist: .5
-  enemyMaxVertDist: .899999976
-  enemyMinHorzDist: .200000003
-  enemyMaxHorzDist: .899999976
+  EnemyMinVertDist: .5
+  EnemyMaxVertDist: .899999976
+  EnemyMinHorzDist: .200000003
+  EnemyMaxHorzDist: .899999976
 --- !u!114 &11425842
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -276,6 +276,22 @@ Prefab:
     - target: {fileID: 0}
       propertyPath: MaxWaveSpawnIntervalCoef
       value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: EnemyMinVertDist
+      value: .5
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: EnemyMaxVertDist
+      value: .899999976
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: EnemyMinHorzDist
+      value: .200000003
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: EnemyMaxHorzDist
+      value: .899999976
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}

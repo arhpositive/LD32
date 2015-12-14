@@ -39,7 +39,7 @@ namespace Assets.Scripts
 
             _adjustmentStepCount = 0;
 
-            _previousWavePlayerHealth = GameConstants.PlayerInitialHealth;
+            _previousWavePlayerHealth = Player.PlayerInitialHealth;
         }
 
         void Update()

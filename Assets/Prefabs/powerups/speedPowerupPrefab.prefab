@@ -87,6 +87,7 @@ MonoBehaviour:
   BounceOnHorizontalLimits: 1
   DestroyOnVerticalLimits: 1
   DestroyOnHorizontalLimits: 1
+  DestroyOnEarlyHorizontalLimits: 0
 --- !u!114 &11489236
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -101,6 +102,7 @@ MonoBehaviour:
   PowerupType: 1
   PowerupOccurence: 3
   IsNegativePowerup: 0
+  NegativePowerupBlinkColor: {r: 0, g: 0, b: 0, a: 0}
   GainPowerupClip: {fileID: 8300000, guid: ad88cb7e7d7fa8a49af79977ff10de68, type: 3}
 --- !u!212 &21227272
 SpriteRenderer:
@@ -142,6 +144,10 @@ Prefab:
     - target: {fileID: 0}
       propertyPath: PowerupOccurence
       value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: MoveSpeed
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}

@@ -151,6 +151,10 @@ Prefab:
       propertyPath: DestroyOnHorizontalLimits
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: MoveDirX
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}
   m_RootGameObject: {fileID: 151552}

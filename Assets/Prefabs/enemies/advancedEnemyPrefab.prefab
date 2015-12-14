@@ -251,6 +251,7 @@ MonoBehaviour:
   BounceOnHorizontalLimits: 1
   DestroyOnVerticalLimits: 0
   DestroyOnHorizontalLimits: 0
+  DestroyOnEarlyHorizontalLimits: 0
 --- !u!114 &11495518
 MonoBehaviour:
   m_ObjectHideFlags: 1

@@ -34,7 +34,7 @@ namespace Assets.Scripts
         Color _rendererColor;
         bool _hasCollided;
         float _lastBlinkTime;
-        const float _blinkSpeed = 0.5f;
+        const float BlinkSpeed = 0.5f;
 
         void Start()
         {
@@ -45,7 +45,7 @@ namespace Assets.Scripts
 
         void Update()
         {
-            if (IsNegativePowerup && Time.time - _lastBlinkTime > _blinkSpeed)
+            if (IsNegativePowerup && Time.time - _lastBlinkTime > BlinkSpeed)
             {
                 //negative powerups blink
                 if (_spriteRenderer.color == _rendererColor)
