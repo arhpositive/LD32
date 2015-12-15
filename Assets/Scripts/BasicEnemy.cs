@@ -129,6 +129,11 @@ namespace Assets.Scripts
                 bool playerGotHit = _playerScript.PlayerGotHit();
                 if (playerGotHit)
                 {
+                    if (_playerScript)
+                    {
+                        //player might not be alive, game might have ended, do not score negative points in this case
+                        _playerScript.TriggerEnemyDestruction();
+                    }
                     EventLogger.PrintToLog("Enemy Collision v Player");
                     _hasCollided = true;
                     AudioSource.PlayClipAtPoint(ExplosionClip, transform.position);
@@ -141,6 +146,11 @@ namespace Assets.Scripts
                 bool shieldGotHit = _playerScript.ShieldGotHit();
                 if (shieldGotHit)
                 {
+                    if (_playerScript)
+                    {
+                        //player might not be alive, game might have ended, do not score negative points in this case
+                        _playerScript.TriggerEnemyDestruction();
+                    }
                     EventLogger.PrintToLog("Enemy Collision v Shield");
                     _hasCollided = true;
                     AudioSource.PlayClipAtPoint(ExplosionClip, transform.position);

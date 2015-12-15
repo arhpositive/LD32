@@ -30,11 +30,13 @@ namespace Assets.Scripts
     {
         public List<WaveEntity> WaveEntities { get; private set; }
         public int HorizontalShipSpan { get; private set; }
+        public bool RequiresShipwideHorizontalSpan { get; private set; }
 
-        public Formation(List<WaveEntity> waveEntities, int horizontalShipSpan)
+        public Formation(List<WaveEntity> waveEntities, int horizontalShipSpan, bool requiresShipwideHorizontalSpan)
         {
             WaveEntities = waveEntities;
             HorizontalShipSpan = horizontalShipSpan;
+            RequiresShipwideHorizontalSpan = requiresShipwideHorizontalSpan;
         }
     }
 
@@ -182,7 +184,7 @@ namespace Assets.Scripts
                 new WaveEntity(new Vector2(0, 8), Vector2.left),
                 new WaveEntity(new Vector2(0, 9), Vector2.left)
             };
-            _formations.Add(new Formation(straightLine, 0));
+            _formations.Add(new Formation(straightLine, 0, false));
 
             List<WaveEntity> echelonLine = new List<WaveEntity>()
             {
@@ -203,7 +205,7 @@ namespace Assets.Scripts
                 new WaveEntity(new Vector2(0, 8), Vector2.left),
                 new WaveEntity(new Vector2(1, 9), Vector2.left)
             };
-            _formations.Add(new Formation(echelonLine, 1));
+            _formations.Add(new Formation(echelonLine, 1, false));
 
             List<WaveEntity> forwardsWedge = new List<WaveEntity>
             {
@@ -224,7 +226,7 @@ namespace Assets.Scripts
                 new WaveEntity(new Vector2(0, 4), Vector2.left),
                 new WaveEntity(new Vector2(0, 5), Vector2.left)
             };
-            _formations.Add(new Formation(forwardsWedge, 4));
+            _formations.Add(new Formation(forwardsWedge, 4, false));
             
             List<WaveEntity> backwardsWedge = new List<WaveEntity>
             {
@@ -245,7 +247,7 @@ namespace Assets.Scripts
                 new WaveEntity(new Vector2(4, 4), Vector2.left),
                 new WaveEntity(new Vector2(4, 5), Vector2.left)
             };
-            _formations.Add(new Formation(backwardsWedge, 4));
+            _formations.Add(new Formation(backwardsWedge, 4, false));
 
             List<WaveEntity> phalanx = new List<WaveEntity>
             {
@@ -263,9 +265,15 @@ namespace Assets.Scripts
                 new WaveEntity(new Vector2(0, 3), Vector2.left),
                 new WaveEntity(new Vector2(1, 3), Vector2.left),
                 new WaveEntity(new Vector2(0, 4), Vector2.left),
-                new WaveEntity(new Vector2(1, 4), Vector2.left)
+                new WaveEntity(new Vector2(1, 4), Vector2.left),
+                new WaveEntity(new Vector2(0, 5), Vector2.left),
+                new WaveEntity(new Vector2(1, 5), Vector2.left),
+                new WaveEntity(new Vector2(0, 6), Vector2.left),
+                new WaveEntity(new Vector2(1, 6), Vector2.left),
+                new WaveEntity(new Vector2(0, 7), Vector2.left),
+                new WaveEntity(new Vector2(1, 7), Vector2.left)
             };
-            //_formations.Add(new Formation(phalanx, 1)); //TODO adjust min spawn interval accordingly for phalanx to work
+            _formations.Add(new Formation(phalanx, 1, true));
         }
 
         //Generate new waves and spawn them on scene
@@ -284,6 +292,15 @@ namespace Assets.Scripts
 
             int randomWaveIndex = Random.Range(0, _formations.Count);
             
+            //adjustments are being made for formations which require more than one column of enemies
+            float minEnemyHorizontalDist = EnemyMinHorzDist;
+            if (_formations[randomWaveIndex].RequiresShipwideHorizontalSpan)
+            {
+                //we're assuming that width and height of an enemy ship is approx. the same
+                //we might want to improve this with real, calculated width and height values for each ship
+                minEnemyHorizontalDist = Mathf.Min(EnemyMinVertDist, EnemyMaxHorzDist);
+            }
+
             float nextWaveHorizontalDistance = _waveSpawnInterval * BasicEnemy.MoveSpeed;
             float maxEnemyHorizontalDist = nextWaveHorizontalDistance - EnemyMaxHorzDist;
             if (_formations[randomWaveIndex].HorizontalShipSpan > 1)
@@ -295,17 +312,25 @@ namespace Assets.Scripts
 
             //I. Determine Spread
             float enemyVerticalDist = Random.Range(EnemyMinVertDist, EnemyMaxVertDist);
-            float enemyHorizontalDist = Random.Range(EnemyMinHorzDist, maxEnemyHorizontalDist);
+            float enemyHorizontalDist = Random.Range(minEnemyHorizontalDist, maxEnemyHorizontalDist);
 
             //II. Determine Number of Enemies
             float verticalMovementLength = GameConstants.MaxVerticalMovementLimit - GameConstants.MinVerticalMovementLimit;
 
             //TODO these counts only make sense for single line formations, phalanx formation breaks these rules
             int verticalIntervalCount = Mathf.FloorToInt(verticalMovementLength/enemyVerticalDist);
+
             int enemyMaxCount = Mathf.Min(1 + verticalIntervalCount, _formations[randomWaveIndex].WaveEntities.Count);
             int enemyMinCount = Mathf.Max(2, enemyMaxCount - 6);
             int enemyCount = Random.Range(enemyMinCount, enemyMaxCount);
-            float maxVerticalStartCoord = VMaxCoord - ((enemyCount - 1) * enemyVerticalDist);
+
+            int verticalSpanCount = enemyCount;
+            if (_formations[randomWaveIndex].RequiresShipwideHorizontalSpan)
+            {
+                verticalSpanCount = Mathf.CeilToInt(verticalSpanCount / 2);
+            }
+            verticalSpanCount -= 1;
+            float maxVerticalStartCoord = VMaxCoord - (verticalSpanCount * enemyVerticalDist);
 
             //III. Select Enemies From Formation List
             List<WaveEntity> selectedFormationEntities = new List<WaveEntity>();
