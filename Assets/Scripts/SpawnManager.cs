@@ -69,10 +69,10 @@ namespace Assets.Scripts
 
         //TODO NEXT for every star and meteor destroyed, just spawn another one, remove all timers and intervals
         float _previousMeteorSpawnTime;
-        const float MeteorSpawnInterval = 1.0f;
+        float _meteorSpawnInterval;
 
         float _previousStarSpawnTime;
-        const float StarSpawnInterval = MeteorSpawnInterval * GameConstants.StarToMeteorRatio; 
+        float _starSpawnInterval; //TODO include star speed vs meteor speed
 
         List<Formation> _formations;
         
@@ -86,7 +86,8 @@ namespace Assets.Scripts
 	        {
 		        return;
 	        }
-
+            
+            //instantiate player
 	        Instantiate(PlayerPrefab,
 		        new Vector2(0.0f, Random.Range(GameConstants.MinVerticalMovementLimit, GameConstants.MaxVerticalMovementLimit)),
 		        Quaternion.identity);
@@ -108,7 +109,12 @@ namespace Assets.Scripts
             _powerupSpawnInterval = PowerupSpawnBaseInterval;
             _previousPowerupSpawnTime = Time.time;
 
+            _meteorSpawnInterval = 1.0f;
             _previousMeteorSpawnTime = Time.time;
+
+            float meteorToStarSpeedRatio = 
+                MeteorPrefabArray[0].GetComponent<BasicMove>().MoveSpeed / StarPrefab.GetComponent<BasicMove>().MoveSpeed;
+            _starSpawnInterval = (_meteorSpawnInterval / GameConstants.StarToMeteorRatio) * meteorToStarSpeedRatio;
             _previousStarSpawnTime = Time.time;
 
             InitialMeteorAndStarSpawn();
@@ -136,7 +142,7 @@ namespace Assets.Scripts
                 }
             }
 
-            if (Time.time - _previousMeteorSpawnTime > MeteorSpawnInterval)
+            if (Time.time - _previousMeteorSpawnTime > _meteorSpawnInterval)
             {
                 int meteorKind = Random.Range(0, MeteorPrefabArray.Length);
                 Vector2 meteorPos = new Vector2(Random.Range(GameConstants.HorizontalMaxCoord - 1.0f, GameConstants.HorizontalMaxCoord),
@@ -145,7 +151,7 @@ namespace Assets.Scripts
                 _previousMeteorSpawnTime = Time.time;
             }
 
-            if (Time.time - _previousStarSpawnTime > StarSpawnInterval)
+            if (Time.time - _previousStarSpawnTime > _starSpawnInterval)
             {
                 Vector2 starPos = new Vector2(Random.Range(GameConstants.HorizontalMaxCoord - 0.1f, GameConstants.HorizontalMaxCoord),
                     Random.Range(GameConstants.MinVerticalMovementLimit - 1.0f, GameConstants.MaxVerticalMovementLimit + 1.0f));
