@@ -30,13 +30,13 @@ namespace Assets.Scripts
     {
         public List<WaveEntity> WaveEntities { get; private set; }
         public int HorizontalShipSpan { get; private set; }
-        public bool RequiresShipwideHorizontalSpan { get; private set; }
+        public bool IsTwoShipWide { get; private set; }
 
-        public Formation(List<WaveEntity> waveEntities, int horizontalShipSpan, bool requiresShipwideHorizontalSpan)
+        public Formation(List<WaveEntity> waveEntities, int horizontalShipSpan, bool isTwoShipWide)
         {
             WaveEntities = waveEntities;
             HorizontalShipSpan = horizontalShipSpan;
-            RequiresShipwideHorizontalSpan = requiresShipwideHorizontalSpan;
+            IsTwoShipWide = isTwoShipWide;
         }
     }
 
@@ -277,7 +277,11 @@ namespace Assets.Scripts
                 new WaveEntity(new Vector2(0, 6), Vector2.left),
                 new WaveEntity(new Vector2(1, 6), Vector2.left),
                 new WaveEntity(new Vector2(0, 7), Vector2.left),
-                new WaveEntity(new Vector2(1, 7), Vector2.left)
+                new WaveEntity(new Vector2(1, 7), Vector2.left),
+                new WaveEntity(new Vector2(0, 8), Vector2.left),
+                new WaveEntity(new Vector2(1, 8), Vector2.left),
+                new WaveEntity(new Vector2(0, 9), Vector2.left),
+                new WaveEntity(new Vector2(1, 9), Vector2.left)
             };
             _formations.Add(new Formation(phalanx, 1, true));
         }
@@ -285,28 +289,26 @@ namespace Assets.Scripts
         //Generate new waves and spawn them on scene
         void SpawnNewWave()
         {
+            //TODO NEXT no-exit style formations when difficulty level is higher than a certain point
+
             EventLogger.PrintToLog("New Wave Spawn");
-
-            // 1. determine number of enemies
-
+            
             //TODO low difficulty = wider spread & less enemies
             //TODO high difficulty = shorter spread & more enemies
 
-            //based on spread, determine max number of enemies vertically
-            //determine number of enemies, low number is fixed (tied to max. spread aswell), high number is calculated based on spread
-            //based on number of enemies and spread, starting point has a min and max vertically, randomize between constraints
-
+            //I. Pick a random formation type
             int randomWaveIndex = Random.Range(0, _formations.Count);
             
-            //adjustments are being made for formations which require more than one column of enemies
+            //II. Make adjustments for formations which require more than one column of enemies
             float minEnemyHorizontalDist = EnemyMinHorzDist;
-            if (_formations[randomWaveIndex].RequiresShipwideHorizontalSpan)
+            if (_formations[randomWaveIndex].IsTwoShipWide)
             {
-                //we're assuming that width and height of an enemy ship is approx. the same
-                //we might want to improve this with real, calculated width and height values for each ship
-                minEnemyHorizontalDist = Mathf.Min(EnemyMinVertDist, EnemyMaxHorzDist);
+                //TODO stop assuming the width and height of an enemy ship is the same
+                //we want to improve this with real, calculated width and height values for each ship
+                minEnemyHorizontalDist = Mathf.Min(EnemyMinVertDist + 0.1f, EnemyMaxHorzDist);
             }
 
+            //III. Make adjustments regarding horizontal distance between two consecutive waves
             float nextWaveHorizontalDistance = _waveSpawnInterval * BasicEnemy.MoveSpeed;
             float maxEnemyHorizontalDist = nextWaveHorizontalDistance - EnemyMaxHorzDist;
             if (_formations[randomWaveIndex].HorizontalShipSpan > 1)
@@ -314,31 +316,34 @@ namespace Assets.Scripts
                 maxEnemyHorizontalDist /= _formations[randomWaveIndex].HorizontalShipSpan;
             }
             maxEnemyHorizontalDist = Mathf.Clamp(maxEnemyHorizontalDist, EnemyMinHorzDist, EnemyMaxHorzDist);
-            print(maxEnemyHorizontalDist);
 
-            //I. Determine Spread
+            //IV. Determine Spread
             float enemyVerticalDist = Random.Range(EnemyMinVertDist, EnemyMaxVertDist);
             float enemyHorizontalDist = Random.Range(minEnemyHorizontalDist, maxEnemyHorizontalDist);
 
-            //II. Determine Number of Enemies
+            //V. Determine Number of Enemies
             float verticalMovementLength = GameConstants.MaxVerticalMovementLimit - GameConstants.MinVerticalMovementLimit;
+            
+            int maxPossibleVerticalIntervalCount = Mathf.FloorToInt(verticalMovementLength/enemyVerticalDist);
+            int maxPossibleShipCount = 1 + maxPossibleVerticalIntervalCount;
+            if (_formations[randomWaveIndex].IsTwoShipWide)
+            {
+                maxPossibleShipCount *= 2;
+            }
 
-            //TODO these counts only make sense for single line formations, phalanx formation breaks these rules
-            int verticalIntervalCount = Mathf.FloorToInt(verticalMovementLength/enemyVerticalDist);
-
-            int enemyMaxCount = Mathf.Min(1 + verticalIntervalCount, _formations[randomWaveIndex].WaveEntities.Count);
+            int enemyMaxCount = Mathf.Min(maxPossibleShipCount, _formations[randomWaveIndex].WaveEntities.Count);
             int enemyMinCount = Mathf.Max(2, enemyMaxCount - 6);
             int enemyCount = Random.Range(enemyMinCount, enemyMaxCount);
 
-            int verticalSpanCount = enemyCount;
-            if (_formations[randomWaveIndex].RequiresShipwideHorizontalSpan)
+            int actualVerticalIntervalCount = enemyCount;
+            if (_formations[randomWaveIndex].IsTwoShipWide)
             {
-                verticalSpanCount = Mathf.CeilToInt(verticalSpanCount / 2);
+                actualVerticalIntervalCount = Mathf.CeilToInt(actualVerticalIntervalCount * 0.5f);
             }
-            verticalSpanCount -= 1;
-            float maxVerticalStartCoord = VMaxCoord - (verticalSpanCount * enemyVerticalDist);
+            actualVerticalIntervalCount -= 1;
+            float maxVerticalStartCoord = VMaxCoord - (actualVerticalIntervalCount * enemyVerticalDist);
 
-            //III. Select Enemies From Formation List
+            //VI. Select Enemies From Formation List
             List<WaveEntity> selectedFormationEntities = new List<WaveEntity>();
             for (int i = 0; i < enemyCount; ++i)
             {
@@ -346,12 +351,13 @@ namespace Assets.Scripts
             }
             selectedFormationEntities.Sort(FormationComparison);
 
-            //IV. Determine Advanced Enemy Percentage
+            //VII. Determine Advanced Enemy Percentage
             float difficultyInterval = GameConstants.MaxDifficultyMultiplier - GameConstants.MinDifficultyMultiplier;
             float advancedEnemyPercentage =
                 ((_difficultyManagerScript.DifficultyMultiplier - GameConstants.MinDifficultyMultiplier) / 
                 difficultyInterval) * 100.0f;
 
+            //VIII. Spawn Enemies
             Vector2 previousEnemyPos = Vector2.zero;
             for (int i = 0; i < selectedFormationEntities.Count; i++)
             {
