@@ -58,10 +58,8 @@ namespace Assets.Scripts
 				        enemyScript.TriggerSpeedBoost();
 				        break;
 		        }
-		        _hasCollided = true;
-	            _destroyedByCollision = true;
-		        AudioSource.PlayClipAtPoint(BulletHitClip, transform.position);
-		        Destroy(gameObject);
+                _destroyedByCollision = true;
+                Hit();
 	        }
 	        else if (other.gameObject.tag == "Player")
 	        {
@@ -72,10 +70,8 @@ namespace Assets.Scripts
 		                if (playerGotHit)
 		                {
                             EventLogger.PrintToLog("Bullet Collision v Player");
-		                    _hasCollided = true;
-		                    AudioSource.PlayClipAtPoint(BulletHitClip, transform.position);
-		                    Destroy(gameObject);
-		                }
+                            Hit();
+                        }
 				        break;
 		        }
 	        }
@@ -90,13 +86,18 @@ namespace Assets.Scripts
 				        if (shieldGotHit)
 				        {
                             EventLogger.PrintToLog("Bullet Collision v Shield");
-					        _hasCollided = true;
-					        AudioSource.PlayClipAtPoint(BulletHitClip, transform.position);
-					        Destroy(gameObject);
-				        }
+                            Hit();
+                        }
 				        break;
 		        }
 	        }
+        }
+
+        void Hit()
+        {
+            _hasCollided = true;
+            AudioSource.PlayClipAtPoint(BulletHitClip, transform.position);
+            Destroy(gameObject);
         }
 
         void OnDestroy()

@@ -129,15 +129,8 @@ namespace Assets.Scripts
                 bool playerGotHit = _playerScript.PlayerGotHit();
                 if (playerGotHit)
                 {
-                    if (_playerScript)
-                    {
-                        //player might not be alive, game might have ended, do not score negative points in this case
-                        _playerScript.TriggerEnemyDestruction();
-                    }
                     EventLogger.PrintToLog("Enemy Collision v Player");
-                    _hasCollided = true;
-                    AudioSource.PlayClipAtPoint(ExplosionClip, transform.position);
-                    Destroy(gameObject);
+                    Explode();
                 }
             }
             else if (other.gameObject.tag == "Shield")
@@ -146,28 +139,14 @@ namespace Assets.Scripts
                 bool shieldGotHit = _playerScript.ShieldGotHit();
                 if (shieldGotHit)
                 {
-                    if (_playerScript)
-                    {
-                        //player might not be alive, game might have ended, do not score negative points in this case
-                        _playerScript.TriggerEnemyDestruction();
-                    }
                     EventLogger.PrintToLog("Enemy Collision v Shield");
-                    _hasCollided = true;
-                    AudioSource.PlayClipAtPoint(ExplosionClip, transform.position);
-                    Destroy(gameObject);
+                    Explode();
                 }
             }
             else if (other.gameObject.tag == "Enemy")
             {
-                if (_playerScript) 
-                {
-                    //player might not be alive, game might have ended, do not score negative points in this case
-                    _playerScript.TriggerEnemyDestruction();
-                }
                 EventLogger.PrintToLog("Enemy Collision v Enemy");
-                _hasCollided = true;
-                AudioSource.PlayClipAtPoint(ExplosionClip, transform.position);
-                Destroy(gameObject);
+                Explode();
             }
         }
 
@@ -188,6 +167,18 @@ namespace Assets.Scripts
         {
             float randomIntervalCoef = Random.Range(MinFiringInterval, 2 * MinFiringInterval);
             _nextFiringInterval = randomIntervalCoef / Mathf.Sqrt(_difficultyManagerScript.DifficultyMultiplier);
+        }
+
+        void Explode()
+        {
+            if (_playerScript)
+            {
+                //player might not be alive, game might have ended, do not score negative points in this case
+                _playerScript.TriggerEnemyDestruction();
+            }
+            _hasCollided = true;
+            AudioSource.PlayClipAtPoint(ExplosionClip, transform.position);
+            Destroy(gameObject);
         }
     }
 }

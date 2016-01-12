@@ -67,19 +67,19 @@ namespace Assets.Scripts
         float _previousPowerupSpawnTime;
         float _powerupSpawnInterval;
 
-        //TODO NEXT for every star and meteor destroyed, just spawn another one, remove all timers and intervals
+        //TODO LATER for every star and meteor destroyed, just spawn another one, remove all timers and intervals
         float _previousMeteorSpawnTime;
         float _meteorSpawnInterval;
 
         float _previousStarSpawnTime;
-        float _starSpawnInterval; //TODO include star speed vs meteor speed
+        float _starSpawnInterval;
 
         List<Formation> _formations;
         
         const float HSpawnCoord = GameConstants.HorizontalMaxCoord;
         const float VMinCoord = GameConstants.MinVerticalMovementLimit;
         const float VMaxCoord = GameConstants.MaxVerticalMovementLimit;
-
+        
         void Awake()
         {
 	        if (!IsGameScene)
@@ -126,19 +126,14 @@ namespace Assets.Scripts
             {
                 if (Time.time - _previousWaveSpawnTime > _waveSpawnInterval)
                 {
-                    _previousWaveSpawnTime = Time.time;
-                    float randomIntervalCoef = Random.Range(MinWaveSpawnIntervalCoef, MaxWaveSpawnIntervalCoef);
-                    _waveSpawnInterval = randomIntervalCoef / Mathf.Sqrt(_difficultyManagerScript.DifficultyMultiplier);
-                    //spawn new wave uses new _waveSpawnInterval to calculate spawn horizontal position, do not change the order here!
                     SpawnNewWave();
+                    _previousWaveSpawnTime = Time.time;
                 }
 
                 if (Time.time - _previousPowerupSpawnTime > _powerupSpawnInterval)
                 {
                     SpawnNewPowerup();
                     _previousPowerupSpawnTime = Time.time;
-                    float randomIntervalCoef = Random.Range(PowerupSpawnBaseInterval, PowerupSpawnBaseInterval * 2);
-                    _powerupSpawnInterval = randomIntervalCoef * Mathf.Sqrt(_difficultyManagerScript.DifficultyMultiplier);
                 }
             }
 
@@ -292,7 +287,10 @@ namespace Assets.Scripts
             //TODO NEXT no-exit style formations when difficulty level is higher than a certain point
 
             EventLogger.PrintToLog("New Wave Spawn");
-            
+
+            float randomIntervalCoef = Random.Range(MinWaveSpawnIntervalCoef, MaxWaveSpawnIntervalCoef);
+            _waveSpawnInterval = randomIntervalCoef / Mathf.Sqrt(_difficultyManagerScript.DifficultyMultiplier);
+
             //TODO low difficulty = wider spread & less enemies
             //TODO high difficulty = shorter spread & more enemies
 
@@ -408,6 +406,9 @@ namespace Assets.Scripts
 
         void SpawnNewPowerup()
         {
+            float randomIntervalCoef = Random.Range(PowerupSpawnBaseInterval, PowerupSpawnBaseInterval * 2);
+            _powerupSpawnInterval = randomIntervalCoef * Mathf.Sqrt(_difficultyManagerScript.DifficultyMultiplier);
+
             float currentDifficulty = _difficultyManagerScript.DifficultyMultiplier;
 
             int powerupCount = PowerupPrefabArray.Length;
