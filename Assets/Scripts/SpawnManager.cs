@@ -32,11 +32,10 @@ namespace Assets.Scripts
         public int HorizontalShipSpan { get; private set; }
         public bool IsTwoShipWide { get; private set; }
 
-        public Formation(List<WaveEntity> waveEntities, int horizontalShipSpan, bool isTwoShipWide)
+        public Formation(List<WaveEntity> waveEntities, int horizontalShipSpan)
         {
             WaveEntities = waveEntities;
             HorizontalShipSpan = horizontalShipSpan;
-            IsTwoShipWide = isTwoShipWide;
         }
     }
 
@@ -55,6 +54,8 @@ namespace Assets.Scripts
         public float EnemyMaxVertDist;
         public float EnemyMinHorzDist;
         public float EnemyMaxHorzDist;
+        public float ShipVerticalSize;
+        public float ShipHorizontalSize;
 
         int _initialMeteorCount;
         int _initialStarCount;
@@ -185,7 +186,7 @@ namespace Assets.Scripts
                 new WaveEntity(new Vector2(0, 8), Vector2.left),
                 new WaveEntity(new Vector2(0, 9), Vector2.left)
             };
-            _formations.Add(new Formation(straightLine, 0, false));
+            _formations.Add(new Formation(straightLine, 0));
 
             List<WaveEntity> echelonLine = new List<WaveEntity>()
             {
@@ -206,7 +207,7 @@ namespace Assets.Scripts
                 new WaveEntity(new Vector2(0, 8), Vector2.left),
                 new WaveEntity(new Vector2(1, 9), Vector2.left)
             };
-            _formations.Add(new Formation(echelonLine, 1, false));
+            _formations.Add(new Formation(echelonLine, 1));
 
             List<WaveEntity> forwardsWedge = new List<WaveEntity>
             {
@@ -227,7 +228,7 @@ namespace Assets.Scripts
                 new WaveEntity(new Vector2(0, 4), Vector2.left),
                 new WaveEntity(new Vector2(0, 5), Vector2.left)
             };
-            _formations.Add(new Formation(forwardsWedge, 4, false));
+            _formations.Add(new Formation(forwardsWedge, 4));
             
             List<WaveEntity> backwardsWedge = new List<WaveEntity>
             {
@@ -248,57 +249,34 @@ namespace Assets.Scripts
                 new WaveEntity(new Vector2(4, 4), Vector2.left),
                 new WaveEntity(new Vector2(4, 5), Vector2.left)
             };
-            _formations.Add(new Formation(backwardsWedge, 4, false));
-
-            List<WaveEntity> phalanx = new List<WaveEntity>
-            {
-                //  8   9
-                //  6   7
-                //  4   5
-                //  2   3
-                //  0   1
-                new WaveEntity(Vector2.zero, Vector2.left),
-                new WaveEntity(new Vector2(1, 0), Vector2.left),
-                new WaveEntity(new Vector2(0, 1), Vector2.left),
-                new WaveEntity(new Vector2(1, 1), Vector2.left),
-                new WaveEntity(new Vector2(0, 2), Vector2.left),
-                new WaveEntity(new Vector2(1, 2), Vector2.left),
-                new WaveEntity(new Vector2(0, 3), Vector2.left),
-                new WaveEntity(new Vector2(1, 3), Vector2.left),
-                new WaveEntity(new Vector2(0, 4), Vector2.left),
-                new WaveEntity(new Vector2(1, 4), Vector2.left),
-                new WaveEntity(new Vector2(0, 5), Vector2.left),
-                new WaveEntity(new Vector2(1, 5), Vector2.left),
-                new WaveEntity(new Vector2(0, 6), Vector2.left),
-                new WaveEntity(new Vector2(1, 6), Vector2.left),
-                new WaveEntity(new Vector2(0, 7), Vector2.left),
-                new WaveEntity(new Vector2(1, 7), Vector2.left),
-                new WaveEntity(new Vector2(0, 8), Vector2.left),
-                new WaveEntity(new Vector2(1, 8), Vector2.left),
-                new WaveEntity(new Vector2(0, 9), Vector2.left),
-                new WaveEntity(new Vector2(1, 9), Vector2.left)
-            };
-            _formations.Add(new Formation(phalanx, 1, true));
+            _formations.Add(new Formation(backwardsWedge, 4));
         }
 
         //Generate new waves and spawn them on scene
         void SpawnNewWave()
         {
-            //TODO NEXT no-exit style formations when difficulty level is higher than a certain point
-
             EventLogger.PrintToLog("New Wave Spawn");
 
-            float randomIntervalCoef = Random.Range(MinWaveSpawnIntervalCoef, MaxWaveSpawnIntervalCoef);
-            _waveSpawnInterval = randomIntervalCoef / Mathf.Sqrt(_difficultyManagerScript.DifficultyMultiplier);
-
+            //TODO NEXT no-exit style formations when difficulty level is higher than a certain point
             //TODO low difficulty = wider spread & less enemies
             //TODO high difficulty = shorter spread & more enemies
 
-            //I. Pick a random formation type
-            int randomWaveIndex = Random.Range(0, _formations.Count);
+            // I. Determine next spawn time
+            float randomIntervalCoef = Random.Range(MinWaveSpawnIntervalCoef, MaxWaveSpawnIntervalCoef);
+            _waveSpawnInterval = randomIntervalCoef / Mathf.Sqrt(_difficultyManagerScript.DifficultyMultiplier);
             
+            //II. Pick a random formation type
+            int randomWaveIndex = Random.Range(0, _formations.Count);
+
             //II. Make adjustments for formations which require more than one column of enemies
-            float minEnemyHorizontalDist = EnemyMinHorzDist;
+            float minHorizontalDistBetweenEnemies = ShipHorizontalSize * 0.2f;
+            if (_formations[randomWaveIndex].IsTwoShipWide)
+            {
+                minHorizontalDistBetweenEnemies = Mathf.Min(ShipHorizontalSize)
+            }
+
+
+                float minEnemyHorizontalDist = EnemyMinHorzDist;
             if (_formations[randomWaveIndex].IsTwoShipWide)
             {
                 //TODO stop assuming the width and height of an enemy ship is the same
