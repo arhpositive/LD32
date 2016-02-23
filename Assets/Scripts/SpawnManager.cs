@@ -30,13 +30,11 @@ namespace Assets.Scripts
     {
         public List<WaveEntity> WaveEntities { get; private set; }
         public int HorizontalShipSpan { get; private set; }
-        public bool IsTwoShipWide { get; private set; }
 
-        public Formation(List<WaveEntity> waveEntities, int horizontalShipSpan, bool isTwoShipWide)
+        public Formation(List<WaveEntity> waveEntities, int horizontalShipSpan)
         {
             WaveEntities = waveEntities;
             HorizontalShipSpan = horizontalShipSpan;
-            IsTwoShipWide = isTwoShipWide;
         }
     }
 
@@ -185,7 +183,7 @@ namespace Assets.Scripts
                 new WaveEntity(new Vector2(0, 8), Vector2.left),
                 new WaveEntity(new Vector2(0, 9), Vector2.left)
             };
-            _formations.Add(new Formation(straightLine, 0, false));
+            _formations.Add(new Formation(straightLine, 0));
 
             List<WaveEntity> echelonLine = new List<WaveEntity>()
             {
@@ -206,7 +204,7 @@ namespace Assets.Scripts
                 new WaveEntity(new Vector2(0, 8), Vector2.left),
                 new WaveEntity(new Vector2(1, 9), Vector2.left)
             };
-            _formations.Add(new Formation(echelonLine, 1, false));
+            _formations.Add(new Formation(echelonLine, 1));
 
             List<WaveEntity> forwardsWedge = new List<WaveEntity>
             {
@@ -227,7 +225,7 @@ namespace Assets.Scripts
                 new WaveEntity(new Vector2(0, 4), Vector2.left),
                 new WaveEntity(new Vector2(0, 5), Vector2.left)
             };
-            _formations.Add(new Formation(forwardsWedge, 4, false));
+            _formations.Add(new Formation(forwardsWedge, 4));
             
             List<WaveEntity> backwardsWedge = new List<WaveEntity>
             {
@@ -248,37 +246,7 @@ namespace Assets.Scripts
                 new WaveEntity(new Vector2(4, 4), Vector2.left),
                 new WaveEntity(new Vector2(4, 5), Vector2.left)
             };
-            _formations.Add(new Formation(backwardsWedge, 4, false));
-
-            List<WaveEntity> phalanx = new List<WaveEntity>
-            {
-                //  8   9
-                //  6   7
-                //  4   5
-                //  2   3
-                //  0   1
-                new WaveEntity(Vector2.zero, Vector2.left),
-                new WaveEntity(new Vector2(1, 0), Vector2.left),
-                new WaveEntity(new Vector2(0, 1), Vector2.left),
-                new WaveEntity(new Vector2(1, 1), Vector2.left),
-                new WaveEntity(new Vector2(0, 2), Vector2.left),
-                new WaveEntity(new Vector2(1, 2), Vector2.left),
-                new WaveEntity(new Vector2(0, 3), Vector2.left),
-                new WaveEntity(new Vector2(1, 3), Vector2.left),
-                new WaveEntity(new Vector2(0, 4), Vector2.left),
-                new WaveEntity(new Vector2(1, 4), Vector2.left),
-                new WaveEntity(new Vector2(0, 5), Vector2.left),
-                new WaveEntity(new Vector2(1, 5), Vector2.left),
-                new WaveEntity(new Vector2(0, 6), Vector2.left),
-                new WaveEntity(new Vector2(1, 6), Vector2.left),
-                new WaveEntity(new Vector2(0, 7), Vector2.left),
-                new WaveEntity(new Vector2(1, 7), Vector2.left),
-                new WaveEntity(new Vector2(0, 8), Vector2.left),
-                new WaveEntity(new Vector2(1, 8), Vector2.left),
-                new WaveEntity(new Vector2(0, 9), Vector2.left),
-                new WaveEntity(new Vector2(1, 9), Vector2.left)
-            };
-            _formations.Add(new Formation(phalanx, 1, true));
+            _formations.Add(new Formation(backwardsWedge, 4));
         }
 
         //Generate new waves and spawn them on scene
@@ -299,12 +267,14 @@ namespace Assets.Scripts
             
             //II. Make adjustments for formations which require more than one column of enemies
             float minEnemyHorizontalDist = EnemyMinHorzDist;
-            if (_formations[randomWaveIndex].IsTwoShipWide)
-            {
-                //TODO stop assuming the width and height of an enemy ship is the same
-                //we want to improve this with real, calculated width and height values for each ship
-                minEnemyHorizontalDist = Mathf.Min(EnemyMinVertDist + 0.1f, EnemyMaxHorzDist);
-            }
+
+            //TODO NEXT you've removed isTwoShipWide, adjust these lines accordingly
+            //if (_formations[randomWaveIndex].IsTwoShipWide)
+            //{
+            //    //TODO stop assuming the width and height of an enemy ship is the same
+            //    //we want to improve this with real, calculated width and height values for each ship
+            //    minEnemyHorizontalDist = Mathf.Min(EnemyMinVertDist + 0.1f, EnemyMaxHorzDist);
+            //}
 
             //III. Make adjustments regarding horizontal distance between two consecutive waves
             float nextWaveHorizontalDistance = _waveSpawnInterval * BasicEnemy.MoveSpeed;
@@ -324,20 +294,22 @@ namespace Assets.Scripts
             
             int maxPossibleVerticalIntervalCount = Mathf.FloorToInt(verticalMovementLength/enemyVerticalDist);
             int maxPossibleShipCount = 1 + maxPossibleVerticalIntervalCount;
-            if (_formations[randomWaveIndex].IsTwoShipWide)
-            {
-                maxPossibleShipCount *= 2;
-            }
+            //TODO NEXT you've removed isTwoShipWide, adjust these lines accordingly
+            //if (_formations[randomWaveIndex].IsTwoShipWide)
+            //{
+            //    maxPossibleShipCount *= 2;
+            //}
 
             int enemyMaxCount = Mathf.Min(maxPossibleShipCount, _formations[randomWaveIndex].WaveEntities.Count);
             int enemyMinCount = Mathf.Max(2, enemyMaxCount - 6);
             int enemyCount = Random.Range(enemyMinCount, enemyMaxCount);
 
             int actualVerticalIntervalCount = enemyCount;
-            if (_formations[randomWaveIndex].IsTwoShipWide)
-            {
-                actualVerticalIntervalCount = Mathf.CeilToInt(actualVerticalIntervalCount * 0.5f);
-            }
+            //TODO NEXT you've removed isTwoShipWide, adjust these lines accordingly
+            //if (_formations[randomWaveIndex].IsTwoShipWide)
+            //{
+            //    actualVerticalIntervalCount = Mathf.CeilToInt(actualVerticalIntervalCount * 0.5f);
+            //}
             actualVerticalIntervalCount -= 1;
             float maxVerticalStartCoord = VMaxCoord - (actualVerticalIntervalCount * enemyVerticalDist);
 

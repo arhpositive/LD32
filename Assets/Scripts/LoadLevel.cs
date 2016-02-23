@@ -7,6 +7,7 @@
  */
 
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Assets.Scripts
 {
@@ -14,12 +15,12 @@ namespace Assets.Scripts
     {
         public void LoadMenuScene()
         {
-            Application.LoadLevel(0);
+            SceneManager.LoadScene(0);
         }
 
         public void LoadGameScene()
         {
-            Application.LoadLevel(1);
+            SceneManager.LoadScene(1);
         }
     }
 }
