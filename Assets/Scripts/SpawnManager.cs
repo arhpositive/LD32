@@ -49,7 +49,7 @@ namespace Assets.Scripts
         public float MinWaveSpawnIntervalCoef;
         public float MaxWaveSpawnIntervalCoef;
         public float PowerupSpawnBaseInterval;
-        public float EnemyMinVertDist;
+        public float EnemyMinVertDist; //TODO NEXT remove all four of these
         public float EnemyMaxVertDist;
         public float EnemyMinHorzDist;
         public float EnemyMaxHorzDist;
@@ -73,7 +73,15 @@ namespace Assets.Scripts
         float _starSpawnInterval;
 
         List<Formation> _formations;
-        
+		
+		const float ShipColliderVertSize = 0.46f; //TODO NEXT make public and give values from the editor
+		const float ShipColliderHorzSize = 0.46f;
+		
+		float _enemySpawnMinVertDist;
+		float _enemySpawnMaxVertDist;
+		float _enemySpawnMinHorzDist;
+        float _enemySpawnMaxHorzDist;
+		
         const float HSpawnCoord = GameConstants.HorizontalMaxCoord;
         const float VMinCoord = GameConstants.MinVerticalMovementLimit;
         const float VMaxCoord = GameConstants.MaxVerticalMovementLimit;
@@ -94,7 +102,12 @@ namespace Assets.Scripts
         void Start()
         {
             _difficultyManagerScript = Camera.main.GetComponent<DifficultyManager>();
-
+			
+			_enemySpawnMinVertDist = Mathf.CeilToInt(ShipColliderVertSize * 10.0f) / 10.0f;
+			_enemySpawnMaxVertDist = (ShipColliderVertSize * 2.0f) - 0.01f;
+			_enemySpawnMaxHorzDist = (ShipColliderHorzSize * 2.0f) - 0.01f;
+			_enemySpawnMinHorzDist = Mathf.Min(ShipColliderHorzSize * 0.5f, _enemySpawnMaxHorzDist);
+			
             _initialMeteorCount = 30;
             _initialStarCount = _initialMeteorCount * GameConstants.StarToMeteorRatio;
             
@@ -264,56 +277,36 @@ namespace Assets.Scripts
 
             //I. Pick a random formation type
             int randomWaveIndex = Random.Range(0, _formations.Count);
-            
-            //II. Make adjustments for formations which require more than one column of enemies
-            float minEnemyHorizontalDist = EnemyMinHorzDist;
 
-            //TODO NEXT you've removed isTwoShipWide, adjust these lines accordingly
-            //if (_formations[randomWaveIndex].IsTwoShipWide)
-            //{
-            //    //TODO stop assuming the width and height of an enemy ship is the same
-            //    //we want to improve this with real, calculated width and height values for each ship
-            //    minEnemyHorizontalDist = Mathf.Min(EnemyMinVertDist + 0.1f, EnemyMaxHorzDist);
-            //}
-
-            //III. Make adjustments regarding horizontal distance between two consecutive waves
+            //II. Make adjustments regarding horizontal distance between two consecutive waves
             float nextWaveHorizontalDistance = _waveSpawnInterval * BasicEnemy.MoveSpeed;
-            float maxEnemyHorizontalDist = nextWaveHorizontalDistance - EnemyMaxHorzDist;
+            float maxEnemyHorizontalDist = nextWaveHorizontalDistance - _enemySpawnMaxHorzDist;
             if (_formations[randomWaveIndex].HorizontalShipSpan > 1)
             {
                 maxEnemyHorizontalDist /= _formations[randomWaveIndex].HorizontalShipSpan;
             }
-            maxEnemyHorizontalDist = Mathf.Clamp(maxEnemyHorizontalDist, EnemyMinHorzDist, EnemyMaxHorzDist);
+			//TODO NEXT we've to calculate waveSpawnInterval in such a way that maxEnemyHorizontalDist can never become less than _enemySpawnMinHorzDist
+            maxEnemyHorizontalDist = Mathf.Clamp(maxEnemyHorizontalDist, _enemySpawnMinHorzDist, _enemySpawnMaxHorzDist);
 
-            //IV. Determine Spread
-            float enemyVerticalDist = Random.Range(EnemyMinVertDist, EnemyMaxVertDist);
-            float enemyHorizontalDist = Random.Range(minEnemyHorizontalDist, maxEnemyHorizontalDist);
+            //III. Determine Spread
+            float enemyVerticalDist = Random.Range(_enemySpawnMinVertDist, _enemySpawnMaxVertDist);
+            float enemyHorizontalDist = Random.Range(_enemySpawnMinHorzDist, maxEnemyHorizontalDist);
 
-            //V. Determine Number of Enemies
+            //IV. Determine Number of Enemies
             float verticalMovementLength = GameConstants.MaxVerticalMovementLimit - GameConstants.MinVerticalMovementLimit;
             
             int maxPossibleVerticalIntervalCount = Mathf.FloorToInt(verticalMovementLength/enemyVerticalDist);
-            int maxPossibleShipCount = 1 + maxPossibleVerticalIntervalCount;
-            //TODO NEXT you've removed isTwoShipWide, adjust these lines accordingly
-            //if (_formations[randomWaveIndex].IsTwoShipWide)
-            //{
-            //    maxPossibleShipCount *= 2;
-            //}
+            int maxPossibleShipCount = maxPossibleVerticalIntervalCount + 1;
 
+			//TODO NEXT adjust these three lines to ensure no holes in the line for tougher difficulties
             int enemyMaxCount = Mathf.Min(maxPossibleShipCount, _formations[randomWaveIndex].WaveEntities.Count);
             int enemyMinCount = Mathf.Max(2, enemyMaxCount - 6);
             int enemyCount = Random.Range(enemyMinCount, enemyMaxCount);
 
-            int actualVerticalIntervalCount = enemyCount;
-            //TODO NEXT you've removed isTwoShipWide, adjust these lines accordingly
-            //if (_formations[randomWaveIndex].IsTwoShipWide)
-            //{
-            //    actualVerticalIntervalCount = Mathf.CeilToInt(actualVerticalIntervalCount * 0.5f);
-            //}
-            actualVerticalIntervalCount -= 1;
+            int actualVerticalIntervalCount = enemyCount - 1;
             float maxVerticalStartCoord = VMaxCoord - (actualVerticalIntervalCount * enemyVerticalDist);
 
-            //VI. Select Enemies From Formation List
+            //V. Select Enemies From Formation List
             List<WaveEntity> selectedFormationEntities = new List<WaveEntity>();
             for (int i = 0; i < enemyCount; ++i)
             {
@@ -321,13 +314,13 @@ namespace Assets.Scripts
             }
             selectedFormationEntities.Sort(FormationComparison);
 
-            //VII. Determine Advanced Enemy Percentage
+            //VI. Determine Advanced Enemy Percentage
             float difficultyInterval = GameConstants.MaxDifficultyMultiplier - GameConstants.MinDifficultyMultiplier;
             float advancedEnemyPercentage =
                 ((_difficultyManagerScript.DifficultyMultiplier - GameConstants.MinDifficultyMultiplier) / 
                 difficultyInterval) * 100.0f;
 
-            //VIII. Spawn Enemies
+            //VII. Spawn Enemies
             Vector2 previousEnemyPos = Vector2.zero;
             for (int i = 0; i < selectedFormationEntities.Count; i++)
             {
