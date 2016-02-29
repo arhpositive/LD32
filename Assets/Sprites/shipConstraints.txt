@@ -1,0 +1,13 @@
+Player Ship
+---
+Front	: 4px
+Back	: 8px
+Top	: 2px
+Bottom	: 2px
+
+Enemy Ships
+---
+Front	: 2px
+Back	: 8px
+Top	: 2px
+Bottom	: 2px

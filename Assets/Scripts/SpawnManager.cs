@@ -74,10 +74,11 @@ namespace Assets.Scripts
 
         List<Formation> _formations;
 		
-		const float ShipColliderVertSize = 0.46f; //TODO NEXT make public and give values from the editor
-		const float ShipColliderHorzSize = 0.46f;
-		
-		float _enemySpawnMinVertDist;
+		const float ShipColliderVertSize = 0.46f;
+        const float ShipGameObjectVertSize = 0.5f;
+        const float PlayerShipColliderHorzSize = 0.38f;
+
+        float _enemySpawnMinVertDist;
 		float _enemySpawnMaxVertDist;
 		float _enemySpawnMinHorzDist;
         float _enemySpawnMaxHorzDist;
@@ -102,12 +103,15 @@ namespace Assets.Scripts
         void Start()
         {
             _difficultyManagerScript = Camera.main.GetComponent<DifficultyManager>();
-			
-			_enemySpawnMinVertDist = Mathf.CeilToInt(ShipColliderVertSize * 10.0f) / 10.0f;
-			_enemySpawnMaxVertDist = (ShipColliderVertSize * 2.0f) - 0.01f;
-			_enemySpawnMaxHorzDist = (ShipColliderHorzSize * 2.0f) - 0.01f;
-			_enemySpawnMinHorzDist = Mathf.Min(ShipColliderHorzSize * 0.5f, _enemySpawnMaxHorzDist);
-			
+            
+            _enemySpawnMaxVertDist = (ShipColliderVertSize * 2.0f) - 0.01f;
+            _enemySpawnMinVertDist = Mathf.Min(ShipGameObjectVertSize, _enemySpawnMaxVertDist);
+            _enemySpawnMaxHorzDist = (PlayerShipColliderHorzSize * 2.0f) - 0.01f;
+			_enemySpawnMinHorzDist = Mathf.Min(PlayerShipColliderHorzSize * 0.5f, _enemySpawnMaxHorzDist);
+
+            print("Enemy Spawn Min V: " + _enemySpawnMinVertDist + " Max V: " + _enemySpawnMaxVertDist);
+            print("Enemy Spawn Min H: " + _enemySpawnMinHorzDist + " Max H: " + _enemySpawnMaxHorzDist);
+
             _initialMeteorCount = 30;
             _initialStarCount = _initialMeteorCount * GameConstants.StarToMeteorRatio;
             
