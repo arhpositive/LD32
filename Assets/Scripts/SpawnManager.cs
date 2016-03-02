@@ -40,41 +40,40 @@ namespace Assets.Scripts
 
     public class SpawnManager : MonoBehaviour
     {
+        public bool IsGameScene;
+
+        [Header("Prefabs")]
         public GameObject PlayerPrefab;
         public GameObject[] EnemyPrefabArray;
         public GameObject[] PowerupPrefabArray;
         public GameObject[] MeteorPrefabArray;
         public GameObject StarPrefab;
-        public bool IsGameScene;
+        
+        [Header("Interval Properties")]
         public float MinWaveSpawnIntervalCoef;
         public float MaxWaveSpawnIntervalCoef;
         public float PowerupSpawnBaseInterval;
-        public float EnemyMinVertDist; //TODO NEXT remove all four of these
-        public float EnemyMaxVertDist;
-        public float EnemyMinHorzDist;
-        public float EnemyMaxHorzDist;
 
-        int _initialMeteorCount;
-        int _initialStarCount;
+        DifficultyManager _difficultyManagerScript;
 
         float _previousWaveSpawnTime;
         float _waveSpawnInterval;
-
-        DifficultyManager _difficultyManagerScript;
 
         float _previousPowerupSpawnTime;
         float _powerupSpawnInterval;
 
         //TODO LATER for every star and meteor destroyed, just spawn another one, remove all timers and intervals
+        int _initialMeteorCount;
         float _previousMeteorSpawnTime;
         float _meteorSpawnInterval;
 
+        int _initialStarCount;
         float _previousStarSpawnTime;
         float _starSpawnInterval;
 
         List<Formation> _formations;
-		
-		const float ShipColliderVertSize = 0.46f;
+        
+        const float ShipColliderVertSize = 0.46f;
         const float ShipGameObjectVertSize = 0.5f;
         const float PlayerShipColliderHorzSize = 0.38f;
 
@@ -269,12 +268,11 @@ namespace Assets.Scripts
         //Generate new waves and spawn them on scene
         void SpawnNewWave()
         {
-            //TODO NEXT no-exit style formations when difficulty level is higher than a certain point
-
             EventLogger.PrintToLog("New Wave Spawn");
 
             float randomIntervalCoef = Random.Range(MinWaveSpawnIntervalCoef, MaxWaveSpawnIntervalCoef);
             _waveSpawnInterval = randomIntervalCoef / Mathf.Sqrt(_difficultyManagerScript.DifficultyMultiplier);
+            bool hasNoExit = (Random.Range(0, 100)) < 100 ? true : false; //TODO NEXT include difficultyMultiplier in the case here
 
             //TODO low difficulty = wider spread & less enemies
             //TODO high difficulty = shorter spread & more enemies
@@ -282,7 +280,7 @@ namespace Assets.Scripts
             //I. Pick a random formation type
             int randomWaveIndex = Random.Range(0, _formations.Count);
 
-            //II. Make adjustments regarding horizontal distance between two consecutive waves
+            //II. Determine Horizontal Distance Between Enemies
             float nextWaveHorizontalDistance = _waveSpawnInterval * BasicEnemy.MoveSpeed;
             float maxEnemyHorizontalDist = nextWaveHorizontalDistance - _enemySpawnMaxHorzDist;
             if (_formations[randomWaveIndex].HorizontalShipSpan > 1)
@@ -291,21 +289,37 @@ namespace Assets.Scripts
             }
 			//TODO NEXT we've to calculate waveSpawnInterval in such a way that maxEnemyHorizontalDist can never become less than _enemySpawnMinHorzDist
             maxEnemyHorizontalDist = Mathf.Clamp(maxEnemyHorizontalDist, _enemySpawnMinHorzDist, _enemySpawnMaxHorzDist);
-
-            //III. Determine Spread
-            float enemyVerticalDist = Random.Range(_enemySpawnMinVertDist, _enemySpawnMaxVertDist);
             float enemyHorizontalDist = Random.Range(_enemySpawnMinHorzDist, maxEnemyHorizontalDist);
 
-            //IV. Determine Number of Enemies
+            //III. Determine Vertical Distance Between Enemies
             float verticalMovementLength = GameConstants.MaxVerticalMovementLimit - GameConstants.MinVerticalMovementLimit;
+            float minEnemyVerticalDist = _enemySpawnMinVertDist;
+            if (hasNoExit)
+            {
+                int maxIntervalCount = _formations[randomWaveIndex].WaveEntities.Count - 1;
+                float minVerticalDistance = verticalMovementLength / maxIntervalCount;
+                if (minVerticalDistance > minEnemyVerticalDist)
+                {
+                    minEnemyVerticalDist = minVerticalDistance;
+                }
+            }
+            float enemyVerticalDist = Random.Range(minEnemyVerticalDist, _enemySpawnMaxVertDist);
             
+            //IV. Determine Number of Enemies
             int maxPossibleVerticalIntervalCount = Mathf.FloorToInt(verticalMovementLength/enemyVerticalDist);
             int maxPossibleShipCount = maxPossibleVerticalIntervalCount + 1;
-
-			//TODO NEXT adjust these three lines to ensure no holes in the line for tougher difficulties
-            int enemyMaxCount = Mathf.Min(maxPossibleShipCount, _formations[randomWaveIndex].WaveEntities.Count);
-            int enemyMinCount = Mathf.Max(2, enemyMaxCount - 6);
-            int enemyCount = Random.Range(enemyMinCount, enemyMaxCount);
+            
+            int enemyCount;
+            if (hasNoExit)
+            {
+                enemyCount = maxPossibleShipCount;
+            }
+            else
+            {
+                int enemyMaxCount = Mathf.Min(maxPossibleShipCount, _formations[randomWaveIndex].WaveEntities.Count);
+                int enemyMinCount = Mathf.Max(2, enemyMaxCount - 6);
+                enemyCount = Random.Range(enemyMinCount, enemyMaxCount);
+            }
 
             int actualVerticalIntervalCount = enemyCount - 1;
             float maxVerticalStartCoord = VMaxCoord - (actualVerticalIntervalCount * enemyVerticalDist);
