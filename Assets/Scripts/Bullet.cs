@@ -23,11 +23,11 @@ namespace Assets.Scripts
         public BulletType CurrentBulletType;
         public AudioClip BulletHitClip;
         public bool ShotByPlayer;
-        bool _hasCollided;
-        bool _destroyedByCollision;
-        Player _playerScript;
+        private bool _hasCollided;
+        private bool _destroyedByCollision;
+        private Player _playerScript;
 
-        void Start()
+        private void Start()
         {
             _hasCollided = false;
             _destroyedByCollision = false;
@@ -38,7 +38,7 @@ namespace Assets.Scripts
             }
         }
 
-        void OnTriggerStay2D(Collider2D other)
+        private void OnTriggerStay2D(Collider2D other)
         {
 	        if (_hasCollided)
 	        {
@@ -93,14 +93,14 @@ namespace Assets.Scripts
 	        }
         }
 
-        void Hit()
+        private void Hit()
         {
             _hasCollided = true;
             AudioSource.PlayClipAtPoint(BulletHitClip, transform.position);
             Destroy(gameObject);
         }
 
-        void OnDestroy()
+        private void OnDestroy()
         {
             if (ShotByPlayer)
             {

@@ -12,16 +12,16 @@ namespace Assets.Scripts.ui
 {
     public class RefreshPowerupText : MonoBehaviour
     {
-        Text _powerupText;
-        Player _playerScript;
+        private Text _powerupText;
+        private Player _playerScript;
 
-        void Start()
+        private void Start()
         {
             _powerupText = gameObject.GetComponent<Text>();
             _playerScript = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
         }
 
-        void Update()
+        private void Update()
         {
             _powerupText.text = _playerScript.GetSpeedUpGunAmmo().ToString();
         }

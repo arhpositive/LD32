@@ -22,20 +22,20 @@ namespace Assets.Scripts
 
         public const float MoveSpeed = 1.2f;
 
-        GameObject _playerGameObject;
-        Player _playerScript;
-        DifficultyManager _difficultyManagerScript;
-        BasicMove _basicMoveScript;
+        private GameObject _playerGameObject;
+        private Player _playerScript;
+        private DifficultyManager _difficultyManagerScript;
+        private BasicMove _basicMoveScript;
 
-        bool _hasCollided;
-        bool _isStunned;
-        float _lastStunTime;
-        bool _speedBoostIsActive;
-        float _lastFireTime;
-        float _nextFiringInterval;
-        float _displacementLength; //used for scoring
+        private bool _hasCollided;
+        private bool _isStunned;
+        private float _lastStunTime;
+        private bool _speedBoostIsActive;
+        private float _lastFireTime;
+        private float _nextFiringInterval;
+        private float _displacementLength; //used for scoring
 
-        void Start()
+        private void Start()
         {
             _playerGameObject = GameObject.FindGameObjectWithTag("Player");
             if (_playerGameObject)
@@ -55,7 +55,7 @@ namespace Assets.Scripts
             _displacementLength = 0.0f;
         }
 
-        void Update()
+        private void Update()
         {
             // if stun timer expired
             if (_isStunned && Time.time - _lastStunTime > StunDuration)
@@ -98,7 +98,7 @@ namespace Assets.Scripts
             _basicMoveScript.DoesMove = false;
         }
 
-        void RemoveStun()
+        private void RemoveStun()
         {
             _isStunned = false;
             _lastFireTime = Time.time;
@@ -116,7 +116,7 @@ namespace Assets.Scripts
             }
         }
 
-        void OnTriggerStay2D(Collider2D other)
+        private void OnTriggerStay2D(Collider2D other)
         {
             if (_hasCollided)
             {
@@ -150,7 +150,7 @@ namespace Assets.Scripts
             }
         }
 
-        void FireGun()
+        private void FireGun()
         {
             _lastFireTime = Time.time;
             for (int i = 0; i < transform.childCount; i++)
@@ -163,13 +163,13 @@ namespace Assets.Scripts
             SetNextFiringInterval();
         }
 
-        void SetNextFiringInterval()
+        private void SetNextFiringInterval()
         {
             float randomIntervalCoef = Random.Range(MinFiringInterval, 2 * MinFiringInterval);
             _nextFiringInterval = randomIntervalCoef / Mathf.Sqrt(_difficultyManagerScript.DifficultyMultiplier);
         }
 
-        void Explode()
+        private void Explode()
         {
             if (_playerScript)
             {

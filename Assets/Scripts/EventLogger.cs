@@ -15,8 +15,8 @@ namespace Assets.Scripts
 {
     public class EventLogger : MonoBehaviour
     {
-        static StreamWriter _fileWriter;
-        static string _fileName;
+        private static StreamWriter _fileWriter;
+        private static string _fileName;
 
         public static void PrintToLog(object message)
         {

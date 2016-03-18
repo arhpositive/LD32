@@ -12,16 +12,16 @@ namespace Assets.Scripts.ui
 {
     public class RefreshEndScoreText : MonoBehaviour
     {
-        Text _endScoreText;
+        private Text _endScoreText;
 
-        void Start()
+        private void Start()
         {
             _endScoreText = gameObject.GetComponent<Text>();
         }
 
-        void Update()
+        private void Update()
         {
-            _endScoreText.text = "Your Score: " + Player.PlayerScore.ToString();
+            _endScoreText.text = "Your Score: " + Player.PlayerScore;
         }
 
         public void SetTextVisible()

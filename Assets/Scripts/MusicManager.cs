@@ -13,9 +13,9 @@ namespace Assets.Scripts
     public class MusicManager : MonoBehaviour
     {
         public AudioClip[] MusicList;
-        AudioSource _currentAudioSource;
+        private AudioSource _currentAudioSource;
 
-        void Awake()
+        private void Awake()
         {
             int randomIndex = Random.Range(0, MusicList.Length);
 

@@ -14,7 +14,7 @@ using Random = UnityEngine.Random;
 
 namespace Assets.Scripts
 {
-    struct WaveEntity
+    internal struct WaveEntity
     {
         public Vector2 Position;
         public Vector2 MoveDir;
@@ -26,7 +26,7 @@ namespace Assets.Scripts
         }
     };
 
-    struct Formation
+    internal class Formation
     {
         public List<WaveEntity> WaveEntities { get; private set; }
         public int HorizontalShipSpan { get; private set; }
@@ -54,39 +54,39 @@ namespace Assets.Scripts
         public float MaxWaveSpawnIntervalCoef;
         public float PowerupSpawnBaseInterval;
 
-        DifficultyManager _difficultyManagerScript;
+        private DifficultyManager _difficultyManagerScript;
 
-        float _previousWaveSpawnTime;
-        float _waveSpawnInterval;
+        private float _previousWaveSpawnTime;
+        private float _waveSpawnInterval;
 
-        float _previousPowerupSpawnTime;
-        float _powerupSpawnInterval;
+        private float _previousPowerupSpawnTime;
+        private float _powerupSpawnInterval;
 
         //TODO LATER for every star and meteor destroyed, just spawn another one, remove all timers and intervals
-        int _initialMeteorCount;
-        float _previousMeteorSpawnTime;
-        float _meteorSpawnInterval;
+        private int _initialMeteorCount;
+        private float _previousMeteorSpawnTime;
+        private float _meteorSpawnInterval;
 
-        int _initialStarCount;
-        float _previousStarSpawnTime;
-        float _starSpawnInterval;
+        private int _initialStarCount;
+        private float _previousStarSpawnTime;
+        private float _starSpawnInterval;
 
-        List<Formation> _formations;
-        
-        const float ShipColliderVertSize = 0.46f;
-        const float ShipGameObjectVertSize = 0.5f;
-        const float PlayerShipColliderHorzSize = 0.38f;
+        private List<Formation> _formations;
 
-        float _enemySpawnMinVertDist;
-		float _enemySpawnMaxVertDist;
-		float _enemySpawnMinHorzDist;
-        float _enemySpawnMaxHorzDist;
-		
-        const float HSpawnCoord = GameConstants.HorizontalMaxCoord;
-        const float VMinCoord = GameConstants.MinVerticalMovementLimit;
-        const float VMaxCoord = GameConstants.MaxVerticalMovementLimit;
-        
-        void Awake()
+        private const float ShipColliderVertSize = 0.46f;
+        private const float ShipGameObjectVertSize = 0.5f;
+        private const float PlayerShipColliderHorzSize = 0.38f;
+
+        private float _enemySpawnMinVertDist;
+        private float _enemySpawnMaxVertDist;
+        private float _enemySpawnMinHorzDist;
+        private float _enemySpawnMaxHorzDist;
+
+        private const float HSpawnCoord = GameConstants.HorizontalMaxCoord;
+        private const float VMinCoord = GameConstants.MinVerticalMovementLimit;
+        private const float VMaxCoord = GameConstants.MaxVerticalMovementLimit;
+
+        private void Awake()
         {
 	        if (!IsGameScene)
 	        {
@@ -99,13 +99,13 @@ namespace Assets.Scripts
 		        Quaternion.identity);
         }
 
-        void Start()
+        private void Start()
         {
             _difficultyManagerScript = Camera.main.GetComponent<DifficultyManager>();
             
-            _enemySpawnMaxVertDist = (ShipColliderVertSize * 2.0f) - 0.01f;
+            _enemySpawnMaxVertDist = ShipColliderVertSize * 2.0f - 0.01f;
             _enemySpawnMinVertDist = Mathf.Min(ShipGameObjectVertSize, _enemySpawnMaxVertDist);
-            _enemySpawnMaxHorzDist = (PlayerShipColliderHorzSize * 2.0f) - 0.01f;
+            _enemySpawnMaxHorzDist = PlayerShipColliderHorzSize * 2.0f - 0.01f;
 			_enemySpawnMinHorzDist = Mathf.Min(PlayerShipColliderHorzSize * 0.5f, _enemySpawnMaxHorzDist);
 
             print("Enemy Spawn Min V: " + _enemySpawnMinVertDist + " Max V: " + _enemySpawnMaxVertDist);
@@ -134,7 +134,7 @@ namespace Assets.Scripts
             InitialMeteorAndStarSpawn();
         }
 
-        void Update()
+        private void Update()
         {
             if (IsGameScene)
             {
@@ -169,7 +169,7 @@ namespace Assets.Scripts
             }
         }
 
-        void PregeneratePossibleWaves()
+        private void PregeneratePossibleWaves()
         {
             // TODO LATER include different movement patterns, might involve waypoints, etc.
             // waypoint system could make the wave change movement direction after a given amount of time.
@@ -266,13 +266,13 @@ namespace Assets.Scripts
         }
 
         //Generate new waves and spawn them on scene
-        void SpawnNewWave()
+        private void SpawnNewWave()
         {
             EventLogger.PrintToLog("New Wave Spawn");
 
             float randomIntervalCoef = Random.Range(MinWaveSpawnIntervalCoef, MaxWaveSpawnIntervalCoef);
             _waveSpawnInterval = randomIntervalCoef / Mathf.Sqrt(_difficultyManagerScript.DifficultyMultiplier);
-            bool hasNoExit = (Random.Range(0, 100)) < 100 ? true : false; //TODO NEXT include difficultyMultiplier in the case here
+            bool hasNoExit = Random.Range(0, 100) < 100 ? true : false; //TODO NEXT include difficultyMultiplier in the case here
 
             //TODO low difficulty = wider spread & less enemies
             //TODO high difficulty = shorter spread & more enemies
@@ -322,7 +322,7 @@ namespace Assets.Scripts
             }
 
             int actualVerticalIntervalCount = enemyCount - 1;
-            float maxVerticalStartCoord = VMaxCoord - (actualVerticalIntervalCount * enemyVerticalDist);
+            float maxVerticalStartCoord = VMaxCoord - actualVerticalIntervalCount * enemyVerticalDist;
 
             //V. Select Enemies From Formation List
             List<WaveEntity> selectedFormationEntities = new List<WaveEntity>();
@@ -353,14 +353,14 @@ namespace Assets.Scripts
                     int xPosDiff = (int) posDiff.x;
                     int yPosDiff = (int) posDiff.y;
                     
-                    int xIncrement = (xPosDiff != 0) ? Math.Sign(xPosDiff) : 0;
-                    int yIncrement = (yPosDiff != 0) ? Math.Sign(yPosDiff) : 0;
+                    int xIncrement = xPosDiff != 0 ? Math.Sign(xPosDiff) : 0;
+                    int yIncrement = yPosDiff != 0 ? Math.Sign(yPosDiff) : 0;
 
                     enemyPos = new Vector2(previousEnemyPos.x + xIncrement * enemyHorizontalDist, previousEnemyPos.y + yIncrement * enemyVerticalDist);
                 }
                 else
                 {
-                    enemyPos = new Vector2(HSpawnCoord + (selectedFormationEntities[i].Position.x * maxEnemyHorizontalDist), Random.Range(VMinCoord, maxVerticalStartCoord));
+                    enemyPos = new Vector2(HSpawnCoord + selectedFormationEntities[i].Position.x * maxEnemyHorizontalDist, Random.Range(VMinCoord, maxVerticalStartCoord));
                     print("EnemyPos: " + enemyPos);
                 }
 
@@ -387,7 +387,7 @@ namespace Assets.Scripts
             return 0;
         }
 
-        void SpawnNewPowerup()
+        private void SpawnNewPowerup()
         {
             float randomIntervalCoef = Random.Range(PowerupSpawnBaseInterval, PowerupSpawnBaseInterval * 2);
             _powerupSpawnInterval = randomIntervalCoef * Mathf.Sqrt(_difficultyManagerScript.DifficultyMultiplier);
@@ -431,7 +431,7 @@ namespace Assets.Scripts
             Instantiate(PowerupPrefabArray[j], powerupPos, Quaternion.identity);
         }
 
-        void InitialMeteorAndStarSpawn()
+        private void InitialMeteorAndStarSpawn()
         {
             for (int i = 0; i < _initialMeteorCount; i++)
             {
@@ -449,12 +449,12 @@ namespace Assets.Scripts
             }
         }
 
-        void SpawnMeteor(int meteorKind, Vector2 meteorPos)
+        private void SpawnMeteor(int meteorKind, Vector2 meteorPos)
         {
             Instantiate(MeteorPrefabArray[meteorKind], meteorPos, Quaternion.identity);
         }
 
-        void SpawnStar(Vector2 starPos)
+        private void SpawnStar(Vector2 starPos)
         {
             Instantiate(StarPrefab, starPos, Quaternion.identity);
         }

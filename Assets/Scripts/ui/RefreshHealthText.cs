@@ -12,16 +12,16 @@ namespace Assets.Scripts.ui
 {
     public class RefreshHealthText : MonoBehaviour
     {
-        Text _healthText;
-        Player _playerScript;
+        private Text _healthText;
+        private Player _playerScript;
 
-        void Start()
+        private void Start()
         {
             _healthText = gameObject.GetComponent<Text>();
             _playerScript = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
         }
 
-        void Update()
+        private void Update()
         {
             _healthText.text = _playerScript.PlayerHealth.ToString();
         }

@@ -14,18 +14,18 @@ namespace Assets.Scripts
     {
         public float DifficultyMultiplier { get; private set; }
 
-        float _lastDifficultyAdjustmentTime;
-        const float DifficultyAdjustmentInterval = 5.0f;
-        const float DifficultyCoefficient = 1.2f;
+        private float _lastDifficultyAdjustmentTime;
+        private const float DifficultyAdjustmentInterval = 5.0f;
+        private const float DifficultyCoefficient = 1.2f;
 
-        GameObject _playerGameObject;
-        Player _playerScript;
+        private GameObject _playerGameObject;
+        private Player _playerScript;
 
-        int _adjustmentStepCount;
+        private int _adjustmentStepCount;
 
-        int _previousWavePlayerHealth;
+        private int _previousWavePlayerHealth;
 
-        void Start()
+        private void Start()
         {
             // higher difficulty multiplier equals a more challenging game
             DifficultyMultiplier = 1.0f;
@@ -42,12 +42,12 @@ namespace Assets.Scripts
             _previousWavePlayerHealth = Player.PlayerInitialHealth;
         }
 
-        void Update()
+        private void Update()
         {
             if (Time.time - _lastDifficultyAdjustmentTime > DifficultyAdjustmentInterval)
             {
                 _adjustmentStepCount++;
-                float hpDiffSinceLastAdjustment = (_playerScript.PlayerHealth - _previousWavePlayerHealth);
+                float hpDiffSinceLastAdjustment = _playerScript.PlayerHealth - _previousWavePlayerHealth;
 
                 if (hpDiffSinceLastAdjustment < 0.0f)
                 {
@@ -67,7 +67,7 @@ namespace Assets.Scripts
             }
         }
 
-        public void IncreaseDifficulty()
+        private void IncreaseDifficulty()
         {
             float newDifficultyMultiplier = DifficultyMultiplier * DifficultyCoefficient;
 
@@ -78,7 +78,7 @@ namespace Assets.Scripts
             }
         }
 
-        public void DecreaseDifficulty()
+        private void DecreaseDifficulty()
         {
             float newDifficultyMultiplier = DifficultyMultiplier / DifficultyCoefficient;
 

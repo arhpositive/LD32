@@ -30,38 +30,31 @@ namespace Assets.Scripts
         public Color NegativePowerupBlinkColor;
         public AudioClip GainPowerupClip;
 
-        SpriteRenderer _spriteRenderer;
-        Color _rendererColor;
-        bool _hasCollided;
-        float _lastBlinkTime;
-        const float BlinkSpeed = 0.5f;
+        private SpriteRenderer _spriteRenderer;
+        private Color _rendererColor;
+        private bool _hasCollided;
+        private float _lastBlinkTime;
+        private const float BlinkSpeed = 0.5f;
 
-        void Start()
+        private void Start()
         {
             _spriteRenderer = gameObject.GetComponent<SpriteRenderer>();
             _rendererColor = _spriteRenderer.color;
             _hasCollided = false;
         }
 
-        void Update()
+        private void Update()
         {
             if (IsNegativePowerup && Time.time - _lastBlinkTime > BlinkSpeed)
             {
                 //negative powerups blink
-                if (_spriteRenderer.color == _rendererColor)
-                {
-                    _spriteRenderer.color = NegativePowerupBlinkColor;
-                }
-                else
-                {
-                    _spriteRenderer.color = _rendererColor;
-                }
+                _spriteRenderer.color = _spriteRenderer.color == _rendererColor ? NegativePowerupBlinkColor : _rendererColor;
 
                 _lastBlinkTime = Time.time;
             }
         }
 
-        void OnTriggerStay2D(Collider2D other)
+        private void OnTriggerStay2D(Collider2D other)
         {
             if (!_hasCollided)
             {

@@ -12,14 +12,14 @@ namespace Assets.Scripts.ui
 {
     public class RefreshHighScoreText : MonoBehaviour
     {
-        Text _highScoreText;
+        private Text _highScoreText;
 
-        void Start()
+        private void Start()
         {
             _highScoreText = gameObject.GetComponent<Text>();
         }
 
-        void Update()
+        private void Update()
         {
             _highScoreText.text = Player.PlayerScore.ToString();
         }

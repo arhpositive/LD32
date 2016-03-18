@@ -17,7 +17,7 @@ namespace Assets.Scripts
         public bool DoesMove;
         public float MoveSpeed;
         public float SpeedCoef { get; set; }
-        Vector2 _moveDir;
+        private Vector2 _moveDir;
 
         [Range(-1.0f, 1.0f)]
         public float MoveDirX;
@@ -40,10 +40,10 @@ namespace Assets.Scripts
         public bool DestroyOnHorizontalLimits;
         public bool DestroyOnEarlyHorizontalLimits;
 
-        float _minVerticalBounceLimit;
-        float _maxVerticalBounceLimit;
+        private float _minVerticalBounceLimit;
+        private float _maxVerticalBounceLimit;
 
-        void Awake()
+        private void Awake()
         {
             _minVerticalBounceLimit = GameConstants.MinVerticalMovementLimit;
             _maxVerticalBounceLimit = GameConstants.MaxVerticalMovementLimit;
@@ -72,7 +72,7 @@ namespace Assets.Scripts
             }
         }
 
-        void Update()
+        private void Update()
         {
             if (DoesMove)
             {

@@ -12,16 +12,16 @@ namespace Assets.Scripts.ui
 {
 	public class RefreshDifficultyText : MonoBehaviour
 	{
-		Text _difficultyText;
-		DifficultyManager _difficultyManagerScript;
+	    private Text _difficultyText;
+	    private DifficultyManager _difficultyManagerScript;
 
-		void Start ()
+	    private void Start ()
 		{
 			_difficultyText = gameObject.GetComponent<Text>();
 			_difficultyManagerScript = Camera.main.GetComponent<DifficultyManager>();
 		}
-	
-		void Update ()
+
+	    private void Update ()
 		{
 			_difficultyText.text = _difficultyManagerScript.DifficultyMultiplier.ToString();
 		}

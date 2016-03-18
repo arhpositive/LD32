@@ -12,7 +12,7 @@ using Assets.Scripts.ui;
 
 namespace Assets.Scripts
 {
-    struct Gun
+    internal struct Gun
     {
         public GameObject BulletPrefab { get; private set; }
         public float Cooldown { get; private set; }
@@ -54,34 +54,34 @@ namespace Assets.Scripts
 
         public const int PlayerInitialHealth = 3;
 
-        RefreshEndScoreText _endGameScoreText;
+        private RefreshEndScoreText _endGameScoreText;
 
-        GameObject _playerShield;
-        
-        int _hitBulletCount;
-        int _shotBulletCount;
+        private GameObject _playerShield;
 
-        const float DeathDuration = 2.0f;
-        float _deathTime;
+        private int _hitBulletCount;
+        private int _shotBulletCount;
 
-        const float InvulnerabilityDuration = 2.0f;
-        float _invulnerabilityStartTime;
+        private const float DeathDuration = 2.0f;
+        private float _deathTime;
 
-        SpriteRenderer _spriteRenderer;
-        SpriteRenderer[] _childRenderers;
+        private const float InvulnerabilityDuration = 2.0f;
+        private float _invulnerabilityStartTime;
 
-        Gun _stunGun;
-        Gun _speedUpGun;
-        Gun _teleportGun;
+        private SpriteRenderer _spriteRenderer;
+        private SpriteRenderer[] _childRenderers;
 
-        void Awake()
+        private Gun _stunGun;
+        private Gun _speedUpGun;
+        private Gun _teleportGun;
+
+        private void Awake()
         {
             _spriteRenderer = gameObject.GetComponent<SpriteRenderer>();
             _childRenderers = gameObject.GetComponentsInChildren<SpriteRenderer>(true);
             _endGameScoreText = GameObject.FindGameObjectWithTag("ScoreText").GetComponent<RefreshEndScoreText>();
         }
 
-        void Start()
+        private void Start()
         {
             PlayerScore = 0;
             PlayerHealth = PlayerInitialHealth;
@@ -109,7 +109,7 @@ namespace Assets.Scripts
             }
         }
 
-        void Update()
+        private void Update()
         {
             if (IsDead)
             {
@@ -207,7 +207,7 @@ namespace Assets.Scripts
             DoMovement();
         }
 
-        Vector2 GetMoveDirFromInput()
+        private Vector2 GetMoveDirFromInput()
         {
             float horizontalMoveDir;
             float verticalMoveDir;
@@ -232,7 +232,7 @@ namespace Assets.Scripts
             return moveDir;
         }
 
-        void DoMovement()
+        private void DoMovement()
         {
             //movement
             Vector2 inputDir = GetMoveDirFromInput();
@@ -361,7 +361,7 @@ namespace Assets.Scripts
             return _teleportGun.AmmoCount;
         }
 
-        void SetChildRenderers(bool value)
+        private void SetChildRenderers(bool value)
         {
             foreach (SpriteRenderer r in _childRenderers)
             {
@@ -379,7 +379,7 @@ namespace Assets.Scripts
             }
         }
 
-        void FireStunGun()
+        private void FireStunGun()
         {
             _stunGun.LastFireTime = Time.time;
 
@@ -394,7 +394,7 @@ namespace Assets.Scripts
             }
         }
 
-        void FireSpeedUpGun()
+        private void FireSpeedUpGun()
         {
             _speedUpGun.LastFireTime = Time.time;
 
@@ -410,7 +410,7 @@ namespace Assets.Scripts
             }
         }
 
-        void FireTeleportGun()
+        private void FireTeleportGun()
         {
             _teleportGun.LastFireTime = Time.time;
             for (int i = 0; i < transform.childCount; i++)
@@ -426,7 +426,7 @@ namespace Assets.Scripts
             }
         }
 
-        void TriggerTeleportBullet()
+        private void TriggerTeleportBullet()
         {
             if (_teleportGun.LastBullet)
             {
