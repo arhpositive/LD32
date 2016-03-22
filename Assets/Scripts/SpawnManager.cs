@@ -136,6 +136,17 @@ namespace Assets.Scripts
 
         private void Update()
         {
+            if (Input.GetKeyDown(KeyCode.U))
+            {
+                Time.timeScale += 0.1f;
+                print("Timescale Up: " + Time.timeScale);
+            }
+            else if (Input.GetKeyDown(KeyCode.J))
+            {
+                Time.timeScale -= 0.1f;
+                print("Timescale Down: " + Time.timeScale);
+            }
+
             if (IsGameScene)
             {
                 if (Time.time - _previousWaveSpawnTime > _waveSpawnInterval)
