@@ -17,6 +17,7 @@ GameObject:
   - 82: {fileID: 8295414}
   - 114: {fileID: 11425842}
   - 114: {fileID: 11444820}
+  - 114: {fileID: 11435500}
   m_Layer: 0
   m_Name: mainCameraPrefab
   m_TagString: MainCamera
@@ -52,7 +53,7 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: .300000012
+  near clip plane: 0.3
   far clip plane: 1000
   field of view: 60
   orthographic: 1
@@ -68,7 +69,7 @@ Camera:
   m_HDR: 0
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
-  m_StereoSeparation: .0219999999
+  m_StereoSeparation: 0.022
   m_StereoMirrorMode: 0
 --- !u!81 &8143180
 AudioListener:
@@ -117,6 +118,7 @@ AudioSource:
       tangentMode: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
+    m_RotationOrder: 4
   panLevelCustomCurve:
     serializedVersion: 2
     m_Curve:
@@ -127,6 +129,7 @@ AudioSource:
       tangentMode: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
+    m_RotationOrder: 0
   spreadCustomCurve:
     serializedVersion: 2
     m_Curve:
@@ -137,6 +140,7 @@ AudioSource:
       tangentMode: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
+    m_RotationOrder: 4
   reverbZoneMixCustomCurve:
     serializedVersion: 2
     m_Curve:
@@ -147,6 +151,7 @@ AudioSource:
       tangentMode: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
+    m_RotationOrder: 0
 --- !u!92 &9243626
 Behaviour:
   m_ObjectHideFlags: 1
@@ -165,6 +170,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 36404cded83f6b746b819d834707c786, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  IsGameScene: 1
   PlayerPrefab: {fileID: 114074, guid: 58cda14e50f6d8d42a46b3077f960e56, type: 2}
   EnemyPrefabArray:
   - {fileID: 139786, guid: 566fefe5e59b580429b5c12346896bd0, type: 2}
@@ -179,14 +185,9 @@ MonoBehaviour:
   - {fileID: 105448, guid: 4318761234289f640a7017713d221b7b, type: 2}
   - {fileID: 173280, guid: 8dfdc579ad197d34a8f88fe5a10abd54, type: 2}
   StarPrefab: {fileID: 157426, guid: c5f313e4e03d12a4ba060b73e0120301, type: 2}
-  IsGameScene: 1
   MinWaveSpawnIntervalCoef: 5
   MaxWaveSpawnIntervalCoef: 10
   PowerupSpawnBaseInterval: 3
-  EnemyMinVertDist: .5
-  EnemyMaxVertDist: .899999976
-  EnemyMinHorzDist: .200000003
-  EnemyMaxHorzDist: .899999976
 --- !u!114 &11425842
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -198,6 +199,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4531216ae561308459c6b4f35cc6b52f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &11435500
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 102966}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4975a6e437fc3b149a8cd508ce5bdd69, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  threshold: 0.15
+  intensity: 1.5
+  blurSize: 0.25
+  blurIterations: 2
+  blurType: 0
+  fastBloomShader: {fileID: 4800000, guid: 68a00c837b82e4c6d92e7da765dc5f1d, type: 3}
 --- !u!114 &11444820
 MonoBehaviour:
   m_ObjectHideFlags: 1
