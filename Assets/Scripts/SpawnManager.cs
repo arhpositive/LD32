@@ -281,7 +281,7 @@ public class SpawnManager : MonoBehaviour
 
         float randomIntervalCoef = Random.Range(MinWaveSpawnIntervalCoef, MaxWaveSpawnIntervalCoef);
         _waveSpawnInterval = randomIntervalCoef / Mathf.Sqrt(_difficultyManagerScript.DifficultyMultiplier);
-        bool hasNoExit = Random.Range(0, 100) < 100 ? true : false; //TODO NEXT include difficultyMultiplier in the case here
+        bool hasNoExit = Random.Range(0, 100) < 50; //TODO NEXT include difficultyMultiplier in the case here
 
         //TODO low difficulty = wider spread & less enemies
         //TODO high difficulty = shorter spread & more enemies
@@ -299,14 +299,15 @@ public class SpawnManager : MonoBehaviour
         //TODO NEXT we've to calculate waveSpawnInterval in such a way that maxEnemyHorizontalDist can never become less than _enemySpawnMinHorzDist
         maxEnemyHorizontalDist = Mathf.Clamp(maxEnemyHorizontalDist, _enemySpawnMinHorzDist, _enemySpawnMaxHorzDist);
         float enemyHorizontalDist = Random.Range(_enemySpawnMinHorzDist, maxEnemyHorizontalDist);
-
+        
         //III. Determine Vertical Distance Between Enemies
-        float verticalMovementLength = GameConstants.MaxVerticalMovementLimit - GameConstants.MinVerticalMovementLimit;
+        float verticalMovementLength = VMaxCoord - VMinCoord;
         float minEnemyVerticalDist = _enemySpawnMinVertDist;
         if (hasNoExit)
         {
             int maxIntervalCount = _formations[randomWaveIndex].WaveEntities.Count - 1;
-            float minVerticalDistance = verticalMovementLength / maxIntervalCount;
+
+            float minVerticalDistance = (verticalMovementLength - ShipColliderVertSize) / maxIntervalCount;
             if (minVerticalDistance > minEnemyVerticalDist)
             {
                 minEnemyVerticalDist = minVerticalDistance;
@@ -315,9 +316,17 @@ public class SpawnManager : MonoBehaviour
         float enemyVerticalDist = Random.Range(minEnemyVerticalDist, _enemySpawnMaxVertDist);
             
         //IV. Determine Number of Enemies
-        int maxPossibleVerticalIntervalCount = Mathf.FloorToInt(verticalMovementLength/enemyVerticalDist);
+        int lowerIntervalCount = Mathf.FloorToInt((verticalMovementLength - ShipColliderVertSize)/enemyVerticalDist);
+        int higherIntervalCount = Mathf.FloorToInt(verticalMovementLength/enemyVerticalDist);
+
+        int maxPossibleVerticalIntervalCount = (lowerIntervalCount == higherIntervalCount) && !hasNoExit
+            ? lowerIntervalCount
+            : lowerIntervalCount + 1;
+
+        float distBetweenFirstAndLastShip = enemyVerticalDist*maxPossibleVerticalIntervalCount;
+        Assert.IsTrue(!hasNoExit || (distBetweenFirstAndLastShip >= verticalMovementLength - ShipColliderVertSize));
+
         int maxPossibleShipCount = maxPossibleVerticalIntervalCount + 1;
-            
         int enemyCount;
         if (hasNoExit)
         {
@@ -325,13 +334,30 @@ public class SpawnManager : MonoBehaviour
         }
         else
         {
-            int enemyMaxCount = Mathf.Min(maxPossibleShipCount, _formations[randomWaveIndex].WaveEntities.Count);
+            //no possible no-exits here!
+            int enemyMaxCount = Mathf.Min(maxPossibleShipCount - 1, _formations[randomWaveIndex].WaveEntities.Count);
             int enemyMinCount = Mathf.Max(2, enemyMaxCount - 6);
             enemyCount = Random.Range(enemyMinCount, enemyMaxCount);
         }
 
         int actualVerticalIntervalCount = enemyCount - 1;
-        float maxVerticalStartCoord = VMaxCoord - actualVerticalIntervalCount * enemyVerticalDist;
+        float minVerticalStartCoord = VMinCoord;
+        float maxVerticalStartCoord = VMaxCoord - actualVerticalIntervalCount*enemyVerticalDist;
+
+        if (maxVerticalStartCoord < minVerticalStartCoord)
+        {
+            //we just went off the line, this is only possible for no exit formations!
+            Assert.IsTrue(hasNoExit);
+            //Assert.IsTrue(distBetweenFirstAndLastShip > verticalMovementLength);
+
+            float difference = minVerticalStartCoord - maxVerticalStartCoord;
+            maxVerticalStartCoord = minVerticalStartCoord + difference;
+            minVerticalStartCoord = maxVerticalStartCoord;
+        }
+        else
+        {
+            Assert.IsTrue(distBetweenFirstAndLastShip <= verticalMovementLength);
+        }
 
         //V. Select Enemies From Formation List
         List<WaveEntity> selectedFormationEntities = new List<WaveEntity>();
@@ -369,7 +395,7 @@ public class SpawnManager : MonoBehaviour
             }
             else
             {
-                enemyPos = new Vector2(HSpawnCoord + selectedFormationEntities[i].Position.x * maxEnemyHorizontalDist, Random.Range(VMinCoord, maxVerticalStartCoord));
+                enemyPos = new Vector2(HSpawnCoord + selectedFormationEntities[i].Position.x * maxEnemyHorizontalDist, Random.Range(minVerticalStartCoord, maxVerticalStartCoord));
             }
 
             GameObject enemy = Instantiate(EnemyPrefabArray[enemyKind], enemyPos, Quaternion.identity) as GameObject;
