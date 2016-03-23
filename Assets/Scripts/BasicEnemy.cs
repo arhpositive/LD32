@@ -19,6 +19,7 @@ namespace Assets.Scripts
         public float MinFiringInterval;
         public GameObject BulletPrefab;
         public AudioClip ExplosionClip;
+        public GameObject ExplosionPrefab;
 
         public const float MoveSpeed = 1.2f;
 
@@ -26,6 +27,8 @@ namespace Assets.Scripts
         private Player _playerScript;
         private DifficultyManager _difficultyManagerScript;
         private BasicMove _basicMoveScript;
+
+        private SpriteRenderer _spriteRenderer;
 
         private bool _hasCollided;
         private bool _isStunned;
@@ -45,6 +48,8 @@ namespace Assets.Scripts
             _difficultyManagerScript = Camera.main.GetComponent<DifficultyManager>();
             _basicMoveScript = gameObject.GetComponent<BasicMove>();
             _basicMoveScript.MoveSpeed = MoveSpeed;
+
+            _spriteRenderer = gameObject.GetComponent<SpriteRenderer>();
 
             _hasCollided = false;
             _isStunned = false;
@@ -177,7 +182,12 @@ namespace Assets.Scripts
                 _playerScript.TriggerEnemyDestruction();
             }
             _hasCollided = true;
+
+            GameObject explosion = Instantiate(ExplosionPrefab, transform.position, Quaternion.identity) as GameObject;
+            Assert.IsNotNull(explosion);
+            explosion.GetComponent<SpriteRenderer>().material.color = _spriteRenderer.color;
             AudioSource.PlayClipAtPoint(ExplosionClip, transform.position);
+
             Destroy(gameObject);
         }
     }

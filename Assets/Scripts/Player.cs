@@ -9,6 +9,7 @@
 using UnityEngine;
 using CnControls;
 using Assets.Scripts.ui;
+using UnityEngine.Assertions;
 
 namespace Assets.Scripts
 {
@@ -44,6 +45,8 @@ namespace Assets.Scripts
         public AudioClip FireStunGunClip;
         public AudioClip FireSpeedUpGunClip;
         public AudioClip FireTeleportGunClip;
+
+        public GameObject ExplosionPrefab;
         public AudioClip ExplosionClip;
 
         public int PlayerHealth { get; private set; }
@@ -255,7 +258,6 @@ namespace Assets.Scripts
             }
 
             PlayerHealth--;
-
             if (PlayerHealth == 0)
             {
                 EventLogger.PrintToLog("Player Dies: Game Over");
@@ -267,14 +269,21 @@ namespace Assets.Scripts
                 EventLogger.PrintToLog("Player Loses Health");
                 if (IsShielded)
                 {
+                    //shield also disappears
                     ShieldGotHit();
                 }
-                AudioSource.PlayClipAtPoint(ExplosionClip, transform.position);
                 _deathTime = Time.time;
                 IsDead = true;
                 _spriteRenderer.enabled = false;
                 SetChildRenderers(false);
             }
+
+            //animate explosion and emit sound
+            GameObject explosion = Instantiate(ExplosionPrefab, transform.position, Quaternion.identity) as GameObject;
+            Assert.IsNotNull(explosion);
+            explosion.GetComponent<SpriteRenderer>().material.color = _spriteRenderer.color;
+            AudioSource.PlayClipAtPoint(ExplosionClip, transform.position);
+
             return true;
         }
 

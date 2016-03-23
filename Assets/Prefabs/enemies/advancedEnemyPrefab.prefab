@@ -272,6 +272,7 @@ MonoBehaviour:
   MinFiringInterval: 5
   BulletPrefab: {fileID: 104536, guid: efb3702b3f1e6b140ae6e81f3396926b, type: 2}
   ExplosionClip: {fileID: 8300000, guid: 2c95fdf00a27c874cb6cf05c7be45376, type: 3}
+  ExplosionPrefab: {fileID: 187376, guid: 27b818dee9954ae408eba04ee4dc1750, type: 2}
 --- !u!212 &21203258
 SpriteRenderer:
   m_ObjectHideFlags: 1
