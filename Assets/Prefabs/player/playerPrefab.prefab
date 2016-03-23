@@ -13,6 +13,7 @@ GameObject:
   - 61: {fileID: 6197716}
   - 50: {fileID: 5060936}
   - 61: {fileID: 6103242}
+  - 114: {fileID: 11446490}
   m_Layer: 8
   m_Name: playerPrefab
   m_TagString: Player
@@ -358,8 +359,20 @@ MonoBehaviour:
   FireStunGunClip: {fileID: 8300000, guid: d8dbd1a7727573844b51d2e5e2fe2fed, type: 3}
   FireSpeedUpGunClip: {fileID: 8300000, guid: e4fd3e08cf0dc614d98186276bddbf7d, type: 3}
   FireTeleportGunClip: {fileID: 8300000, guid: a743c04785a2f4e44a4798184c7beaa6, type: 3}
-  ExplosionPrefab: {fileID: 187376, guid: 27b818dee9954ae408eba04ee4dc1750, type: 2}
-  ExplosionClip: {fileID: 8300000, guid: 2c95fdf00a27c874cb6cf05c7be45376, type: 3}
+--- !u!114 &11446490
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 114074}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7733fa81943d9e46bcbbe4d40977cd3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  DestructionPrefab: {fileID: 187376, guid: 27b818dee9954ae408eba04ee4dc1750, type: 2}
+  DestructionAudioClip: {fileID: 8300000, guid: 2c95fdf00a27c874cb6cf05c7be45376,
+    type: 3}
 --- !u!212 &21208630
 SpriteRenderer:
   m_ObjectHideFlags: 1

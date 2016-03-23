@@ -5,10 +5,11 @@
  * RefreshAccuracyText.cs
  */
 
+using System.Globalization;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Assets.Scripts.ui
+namespace ui
 {
     public class RefreshAccuracyText : MonoBehaviour
     {
@@ -23,7 +24,7 @@ namespace Assets.Scripts.ui
 
         private void Update()
         {
-            _accuracyText.text = _playerScript.PlayerAccuracy.ToString();
+            _accuracyText.text = _playerScript.PlayerAccuracy.ToString(CultureInfo.InvariantCulture);
         }
     }
 }

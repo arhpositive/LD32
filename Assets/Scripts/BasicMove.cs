@@ -10,126 +10,123 @@
 using UnityEngine;
 using UnityEngine.Assertions;
 
-namespace Assets.Scripts
+public class BasicMove : MonoBehaviour
 {
-    public class BasicMove : MonoBehaviour
+    public bool DoesMove;
+    public float MoveSpeed;
+    public float SpeedCoef { get; set; }
+    private Vector2 _moveDir;
+
+    [Range(-1.0f, 1.0f)]
+    public float MoveDirX;
+    public bool RandomizeMoveDirX;
+    [Range(0.0f, 1.0f)]
+    public float RandomizeMoveDirXCoef;
+    [Range(-1.0f, 1.0f)]
+    public float MoveDirY;
+    public bool RandomizeMoveDirY;
+    [Range(0.0f, 1.0f)]
+    public float RandomizeMoveDirYCoef;
+
+    public bool DoesRotate;
+    public float RotationSpeed;
+    public bool RandomizeRotationSpeed;
+    public float RandomizeRotationSpeedCoef;
+
+    public bool BounceOnHorizontalLimits;
+    public bool DestroyOnVerticalLimits;
+    public bool DestroyOnHorizontalLimits;
+    public bool DestroyOnEarlyHorizontalLimits;
+
+    private float _minVerticalBounceLimit;
+    private float _maxVerticalBounceLimit;
+
+    private void Awake()
     {
-        public bool DoesMove;
-        public float MoveSpeed;
-        public float SpeedCoef { get; set; }
-        private Vector2 _moveDir;
+        _minVerticalBounceLimit = GameConstants.MinVerticalMovementLimit;
+        _maxVerticalBounceLimit = GameConstants.MaxVerticalMovementLimit;
 
-        [Range(-1.0f, 1.0f)]
-        public float MoveDirX;
-        public bool RandomizeMoveDirX;
-        [Range(0.0f, 1.0f)]
-        public float RandomizeMoveDirXCoef;
-        [Range(-1.0f, 1.0f)]
-        public float MoveDirY;
-        public bool RandomizeMoveDirY;
-        [Range(0.0f, 1.0f)]
-        public float RandomizeMoveDirYCoef;
+        _moveDir = new Vector2(MoveDirX, MoveDirY);
+        SpeedCoef = 1.0f;
 
-        public bool DoesRotate;
-        public float RotationSpeed;
-        public bool RandomizeRotationSpeed;
-        public float RandomizeRotationSpeedCoef;
-
-        public bool BounceOnHorizontalLimits;
-        public bool DestroyOnVerticalLimits;
-        public bool DestroyOnHorizontalLimits;
-        public bool DestroyOnEarlyHorizontalLimits;
-
-        private float _minVerticalBounceLimit;
-        private float _maxVerticalBounceLimit;
-
-        private void Awake()
+        if (RandomizeMoveDirX)
         {
-            _minVerticalBounceLimit = GameConstants.MinVerticalMovementLimit;
-            _maxVerticalBounceLimit = GameConstants.MaxVerticalMovementLimit;
+            float range = Random.Range(0.0f, 1.0f) * RandomizeMoveDirXCoef;
+            _moveDir.x = Random.Range(-range, range);
+        }
 
-            _moveDir = new Vector2(MoveDirX, MoveDirY);
-            SpeedCoef = 1.0f;
+        if (RandomizeMoveDirY)
+        {
+            float range = Random.Range(0.0f, 1.0f) * RandomizeMoveDirYCoef;
+            _moveDir.y = Random.Range(-range, range);
+        }
 
-            if (RandomizeMoveDirX)
+        _moveDir.Normalize();
+
+        if (RandomizeRotationSpeed)
+        {
+            float range = Random.Range(0.0f, 1.0f) * RandomizeRotationSpeedCoef;
+            RotationSpeed = Random.Range(-range, range);
+        }
+    }
+
+    private void Update()
+    {
+        if (DoesMove)
+        {
+            transform.Translate(_moveDir * MoveSpeed * SpeedCoef * Time.deltaTime, Space.World);
+        }
+
+        if (DoesRotate)
+        {
+            transform.Rotate(Vector3.forward * RotationSpeed * Time.deltaTime, Space.World);
+        }
+
+        if (DestroyOnEarlyHorizontalLimits)
+        {
+            if (transform.position.x < GameConstants.HorizontalMinCoord || transform.position.x > GameConstants.HorizontalEarlyMaxCoord)
             {
-                float range = Random.Range(0.0f, 1.0f) * RandomizeMoveDirXCoef;
-                _moveDir.x = Random.Range(-range, range);
+                Destroy(gameObject);
             }
-
-            if (RandomizeMoveDirY)
+        }
+        else if (DestroyOnHorizontalLimits)
+        {
+            if (transform.position.x < GameConstants.HorizontalMinCoord || transform.position.x > GameConstants.HorizontalMaxCoord)
             {
-                float range = Random.Range(0.0f, 1.0f) * RandomizeMoveDirYCoef;
-                _moveDir.y = Random.Range(-range, range);
-            }
-
-            _moveDir.Normalize();
-
-            if (RandomizeRotationSpeed)
-            {
-                float range = Random.Range(0.0f, 1.0f) * RandomizeRotationSpeedCoef;
-                RotationSpeed = Random.Range(-range, range);
+                Destroy(gameObject);
             }
         }
 
-        private void Update()
+        if (DestroyOnVerticalLimits)
         {
-            if (DoesMove)
+            if (transform.position.y < GameConstants.VerticalMinCoord || transform.position.y > GameConstants.VerticalMaxCoord)
             {
-                transform.Translate(_moveDir * MoveSpeed * SpeedCoef * Time.deltaTime, Space.World);
-            }
-
-            if (DoesRotate)
-            {
-                transform.Rotate(Vector3.forward * RotationSpeed * Time.deltaTime, Space.World);
-            }
-
-            if (DestroyOnEarlyHorizontalLimits)
-            {
-                if (transform.position.x < GameConstants.HorizontalMinCoord || transform.position.x > GameConstants.HorizontalEarlyMaxCoord)
-                {
-                    Destroy(gameObject);
-                }
-            }
-            else if (DestroyOnHorizontalLimits)
-            {
-                if (transform.position.x < GameConstants.HorizontalMinCoord || transform.position.x > GameConstants.HorizontalMaxCoord)
-                {
-                    Destroy(gameObject);
-                }
-            }
-
-            if (DestroyOnVerticalLimits)
-            {
-                if (transform.position.y < GameConstants.VerticalMinCoord || transform.position.y > GameConstants.VerticalMaxCoord)
-                {
-                    Destroy(gameObject);
-                }
-            }
-
-            if (BounceOnHorizontalLimits)
-            {
-                if (transform.position.y < _minVerticalBounceLimit && _moveDir.y < -float.Epsilon ||
-                    transform.position.y > _maxVerticalBounceLimit && _moveDir.y > float.Epsilon)
-                {
-                    _moveDir.y = -_moveDir.y;
-                    _moveDir.Normalize();
-                }
+                Destroy(gameObject);
             }
         }
 
-        public void SetMoveDir(Vector2 newMoveDir)
+        if (BounceOnHorizontalLimits)
         {
-            _moveDir = newMoveDir;
+            if (transform.position.y < _minVerticalBounceLimit && _moveDir.y < -float.Epsilon ||
+                transform.position.y > _maxVerticalBounceLimit && _moveDir.y > float.Epsilon)
+            {
+                _moveDir.y = -_moveDir.y;
+                _moveDir.Normalize();
+            }
         }
+    }
 
-        public void SetBounceLimits(float minLimit, float maxLimit)
-        {
-            Assert.IsTrue(minLimit >= GameConstants.MinVerticalMovementLimit);
-            Assert.IsTrue(maxLimit <= GameConstants.MaxVerticalMovementLimit);
+    public void SetMoveDir(Vector2 newMoveDir)
+    {
+        _moveDir = newMoveDir;
+    }
 
-            _minVerticalBounceLimit = minLimit;
-            _maxVerticalBounceLimit = maxLimit;
-        }
+    public void SetBounceLimits(float minLimit, float maxLimit)
+    {
+        Assert.IsTrue(minLimit >= GameConstants.MinVerticalMovementLimit);
+        Assert.IsTrue(maxLimit <= GameConstants.MaxVerticalMovementLimit);
+
+        _minVerticalBounceLimit = minLimit;
+        _maxVerticalBounceLimit = maxLimit;
     }
 }

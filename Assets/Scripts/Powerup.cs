@@ -3,100 +3,99 @@
  * Author: Arhan Bakan
  * 
  * Powerup.cs
- * Handles powerup movement
+ * Handles powerup specific features
  */
 
 using UnityEngine;
 
-namespace Assets.Scripts
+public enum PowerupType
 {
-    public enum PowerupType
+    PtHealth,
+    PtSpeedup,
+    PtResearch,
+    PtShield,
+    PtTeleport,
+    PtBomb,
+    PtCount
+}
+
+public class Powerup : MonoBehaviour
+{
+    public PowerupType PowerupType;
+    [Range(0, 10)]
+    public int PowerupOccurence;
+    public bool IsNegativePowerup;
+    public Color NegativePowerupBlinkColor;
+    public AudioClip GainPowerupClip;
+
+    private BasicObject _basicObjectScript;
+    private SpriteRenderer _spriteRenderer;
+    private Color _rendererColor;
+    private bool _hasCollided;
+    private float _lastBlinkTime;
+    private const float BlinkSpeed = 0.5f;
+
+    private void Start()
     {
-        PtHealth,
-        PtSpeedup,
-        PtResearch,
-        PtShield,
-        PtTeleport,
-        PtBomb,
-        PtCount
+        _basicObjectScript = gameObject.GetComponent<BasicObject>();
+        _spriteRenderer = gameObject.GetComponent<SpriteRenderer>();
+        _rendererColor = _spriteRenderer.color;
+        _hasCollided = false;
     }
 
-    public class Powerup : MonoBehaviour
+    private void Update()
     {
-        public PowerupType PowerupType;
-        [Range(0, 10)]
-        public int PowerupOccurence;
-        public bool IsNegativePowerup;
-        public Color NegativePowerupBlinkColor;
-        public AudioClip GainPowerupClip;
-
-        private SpriteRenderer _spriteRenderer;
-        private Color _rendererColor;
-        private bool _hasCollided;
-        private float _lastBlinkTime;
-        private const float BlinkSpeed = 0.5f;
-
-        private void Start()
+        if (IsNegativePowerup && Time.time - _lastBlinkTime > BlinkSpeed)
         {
-            _spriteRenderer = gameObject.GetComponent<SpriteRenderer>();
-            _rendererColor = _spriteRenderer.color;
-            _hasCollided = false;
+            //negative powerups blink
+            _spriteRenderer.color = _spriteRenderer.color == _rendererColor ? NegativePowerupBlinkColor : _rendererColor;
+
+            _lastBlinkTime = Time.time;
         }
+    }
 
-        private void Update()
+    private void OnTriggerStay2D(Collider2D other)
+    {
+        if (!_hasCollided)
         {
-            if (IsNegativePowerup && Time.time - _lastBlinkTime > BlinkSpeed)
+            if (other.gameObject.tag == "Player")
             {
-                //negative powerups blink
-                _spriteRenderer.color = _spriteRenderer.color == _rendererColor ? NegativePowerupBlinkColor : _rendererColor;
+                Player playerScript = other.gameObject.GetComponent<Player>();
 
-                _lastBlinkTime = Time.time;
-            }
-        }
-
-        private void OnTriggerStay2D(Collider2D other)
-        {
-            if (!_hasCollided)
-            {
-                if (other.gameObject.tag == "Player")
+                if (!playerScript.IsDead)
                 {
-                    Player playerScript = other.gameObject.GetComponent<Player>();
-
-                    if (!playerScript.IsDead)
+                    bool gotPickedUp = true;
+                    switch (PowerupType)
                     {
-                        bool gotPickedUp = true;
-                        switch (PowerupType)
-                        {
-                            case PowerupType.PtHealth:
-                                playerScript.TriggerHealthPickup();
-                                break;
-                            case PowerupType.PtSpeedup:
-                                playerScript.TriggerSpeedUpPickup();
-                                break;
-                            case PowerupType.PtResearch:
-                                playerScript.TriggerResearchPickup();
-                                break;
-                            case PowerupType.PtShield:
-                                playerScript.TriggerShieldPickup();
-                                break;
-                            case PowerupType.PtTeleport:
-                                playerScript.TriggerTeleportPickup();
-                                break;
-                            case PowerupType.PtBomb:
-                                gotPickedUp = playerScript.PlayerGotHit();
-                                if (gotPickedUp)
-                                {
-                                    EventLogger.PrintToLog("Bomb Collides v Player");
-                                }
-                                break;
-                        }
+                        case PowerupType.PtHealth:
+                            playerScript.TriggerHealthPickup();
+                            break;
+                        case PowerupType.PtSpeedup:
+                            playerScript.TriggerSpeedUpPickup();
+                            break;
+                        case PowerupType.PtResearch:
+                            playerScript.TriggerResearchPickup();
+                            break;
+                        case PowerupType.PtShield:
+                            playerScript.TriggerShieldPickup();
+                            break;
+                        case PowerupType.PtTeleport:
+                            playerScript.TriggerTeleportPickup();
+                            break;
+                        case PowerupType.PtBomb:
+                            gotPickedUp = playerScript.PlayerGotHit();
+                            if (gotPickedUp)
+                            {
+                                EventLogger.PrintToLog("Bomb Collides v Player");
+                            }
+                            break;
+                    }
 
-                        if (gotPickedUp)
-                        {
-                            _hasCollided = true;
-                            AudioSource.PlayClipAtPoint(GainPowerupClip, transform.position);
-                            Destroy(gameObject);
-                        }
+                    if (gotPickedUp)
+                    {
+                        _hasCollided = true;
+                        _basicObjectScript.OnDestruction();
+                        Destroy(gameObject);
                     }
                 }
             }

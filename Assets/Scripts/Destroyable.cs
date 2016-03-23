@@ -8,10 +8,7 @@
 
 using UnityEngine;
 
-namespace Assets.Scripts
+public class Destroyable : MonoBehaviour
 {
-    public class Destroyable : MonoBehaviour
-    {
-        public void DestroyMe() { Destroy(gameObject); }
-    }
+    public void DestroyMe() { Destroy(gameObject); }
 }

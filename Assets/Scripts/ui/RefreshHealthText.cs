@@ -8,7 +8,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Assets.Scripts.ui
+namespace ui
 {
     public class RefreshHealthText : MonoBehaviour
     {

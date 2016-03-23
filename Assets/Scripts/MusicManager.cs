@@ -8,22 +8,19 @@
 
 using UnityEngine;
 
-namespace Assets.Scripts
+public class MusicManager : MonoBehaviour
 {
-    public class MusicManager : MonoBehaviour
+    public AudioClip[] MusicList;
+    private AudioSource _currentAudioSource;
+
+    private void Awake()
     {
-        public AudioClip[] MusicList;
-        private AudioSource _currentAudioSource;
+        int randomIndex = Random.Range(0, MusicList.Length);
 
-        private void Awake()
-        {
-            int randomIndex = Random.Range(0, MusicList.Length);
+        _currentAudioSource = gameObject.GetComponent<AudioSource>();
 
-            _currentAudioSource = gameObject.GetComponent<AudioSource>();
-
-            _currentAudioSource.clip = MusicList[randomIndex];
-            _currentAudioSource.loop = true;
-            _currentAudioSource.Play();
-        }
+        _currentAudioSource.clip = MusicList[randomIndex];
+        _currentAudioSource.loop = true;
+        _currentAudioSource.Play();
     }
 }

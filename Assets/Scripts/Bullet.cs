@@ -8,104 +8,101 @@
 
 using UnityEngine;
 
-namespace Assets.Scripts
+public enum BulletType
 {
-    public enum BulletType
+    BtStun,
+    BtSpeedup,
+    BtTeleport,
+    BtKiller
+}
+
+public class Bullet : MonoBehaviour
+{
+    public BulletType CurrentBulletType;
+    public AudioClip BulletHitClip;
+    public bool ShotByPlayer;
+    private bool _hasCollided;
+    private bool _destroyedByCollision;
+    private Player _playerScript;
+
+    private void Start()
     {
-        BtStun,
-        BtSpeedup,
-        BtTeleport,
-        BtKiller
+        _hasCollided = false;
+        _destroyedByCollision = false;
+        GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
+        if (playerObject)
+        {
+            _playerScript = playerObject.GetComponent<Player>();
+        }
     }
 
-    public class Bullet : MonoBehaviour
+    private void OnTriggerStay2D(Collider2D other)
     {
-        public BulletType CurrentBulletType;
-        public AudioClip BulletHitClip;
-        public bool ShotByPlayer;
-        private bool _hasCollided;
-        private bool _destroyedByCollision;
-        private Player _playerScript;
-
-        private void Start()
+        if (_hasCollided)
         {
-            _hasCollided = false;
-            _destroyedByCollision = false;
-            GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
-            if (playerObject)
+            return;
+        }
+
+        if (other.gameObject.tag == "Enemy")
+        {
+            BasicEnemy enemyScript = other.gameObject.GetComponent<BasicEnemy>();
+
+            switch (CurrentBulletType)
             {
-                _playerScript = playerObject.GetComponent<Player>();
+                case BulletType.BtStun:
+                    enemyScript.TriggerStun();
+                    break;
+                case BulletType.BtSpeedup:
+                    enemyScript.TriggerSpeedBoost();
+                    break;
+            }
+            _destroyedByCollision = true;
+            Hit();
+        }
+        else if (other.gameObject.tag == "Player")
+        {
+            switch (CurrentBulletType)
+            {
+                case BulletType.BtKiller:
+                    bool playerGotHit = _playerScript.PlayerGotHit();
+                    if (playerGotHit)
+                    {
+                        EventLogger.PrintToLog("Bullet Collision v Player");
+                        Hit();
+                    }
+                    break;
             }
         }
-
-        private void OnTriggerStay2D(Collider2D other)
+        else if (other.gameObject.tag == "Shield")
         {
-	        if (_hasCollided)
-	        {
-		        return;
-	        }
+            Player playerScript = other.gameObject.GetComponentInParent<Player>();
 
-	        if (other.gameObject.tag == "Enemy")
-	        {
-		        BasicEnemy enemyScript = other.gameObject.GetComponent<BasicEnemy>();
-
-		        switch (CurrentBulletType)
-		        {
-			        case BulletType.BtStun:
-				        enemyScript.TriggerStun();
-				        break;
-			        case BulletType.BtSpeedup:
-				        enemyScript.TriggerSpeedBoost();
-				        break;
-		        }
-                _destroyedByCollision = true;
-                Hit();
-	        }
-	        else if (other.gameObject.tag == "Player")
-	        {
-		        switch (CurrentBulletType)
-		        {
-			        case BulletType.BtKiller:
-				        bool playerGotHit = _playerScript.PlayerGotHit();
-		                if (playerGotHit)
-		                {
-                            EventLogger.PrintToLog("Bullet Collision v Player");
-                            Hit();
-                        }
-				        break;
-		        }
-	        }
-	        else if (other.gameObject.tag == "Shield")
-	        {
-		        Player playerScript = other.gameObject.GetComponentInParent<Player>();
-
-		        switch (CurrentBulletType)
-		        {
-			        case BulletType.BtKiller:
-				        bool shieldGotHit = playerScript.ShieldGotHit();
-				        if (shieldGotHit)
-				        {
-                            EventLogger.PrintToLog("Bullet Collision v Shield");
-                            Hit();
-                        }
-				        break;
-		        }
-	        }
-        }
-
-        private void Hit()
-        {
-            _hasCollided = true;
-            AudioSource.PlayClipAtPoint(BulletHitClip, transform.position);
-            Destroy(gameObject);
-        }
-
-        private void OnDestroy()
-        {
-            if (ShotByPlayer)
+            switch (CurrentBulletType)
             {
-                _playerScript.OnBulletDestruction(_destroyedByCollision);
+                case BulletType.BtKiller:
+                    bool shieldGotHit = playerScript.ShieldGotHit();
+                    if (shieldGotHit)
+                    {
+                        EventLogger.PrintToLog("Bullet Collision v Shield");
+                        Hit();
+                    }
+                    break;
             }
+        }
+    }
+
+    private void Hit()
+    {
+        _hasCollided = true;
+        AudioSource.PlayClipAtPoint(BulletHitClip, transform.position);
+        Destroy(gameObject);
+    }
+
+    private void OnDestroy()
+    {
+        if (ShotByPlayer)
+        {
+            _playerScript.OnBulletDestruction(_destroyedByCollision);
         }
     }
 }

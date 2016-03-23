@@ -5,10 +5,11 @@
  * RefreshDifficultyText.cs
  */
 
+using System.Globalization;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Assets.Scripts.ui
+namespace ui
 {
 	public class RefreshDifficultyText : MonoBehaviour
 	{
@@ -23,7 +24,7 @@ namespace Assets.Scripts.ui
 
 	    private void Update ()
 		{
-			_difficultyText.text = _difficultyManagerScript.DifficultyMultiplier.ToString();
+			_difficultyText.text = _difficultyManagerScript.DifficultyMultiplier.ToString(CultureInfo.InvariantCulture);
 		}
 	}
 }

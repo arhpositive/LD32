@@ -13,6 +13,7 @@ GameObject:
   - 50: {fileID: 5044226}
   - 58: {fileID: 5869640}
   - 114: {fileID: 11483228}
+  - 114: {fileID: 11488544}
   m_Layer: 9
   m_Name: basicEnemyPrefab
   m_TagString: Enemy
@@ -154,8 +155,6 @@ MonoBehaviour:
   CanShoot: 1
   MinFiringInterval: 3
   BulletPrefab: {fileID: 104536, guid: efb3702b3f1e6b140ae6e81f3396926b, type: 2}
-  ExplosionClip: {fileID: 8300000, guid: 2c95fdf00a27c874cb6cf05c7be45376, type: 3}
-  ExplosionPrefab: {fileID: 187376, guid: 27b818dee9954ae408eba04ee4dc1750, type: 2}
 --- !u!114 &11483228
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -183,6 +182,20 @@ MonoBehaviour:
   DestroyOnVerticalLimits: 0
   DestroyOnHorizontalLimits: 0
   DestroyOnEarlyHorizontalLimits: 0
+--- !u!114 &11488544
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 139786}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7733fa81943d9e46bcbbe4d40977cd3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  DestructionPrefab: {fileID: 187376, guid: 27b818dee9954ae408eba04ee4dc1750, type: 2}
+  DestructionAudioClip: {fileID: 8300000, guid: 2c95fdf00a27c874cb6cf05c7be45376,
+    type: 3}
 --- !u!212 &21226966
 SpriteRenderer:
   m_ObjectHideFlags: 1

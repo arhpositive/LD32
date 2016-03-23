@@ -9,18 +9,15 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace Assets.Scripts
+public class LoadLevel : MonoBehaviour
 {
-    public class LoadLevel : MonoBehaviour
+    public void LoadMenuScene()
     {
-        public void LoadMenuScene()
-        {
-            SceneManager.LoadScene(0);
-        }
+        SceneManager.LoadScene(0);
+    }
 
-        public void LoadGameScene()
-        {
-            SceneManager.LoadScene(1);
-        }
+    public void LoadGameScene()
+    {
+        SceneManager.LoadScene(1);
     }
 }
