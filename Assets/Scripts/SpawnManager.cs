@@ -99,10 +99,11 @@ public class SpawnManager : MonoBehaviour
 
     private void Start()
     {
+        Time.timeScale = 1.35f;
         _difficultyManagerScript = Camera.main.GetComponent<DifficultyManager>();
             
         _enemySpawnMaxVertDist = ShipColliderVertSize * 2.0f - 0.01f;
-        _enemySpawnMinVertDist = Mathf.Min(ShipGameObjectVertSize, _enemySpawnMaxVertDist);
+        _enemySpawnMinVertDist = Mathf.Min(ShipGameObjectVertSize + 0.05f, _enemySpawnMaxVertDist);
         _enemySpawnMaxHorzDist = PlayerShipColliderHorzSize * 2.0f - 0.01f;
         _enemySpawnMinHorzDist = Mathf.Min(PlayerShipColliderHorzSize * 0.5f, _enemySpawnMaxHorzDist);
 
@@ -281,7 +282,7 @@ public class SpawnManager : MonoBehaviour
 
         float randomIntervalCoef = Random.Range(MinWaveSpawnIntervalCoef, MaxWaveSpawnIntervalCoef);
         _waveSpawnInterval = randomIntervalCoef / Mathf.Sqrt(_difficultyManagerScript.DifficultyMultiplier);
-        bool hasNoExit = Random.Range(0, 100) < 50; //TODO NEXT include difficultyMultiplier in the case here
+        bool hasNoExit = Random.Range(0, 100) < 80; //TODO NEXT include difficultyMultiplier in the case here
 
         //TODO low difficulty = wider spread & less enemies
         //TODO high difficulty = shorter spread & more enemies
@@ -336,7 +337,7 @@ public class SpawnManager : MonoBehaviour
         {
             //no possible no-exits here!
             int enemyMaxCount = Mathf.Min(maxPossibleShipCount - 1, _formations[randomWaveIndex].WaveEntities.Count);
-            int enemyMinCount = Mathf.Max(2, enemyMaxCount - 6);
+            int enemyMinCount = enemyMaxCount - 1;
             enemyCount = Random.Range(enemyMinCount, enemyMaxCount);
         }
 
