@@ -107,9 +107,6 @@ public class SpawnManager : MonoBehaviour
         _enemySpawnMaxHorzDist = PlayerShipColliderHorzSize * 2.0f - 0.01f;
         _enemySpawnMinHorzDist = Mathf.Min(PlayerShipColliderHorzSize * 0.5f, _enemySpawnMaxHorzDist);
 
-        print("Enemy Spawn Min V: " + _enemySpawnMinVertDist + " Max V: " + _enemySpawnMaxVertDist);
-        print("Enemy Spawn Min H: " + _enemySpawnMinHorzDist + " Max H: " + _enemySpawnMaxHorzDist);
-
         _initialMeteorCount = 30;
         _initialStarCount = _initialMeteorCount * GameConstants.StarToMeteorRatio;
             
@@ -297,9 +294,17 @@ public class SpawnManager : MonoBehaviour
         {
             maxEnemyHorizontalDist /= _formations[randomWaveIndex].HorizontalShipSpan;
         }
-        //TODO NEXT we've to calculate waveSpawnInterval in such a way that maxEnemyHorizontalDist can never become less than _enemySpawnMinHorzDist
-        maxEnemyHorizontalDist = Mathf.Clamp(maxEnemyHorizontalDist, _enemySpawnMinHorzDist, _enemySpawnMaxHorzDist);
-        float enemyHorizontalDist = Random.Range(_enemySpawnMinHorzDist, maxEnemyHorizontalDist);
+        
+        float enemyHorizontalDist;
+        if (maxEnemyHorizontalDist < _enemySpawnMinHorzDist)
+        {
+            enemyHorizontalDist = maxEnemyHorizontalDist;
+        }
+        else
+        {
+            maxEnemyHorizontalDist = Mathf.Clamp(maxEnemyHorizontalDist, _enemySpawnMinHorzDist, _enemySpawnMaxHorzDist);
+            enemyHorizontalDist = Random.Range(_enemySpawnMinHorzDist, maxEnemyHorizontalDist);
+        }
         
         //III. Determine Vertical Distance Between Enemies
         float verticalMovementLength = VMaxCoord - VMinCoord;
@@ -349,7 +354,6 @@ public class SpawnManager : MonoBehaviour
         {
             //we just went off the line, this is only possible for no exit formations!
             Assert.IsTrue(hasNoExit);
-            //Assert.IsTrue(distBetweenFirstAndLastShip > verticalMovementLength);
 
             float difference = minVerticalStartCoord - maxVerticalStartCoord;
             maxVerticalStartCoord = minVerticalStartCoord + difference;
