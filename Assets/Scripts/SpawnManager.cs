@@ -279,7 +279,8 @@ public class SpawnManager : MonoBehaviour
 
         float randomIntervalCoef = Random.Range(MinWaveSpawnIntervalCoef, MaxWaveSpawnIntervalCoef);
         _waveSpawnInterval = randomIntervalCoef / Mathf.Sqrt(_difficultyManagerScript.DifficultyMultiplier);
-        bool hasNoExit = Random.Range(0, 100) < 80; //TODO NEXT include difficultyMultiplier in the case here
+        
+        bool hasNoExit = Random.Range(0.0f, 100.0f) < 70.0f * Mathf.Sqrt(_difficultyManagerScript.DifficultyMultiplier);
 
         //TODO low difficulty = wider spread & less enemies
         //TODO high difficulty = shorter spread & more enemies
