@@ -278,7 +278,7 @@ public class SpawnManager : MonoBehaviour
         EventLogger.PrintToLog("New Wave Spawn");
 
         float randomIntervalCoef = Random.Range(MinWaveSpawnIntervalCoef, MaxWaveSpawnIntervalCoef);
-        _waveSpawnInterval = randomIntervalCoef / Mathf.Sqrt(_difficultyManagerScript.DifficultyMultiplier);
+        _waveSpawnInterval = randomIntervalCoef / Mathf.Sqrt(_difficultyManagerScript.DifficultyCoefs[DifficultyParameter.DpWaveSpawnRate]);
         bool hasNoExit = Random.Range(0, 100) < 80; //TODO NEXT include difficultyMultiplier in the case here
 
         //TODO low difficulty = wider spread & less enemies
@@ -375,7 +375,7 @@ public class SpawnManager : MonoBehaviour
         //VI. Determine Advanced Enemy Percentage
         float difficultyInterval = GameConstants.MaxDifficultyMultiplier - GameConstants.MinDifficultyMultiplier;
         float advancedEnemyPercentage =
-            ((_difficultyManagerScript.DifficultyMultiplier - GameConstants.MinDifficultyMultiplier) / 
+            ((_difficultyManagerScript.DifficultyCoefs[DifficultyParameter.DpAdvEnemyCoef] - GameConstants.MinDifficultyMultiplier) / 
              difficultyInterval) * 100.0f;
 
         //VII. Spawn Enemies
@@ -429,9 +429,9 @@ public class SpawnManager : MonoBehaviour
     private void SpawnNewPowerup()
     {
         float randomIntervalCoef = Random.Range(PowerupSpawnBaseInterval, PowerupSpawnBaseInterval * 2);
-        _powerupSpawnInterval = randomIntervalCoef * Mathf.Sqrt(_difficultyManagerScript.DifficultyMultiplier);
+        _powerupSpawnInterval = randomIntervalCoef * Mathf.Sqrt(_difficultyManagerScript.DifficultyCoefs[DifficultyParameter.DpNegPowerupSpawnRate]);
 
-        float currentDifficulty = _difficultyManagerScript.DifficultyMultiplier;
+        float currentDifficulty = _difficultyManagerScript.DifficultyCoefs[DifficultyParameter.DpNegPowerupSpawnRate]; //TODO NEXT change this
 
         int powerupCount = PowerupPrefabArray.Length;
 

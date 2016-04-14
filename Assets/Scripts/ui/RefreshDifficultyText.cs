@@ -23,8 +23,14 @@ namespace ui
 		}
 
 	    private void Update ()
-		{
-			_difficultyText.text = _difficultyManagerScript.DifficultyMultiplier.ToString(CultureInfo.InvariantCulture);
+	    {
+	        float avgDifficulty = 0.0f;
+	        for (DifficultyParameter curParam = DifficultyParameter.DpShipFireRate; curParam < DifficultyParameter.DpCount; ++curParam)
+	        {
+	            avgDifficulty += _difficultyManagerScript.DifficultyCoefs[curParam];
+	        }
+	        avgDifficulty /= (int)DifficultyParameter.DpCount;
+			_difficultyText.text = avgDifficulty.ToString(CultureInfo.InvariantCulture);
 		}
 	}
 }
