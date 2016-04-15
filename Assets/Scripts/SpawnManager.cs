@@ -43,7 +43,8 @@ public class SpawnManager : MonoBehaviour
     [Header("Prefabs")]
     public GameObject PlayerPrefab;
     public GameObject[] EnemyPrefabArray;
-    public GameObject[] PowerupPrefabArray;
+    public GameObject[] PosPowerupPrefabArray;
+    public GameObject[] NegPowerupPrefabArray;
     public GameObject[] MeteorPrefabArray;
     public GameObject StarPrefab;
         
@@ -57,8 +58,10 @@ public class SpawnManager : MonoBehaviour
     private float _previousWaveSpawnTime;
     private float _waveSpawnInterval;
 
-    private float _previousPowerupSpawnTime;
-    private float _powerupSpawnInterval;
+    private float _previousPosPowerupSpawnTime;
+    private float _posPowerupSpawnInterval;
+    private float _previousNegPowerupSpawnTime;
+    private float _negPowerupSpawnInterval;
 
     //TODO LATER for every star and meteor destroyed, just spawn another one, remove all timers and intervals
     private int _initialMeteorCount;
@@ -83,6 +86,8 @@ public class SpawnManager : MonoBehaviour
     private const float HSpawnCoord = GameConstants.HorizontalMaxCoord;
     private const float VMinCoord = GameConstants.MinVerticalMovementLimit;
     private const float VMaxCoord = GameConstants.MaxVerticalMovementLimit;
+
+    private const float DifficultyDifferenceCoef = 100.0f / (GameConstants.MaxDifficultyMultiplier - GameConstants.MinDifficultyMultiplier);
 
     private void Awake()
     {
@@ -116,8 +121,11 @@ public class SpawnManager : MonoBehaviour
             
         PregeneratePossibleWaves();
 
-        _powerupSpawnInterval = PowerupSpawnBaseInterval;
-        _previousPowerupSpawnTime = Time.time;
+        _posPowerupSpawnInterval = Random.Range(PowerupSpawnBaseInterval, PowerupSpawnBaseInterval * 2);
+        _previousPosPowerupSpawnTime = Time.time;
+
+        _negPowerupSpawnInterval = Random.Range(PowerupSpawnBaseInterval, PowerupSpawnBaseInterval * 2);
+        _previousNegPowerupSpawnTime = Time.time;
 
         _meteorSpawnInterval = 1.0f;
         _previousMeteorSpawnTime = Time.time;
@@ -151,10 +159,16 @@ public class SpawnManager : MonoBehaviour
                 _previousWaveSpawnTime = Time.time;
             }
 
-            if (Time.time - _previousPowerupSpawnTime > _powerupSpawnInterval)
+            if (Time.time - _previousPosPowerupSpawnTime > _posPowerupSpawnInterval)
             {
-                SpawnNewPowerup();
-                _previousPowerupSpawnTime = Time.time;
+                SpawnNewPowerup(true);
+                _previousPosPowerupSpawnTime = Time.time;
+            }
+
+            if (Time.time - _previousNegPowerupSpawnTime > _negPowerupSpawnInterval)
+            {
+                SpawnNewPowerup(false);
+                _previousNegPowerupSpawnTime = Time.time;
             }
         }
 
@@ -278,8 +292,9 @@ public class SpawnManager : MonoBehaviour
         EventLogger.PrintToLog("New Wave Spawn");
 
         float randomIntervalCoef = Random.Range(MinWaveSpawnIntervalCoef, MaxWaveSpawnIntervalCoef);
-        _waveSpawnInterval = randomIntervalCoef / Mathf.Sqrt(_difficultyManagerScript.DifficultyCoefs[DifficultyParameter.DpWaveSpawnRate]);
-        bool hasNoExit = Random.Range(0, 100) < 80; //TODO NEXT include difficultyMultiplier in the case here
+        _waveSpawnInterval = randomIntervalCoef / _difficultyManagerScript.DifficultyCoefs[DifficultyParameter.DpWaveSpawnRateIncrease];
+        
+        bool hasNoExit = Random.Range(0, 100) < DifficultyDifferenceCoef * (_difficultyManagerScript.GetAverageDifficultyLevel() - GameConstants.MinDifficultyMultiplier);
 
         //TODO low difficulty = wider spread & less enemies
         //TODO high difficulty = shorter spread & more enemies
@@ -373,10 +388,7 @@ public class SpawnManager : MonoBehaviour
         selectedFormationEntities.Sort(FormationComparison);
 
         //VI. Determine Advanced Enemy Percentage
-        float difficultyInterval = GameConstants.MaxDifficultyMultiplier - GameConstants.MinDifficultyMultiplier;
-        float advancedEnemyPercentage =
-            ((_difficultyManagerScript.DifficultyCoefs[DifficultyParameter.DpAdvEnemyCoef] - GameConstants.MinDifficultyMultiplier) / 
-             difficultyInterval) * 100.0f;
+        float advancedEnemyPercentage = DifficultyDifferenceCoef * (_difficultyManagerScript.DifficultyCoefs[DifficultyParameter.DpAdvEnemyPercentage] - GameConstants.MinDifficultyMultiplier);
 
         //VII. Spawn Enemies
         Vector2 previousEnemyPos = Vector2.zero;
@@ -426,48 +438,37 @@ public class SpawnManager : MonoBehaviour
         return 0;
     }
 
-    private void SpawnNewPowerup()
+    private void SpawnNewPowerup(bool isPositive)
     {
         float randomIntervalCoef = Random.Range(PowerupSpawnBaseInterval, PowerupSpawnBaseInterval * 2);
-        _powerupSpawnInterval = randomIntervalCoef * Mathf.Sqrt(_difficultyManagerScript.DifficultyCoefs[DifficultyParameter.DpNegPowerupSpawnRate]);
 
-        float currentDifficulty = _difficultyManagerScript.DifficultyCoefs[DifficultyParameter.DpNegPowerupSpawnRate]; //TODO NEXT change this
+        GameObject[] powerupPrefabArray;
+        if (isPositive)
+        {
+            _posPowerupSpawnInterval = randomIntervalCoef * _difficultyManagerScript.DifficultyCoefs[DifficultyParameter.DpPosPowerupSpawnRateDecrease];
+            powerupPrefabArray = PosPowerupPrefabArray;
+        }
+        else
+        {
+            _negPowerupSpawnInterval = randomIntervalCoef / _difficultyManagerScript.DifficultyCoefs[DifficultyParameter.DpNegPowerupSpawnRateIncrease];
+            powerupPrefabArray = NegPowerupPrefabArray;
+        }
 
-        int powerupCount = PowerupPrefabArray.Length;
-
-        float[] occurenceArray = new float[powerupCount];
-        float totalOccurence = 0.0f;
-
+        List<int> occurenceList = new List<int>();
+        int powerupCount = powerupPrefabArray.Length;
         for (int i = 0; i < powerupCount; ++i)
         {
-            Powerup powerupScript = PowerupPrefabArray[i].GetComponent<Powerup>();
-            if (powerupScript.IsNegativePowerup)
+            int powerupOccurence = powerupPrefabArray[i].GetComponent<Powerup>().PowerupOccurence;
+            for (int j = 0; j < powerupOccurence; ++j)
             {
-                occurenceArray[i] = powerupScript.PowerupOccurence * currentDifficulty;
+                occurenceList.Add(i);
             }
-            else
-            {
-                occurenceArray[i] = powerupScript.PowerupOccurence / currentDifficulty;
-            }
-            totalOccurence += occurenceArray[i];
         }
 
-        float randomOccurence = Random.Range(0.0f, totalOccurence);
-        float currentOccurence = 0.0f;
-
-        int j = 0;
-        while (j < powerupCount)
-        {
-            currentOccurence += occurenceArray[j];
-            if (randomOccurence < currentOccurence)
-            {
-                break;
-            }
-            ++j;
-        }
-        Vector3 powerupPos = new Vector2(GameConstants.HorizontalMaxCoord, 
-            Random.Range(GameConstants.MinVerticalMovementLimit, GameConstants.MaxVerticalMovementLimit));
-        Instantiate(PowerupPrefabArray[j], powerupPos, Quaternion.identity);
+        int powerupIndex = Random.Range(0, occurenceList.Count);
+        Vector3 powerupPos = new Vector2(GameConstants.HorizontalMaxCoord,
+           Random.Range(GameConstants.MinVerticalMovementLimit, GameConstants.MaxVerticalMovementLimit));
+        Instantiate(powerupPrefabArray[occurenceList[powerupIndex]], powerupPos, Quaternion.identity);
     }
 
     private void InitialMeteorAndStarSpawn()

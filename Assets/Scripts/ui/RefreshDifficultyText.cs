@@ -24,13 +24,7 @@ namespace ui
 
 	    private void Update ()
 	    {
-	        float avgDifficulty = 0.0f;
-	        for (DifficultyParameter curParam = DifficultyParameter.DpShipFireRate; curParam < DifficultyParameter.DpCount; ++curParam)
-	        {
-	            avgDifficulty += _difficultyManagerScript.DifficultyCoefs[curParam];
-	        }
-	        avgDifficulty /= (int)DifficultyParameter.DpCount;
-			_difficultyText.text = avgDifficulty.ToString(CultureInfo.InvariantCulture);
+			_difficultyText.text = _difficultyManagerScript.GetAverageDifficultyLevel().ToString(CultureInfo.InvariantCulture);
 		}
 	}
 }

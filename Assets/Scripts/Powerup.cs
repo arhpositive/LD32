@@ -26,7 +26,6 @@ public class Powerup : MonoBehaviour
     public int PowerupOccurence;
     public bool IsNegativePowerup;
     public Color NegativePowerupBlinkColor;
-    public AudioClip GainPowerupClip;
 
     private BasicObject _basicObjectScript;
     private SpriteRenderer _spriteRenderer;

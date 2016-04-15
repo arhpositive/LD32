@@ -165,7 +165,7 @@ public class BasicEnemy : MonoBehaviour
     private void SetNextFiringInterval()
     {
         float randomIntervalCoef = Random.Range(MinFiringInterval, 2 * MinFiringInterval);
-        _nextFiringInterval = randomIntervalCoef / Mathf.Sqrt(_difficultyManagerScript.DifficultyCoefs[DifficultyParameter.DpShipFireRate]);
+        _nextFiringInterval = randomIntervalCoef / _difficultyManagerScript.DifficultyCoefs[DifficultyParameter.DpShipFireRateIncrease];
     }
 
     private void Explode()

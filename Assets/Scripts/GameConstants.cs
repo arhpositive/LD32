@@ -18,8 +18,8 @@ public static class GameConstants
     public const float MaxHorizontalMovementLimit = 7.15f;
     public const float MinVerticalMovementLimit = 0.45f;
     public const float MaxVerticalMovementLimit = 5.15f;
-    public const float MinDifficultyMultiplier = 0.33f;
-    public const float MaxDifficultyMultiplier = 3.0f;
+    public const float MinDifficultyMultiplier = 0.25f;
+    public const float MaxDifficultyMultiplier = 4.0f;
     public const float JoystickDeadZoneCoef = 0.19f;
     public const int StarToMeteorRatio = 10;
 }

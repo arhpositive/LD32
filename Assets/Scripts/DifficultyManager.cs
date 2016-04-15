@@ -12,11 +12,11 @@ using UnityEngine.Assertions;
 
 public enum DifficultyParameter
 {
-    DpShipFireRate,
-    DpWaveSpawnRate,
-    DpPosPowerupSpawnRate,
-    DpNegPowerupSpawnRate, //TODO might remove bombs or separate from powerups
-    DpAdvEnemyCoef,
+    DpShipFireRateIncrease,
+    DpWaveSpawnRateIncrease,
+    DpPosPowerupSpawnRateDecrease,
+    DpNegPowerupSpawnRateIncrease,
+    DpAdvEnemyPercentage, //TODO advanced enemy percentage should work differently
     DpCount
 }
 
@@ -47,14 +47,13 @@ public class DifficultyManager : MonoBehaviour
     private Player _playerScript;
 
     private int _adjustmentStepCount;
-
     private int _previousWavePlayerHealth;
 
     private void Start()
     {
         //TODO later on, these multipliers have to be pulled out from our learning data
         DifficultyCoefs = new Dictionary<DifficultyParameter, float>((int)DifficultyParameter.DpCount);
-        for (DifficultyParameter curParam = DifficultyParameter.DpShipFireRate; curParam < DifficultyParameter.DpCount; ++curParam)
+        for (DifficultyParameter curParam = DifficultyParameter.DpShipFireRateIncrease; curParam < DifficultyParameter.DpCount; ++curParam)
         {
             DifficultyCoefs.Add(curParam, 1.0f);
         }
@@ -97,6 +96,8 @@ public class DifficultyManager : MonoBehaviour
         //for now, lets put up some examples
         //do not consider difficulty numbers going off the limits here, they won't be of any problem once ML system is online
 
+
+
         float hpDiffSinceLastAdjustment = _playerScript.PlayerHealth - _previousWavePlayerHealth;
 
         if (hpDiffSinceLastAdjustment < 0.0f)
@@ -117,7 +118,7 @@ public class DifficultyManager : MonoBehaviour
 
     private void RandomDiffAdjustment(bool isIncrement)
     {
-        DifficultyParameter selectedDifficultyParameter = (DifficultyParameter)Random.Range((int)DifficultyParameter.DpShipFireRate,
+        DifficultyParameter selectedDifficultyParameter = (DifficultyParameter)Random.Range((int)DifficultyParameter.DpShipFireRateIncrease,
                         (int)DifficultyParameter.DpCount);
         float oldValue = DifficultyCoefs[selectedDifficultyParameter];
 
@@ -126,7 +127,7 @@ public class DifficultyManager : MonoBehaviour
         int numRetries = 3;
         for (int i = 0; i < numRetries || (isIncrement ? (oldValue <= GameConstants.MinDifficultyMultiplier) : (oldValue >= GameConstants.MaxDifficultyMultiplier)); ++i)
         {
-            selectedDifficultyParameter = (DifficultyParameter)Random.Range((int)DifficultyParameter.DpShipFireRate,
+            selectedDifficultyParameter = (DifficultyParameter)Random.Range((int)DifficultyParameter.DpShipFireRateIncrease,
                     (int)DifficultyParameter.DpCount);
             oldValue = DifficultyCoefs[selectedDifficultyParameter];
         }
@@ -140,5 +141,17 @@ public class DifficultyManager : MonoBehaviour
         //Assert.IsTrue(newValue >= GameConstants.MinDifficultyMultiplier && newValue <= GameConstants.MaxDifficultyMultiplier);
         DifficultyCoefs[difficultyParameter] = Mathf.Clamp(newValue, GameConstants.MinDifficultyMultiplier, GameConstants.MaxDifficultyMultiplier);
         EventLogger.PrintToLog("Difficulty Changed: " + difficultyParameter + " Value: " + newValue);
+    }
+
+    public float GetAverageDifficultyLevel()
+    {
+        float avgDifficulty = 0.0f;
+        for (DifficultyParameter curParam = DifficultyParameter.DpShipFireRateIncrease; curParam < DifficultyParameter.DpCount; ++curParam)
+        {
+            avgDifficulty += DifficultyCoefs[curParam];
+        }
+        avgDifficulty /= (int)DifficultyParameter.DpCount;
+
+        return avgDifficulty;
     }
 }

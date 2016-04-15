@@ -175,11 +175,13 @@ MonoBehaviour:
   EnemyPrefabArray:
   - {fileID: 139786, guid: 566fefe5e59b580429b5c12346896bd0, type: 2}
   - {fileID: 190498, guid: a9dbab4630dcdae4ca684a97057da1a1, type: 2}
-  PowerupPrefabArray:
+  PosPowerupPrefabArray:
   - {fileID: 186326, guid: 34c4edda1b1fbba4bb38a7f81c642d6b, type: 2}
   - {fileID: 195642, guid: 7e24ad8ee91fea748a9cf394b8bd4c47, type: 2}
   - {fileID: 107878, guid: e27706cab5b9776428cddb7dee2575de, type: 2}
   - {fileID: 178398, guid: 9e1492490beda70419e92a554887e3b8, type: 2}
+  - {fileID: 169616, guid: 5d7a9305dd987d44ca4c1ecf396b3599, type: 2}
+  NegPowerupPrefabArray:
   - {fileID: 113784, guid: a461906a5484a2e48b374b9d9d771f02, type: 2}
   MeteorPrefabArray:
   - {fileID: 105448, guid: 4318761234289f640a7017713d221b7b, type: 2}
