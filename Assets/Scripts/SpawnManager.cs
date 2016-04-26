@@ -357,8 +357,7 @@ public class SpawnManager : MonoBehaviour
         {
             //no possible no-exits here!
             int enemyMaxCount = Mathf.Min(maxPossibleShipCount - 1, _formations[randomWaveIndex].WaveEntities.Count);
-            int enemyMinCount = enemyMaxCount - 1;
-            enemyCount = Random.Range(enemyMinCount, enemyMaxCount);
+            enemyCount = Random.Range(enemyMaxCount - 2, enemyMaxCount);
         }
 
         int actualVerticalIntervalCount = enemyCount - 1;
@@ -387,15 +386,62 @@ public class SpawnManager : MonoBehaviour
         }
         selectedFormationEntities.Sort(FormationComparison);
 
-        //VI. Determine Advanced Enemy Percentage
-        float advancedEnemyPercentage = DifficultyDifferenceCoef * (_difficultyManagerScript.DifficultyCoefs[DifficultyParameter.DpAdvEnemyPercentage] - GameConstants.MinDifficultyMultiplier);
+        //VI. Determine Advanced Enemy Count
+        int enemyTypeCount = EnemyPrefabArray.Length;
+        int[] enemyTypeSteps = new int[enemyTypeCount];
+        for (int i = 0; i < enemyTypeSteps.Length; ++i)
+        {
+            enemyTypeSteps[i] = Mathf.RoundToInt((i*100.0f)/(enemyTypeSteps.Length-1));
+            //enemyTypeSteps = {0, 100} for 2 enemies, {0, 50, 100} for 3 enemies, {0, 33, 67, 100} for 4 enemies, and so on
+        }
+
+        float advancedEnemyPercentage = DifficultyDifferenceCoef * (_difficultyManagerScript.DifficultyCoefs[DifficultyParameter.DpEnemyShipStrength] - GameConstants.MinDifficultyMultiplier);
+        print(advancedEnemyPercentage);
+
+        int advEnemyTypeIndex = 1;
+        int currentEnemyTypeStep = enemyTypeSteps[advEnemyTypeIndex];
+        while (advancedEnemyPercentage > currentEnemyTypeStep)
+        {
+            ++advEnemyTypeIndex;
+            Assert.IsTrue(advEnemyTypeIndex < enemyTypeSteps.Length);
+            currentEnemyTypeStep = enemyTypeSteps[advEnemyTypeIndex];
+        }
+        // if we're here, we know which two enemies we're gonna use
+        int previousEnemyTypeStep = enemyTypeSteps[advEnemyTypeIndex - 1];
+        float percentageOfStrongerEnemy = (advancedEnemyPercentage - previousEnemyTypeStep) / (currentEnemyTypeStep - previousEnemyTypeStep);
+
+        int minAdvancedEnemyCount = Mathf.FloorToInt(percentageOfStrongerEnemy * selectedFormationEntities.Count);
+        int maxAdvancedEnemyCount = Mathf.CeilToInt(percentageOfStrongerEnemy * selectedFormationEntities.Count);
+        int advancedEnemyCount = Random.Range(minAdvancedEnemyCount, maxAdvancedEnemyCount + 1);
+
+        //create ship types list
+        int[] shipTypes = new int[selectedFormationEntities.Count];
+        for (int i = 0; i < shipTypes.Length; ++i)
+        {
+            if (i < advancedEnemyCount)
+            {
+                shipTypes[i] = advEnemyTypeIndex;
+            }
+            else
+            {
+                shipTypes[i] = advEnemyTypeIndex - 1;
+            }
+        }
+
+        //shuffle the list
+        for (int i = 0; i < shipTypes.Length; ++i)
+        {
+            int temp = shipTypes[i];
+            int randomIndex = Random.Range(i, shipTypes.Length);
+            shipTypes[i] = shipTypes[randomIndex];
+            shipTypes[randomIndex] = temp;
+        }
 
         //VII. Spawn Enemies
         Vector2 previousEnemyPos = Vector2.zero;
         for (int i = 0; i < selectedFormationEntities.Count; i++)
         {
-            float randomEnemy = Random.Range(0.0f, 100.0f);
-            int enemyKind = randomEnemy < advancedEnemyPercentage ? 1 : 0;
+            int enemyKind = shipTypes[i];
 
             Vector2 enemyPos;
             if (i > 0)

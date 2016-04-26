@@ -16,7 +16,7 @@ public enum DifficultyParameter
     DpWaveSpawnRateIncrease,
     DpPosPowerupSpawnRateDecrease,
     DpNegPowerupSpawnRateIncrease,
-    DpAdvEnemyPercentage, //TODO advanced enemy percentage should work differently
+    DpEnemyShipStrength,
     DpCount
 }
 
@@ -52,10 +52,11 @@ public class DifficultyManager : MonoBehaviour
     private void Start()
     {
         //TODO later on, these multipliers have to be pulled out from our learning data
+        float avgDifficulty = (GameConstants.MaxDifficultyMultiplier + GameConstants.MinDifficultyMultiplier)/2.0f;
         DifficultyCoefs = new Dictionary<DifficultyParameter, float>((int)DifficultyParameter.DpCount);
         for (DifficultyParameter curParam = DifficultyParameter.DpShipFireRateIncrease; curParam < DifficultyParameter.DpCount; ++curParam)
         {
-            DifficultyCoefs.Add(curParam, 1.0f);
+            DifficultyCoefs.Add(curParam, avgDifficulty);
         }
 
         _lastDifficultyAdjustmentTime = Time.time;
@@ -92,11 +93,8 @@ public class DifficultyManager : MonoBehaviour
         //you'll have all kinds of raw statistics the game can supply you with, here
         //you'll make decisions depending on the game state to slightly alter the difficulty level
 
-
         //for now, lets put up some examples
         //do not consider difficulty numbers going off the limits here, they won't be of any problem once ML system is online
-
-
 
         float hpDiffSinceLastAdjustment = _playerScript.PlayerHealth - _previousWavePlayerHealth;
 

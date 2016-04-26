@@ -388,7 +388,7 @@ public class Player : MonoBehaviour
 
         for (int i = 0; i < transform.childCount; i++)
         {
-            if (transform.GetChild(i).CompareTag("BulletStart")) //TODO LATER experiment with multiple gun slots
+            if (transform.GetChild(i).CompareTag("BulletStart"))
             {
                 Vector3 bulletStartPoint = transform.GetChild(i).position;
                 Instantiate(_stunGun.BulletPrefab, bulletStartPoint, Quaternion.identity);
