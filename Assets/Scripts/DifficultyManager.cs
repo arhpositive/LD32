@@ -131,7 +131,7 @@ public class DifficultyManager : MonoBehaviour
         }
         //end
 
-        ChangeDifficultyParameter(selectedDifficultyParameter, oldValue + (0.5f * (isIncrement ? 1 : -1)));
+        ChangeDifficultyParameter(selectedDifficultyParameter, oldValue + (0.1f * (isIncrement ? 1 : -1)));
     }
 
     private void ChangeDifficultyParameter(DifficultyParameter difficultyParameter, float newValue)

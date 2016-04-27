@@ -45,10 +45,11 @@ public class Player : MonoBehaviour
     public AudioClip FireTeleportGunClip;
     
     public const int PlayerInitialHealth = 3;
-
+    
     public int PlayerHealth { get; private set; }
     public bool IsDead { get; private set; }
     public float PlayerAccuracy { get; private set; }
+    public int DisplacedActiveEnemyCount { get; private set; }
 
     private bool _isInvulnerable;
     private bool _isShielded;
@@ -87,6 +88,7 @@ public class Player : MonoBehaviour
         PlayerScore = 0;
         PlayerHealth = PlayerInitialHealth;
         IsDead = false;
+        DisplacedActiveEnemyCount = 0;
         _isShielded = false;
         _isInvulnerable = true;
         _invulnerabilityStartTime = Time.time;
@@ -94,7 +96,7 @@ public class Player : MonoBehaviour
         PlayerAccuracy = 0.0f;
         _hitBulletCount = 0;
         _shotBulletCount = 0;
-
+        
         _stunGun = new Gun(StunBulletPrefab, 0.3f, -1);
         _speedUpGun = new Gun(SpeedUpBulletPrefab, 0.5f, 3);
         _teleportGun = new Gun(TeleportBulletPrefab, 1.0f, 10);
@@ -295,6 +297,16 @@ public class Player : MonoBehaviour
         return true;
     }
 
+    public void EnemyGotDisplaced()
+    {
+        ++DisplacedActiveEnemyCount;
+    }
+
+    public void DisplacedEnemyGotDestroyed()
+    {
+        --DisplacedActiveEnemyCount;
+    }
+
     public void OnBulletDestruction(bool bulletHitEnemy)
     {
         _shotBulletCount++;
@@ -313,7 +325,8 @@ public class Player : MonoBehaviour
 
     public void TriggerEnemyDisplacement(int scoreAddition)
     {
-        PlayerScore += scoreAddition;
+        PlayerScore += scoreAddition * DisplacedActiveEnemyCount;
+        EventLogger.PrintToLog("Enemy Scored: " + scoreAddition * DisplacedActiveEnemyCount);
     }
 
     public void TriggerHealthPickup()
@@ -331,7 +344,7 @@ public class Player : MonoBehaviour
     public void TriggerResearchPickup()
     {
         EventLogger.PrintToLog("Player Gains Research Powerup");
-        PlayerScore += 50;
+        PlayerScore += (int) (5 * GameConstants.BaseScoreAddition * DisplacedActiveEnemyCount);
     }
 
     public void TriggerShieldPickup()
@@ -344,7 +357,7 @@ public class Player : MonoBehaviour
         }
         else
         {
-            PlayerScore += 10;
+            PlayerScore += (int) (GameConstants.BaseScoreAddition * DisplacedActiveEnemyCount);
         }
     }
 

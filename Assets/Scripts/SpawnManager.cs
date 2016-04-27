@@ -396,7 +396,6 @@ public class SpawnManager : MonoBehaviour
         }
 
         float advancedEnemyPercentage = DifficultyDifferenceCoef * (_difficultyManagerScript.DifficultyCoefs[DifficultyParameter.DpEnemyShipStrength] - GameConstants.MinDifficultyMultiplier);
-        print(advancedEnemyPercentage);
 
         int advEnemyTypeIndex = 1;
         int currentEnemyTypeStep = enemyTypeSteps[advEnemyTypeIndex];

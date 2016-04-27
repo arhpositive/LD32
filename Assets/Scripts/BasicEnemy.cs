@@ -6,6 +6,7 @@
  * Handles basic enemy behaviour
  */
 
+using System.Reflection;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -32,6 +33,7 @@ public class BasicEnemy : MonoBehaviour
     private float _lastFireTime;
     private float _nextFiringInterval;
     private float _displacementLength; //used for scoring
+    private bool _isDisplaced;
 
     private void Start()
     {
@@ -52,6 +54,7 @@ public class BasicEnemy : MonoBehaviour
         _lastFireTime = Time.time;
         SetNextFiringInterval();
         _displacementLength = 0.0f;
+        _isDisplaced = false;
     }
 
     private void Update()
@@ -73,6 +76,7 @@ public class BasicEnemy : MonoBehaviour
             if (_speedBoostIsActive)
             {
                 _displacementLength -= Time.deltaTime * _basicMoveScript.MoveSpeed * (_basicMoveScript.SpeedCoef - 1.0f);
+                OnDisplaced();
             }
 
             if (transform.position.x < GameConstants.HorizontalMinCoord)
@@ -80,9 +84,12 @@ public class BasicEnemy : MonoBehaviour
                 //cash in the points
                 if (_playerScript)
                 {
-                    int scoreAddition = (int) (Mathf.Abs(_displacementLength) * 10.0f);
-                    EventLogger.PrintToLog("Enemy Scored: " + scoreAddition);
+                    int scoreAddition = (int)(Mathf.Abs(_displacementLength) * GameConstants.BaseScoreAddition);
                     _playerScript.TriggerEnemyDisplacement(scoreAddition);
+                    if (_isDisplaced)
+                    {
+                        _playerScript.DisplacedEnemyGotDestroyed();
+                    }
                 }
 
                 Destroy(gameObject);
@@ -103,6 +110,7 @@ public class BasicEnemy : MonoBehaviour
         _lastFireTime = Time.time;
         _basicMoveScript.DoesMove = true;
         _displacementLength += StunDuration * _basicMoveScript.MoveSpeed;
+        OnDisplaced();
     }
 
     public void TriggerSpeedBoost()
@@ -166,6 +174,15 @@ public class BasicEnemy : MonoBehaviour
     {
         float randomIntervalCoef = Random.Range(MinFiringInterval, 2 * MinFiringInterval);
         _nextFiringInterval = randomIntervalCoef / _difficultyManagerScript.DifficultyCoefs[DifficultyParameter.DpShipFireRateIncrease];
+    }
+
+    private void OnDisplaced()
+    {
+        if (_playerScript && !_isDisplaced)
+        {
+            _isDisplaced = true;
+            _playerScript.EnemyGotDisplaced();
+        }
     }
 
     private void Explode()
