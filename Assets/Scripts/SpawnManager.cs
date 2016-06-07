@@ -53,6 +53,10 @@ public class SpawnManager : MonoBehaviour
     public float MaxWaveSpawnIntervalCoef;
     public float PowerupSpawnBaseInterval;
 
+    [Header("Parallax Counts")]
+    public int MeteorCount;
+    public int StarCount;
+
     private DifficultyManager _difficultyManagerScript;
 
     private float _previousWaveSpawnTime;
@@ -62,15 +66,6 @@ public class SpawnManager : MonoBehaviour
     private float _posPowerupSpawnInterval;
     private float _previousNegPowerupSpawnTime;
     private float _negPowerupSpawnInterval;
-
-    //TODO LATER for every star and meteor destroyed, just spawn another one, remove all timers and intervals
-    private int _initialMeteorCount;
-    private float _previousMeteorSpawnTime;
-    private float _meteorSpawnInterval;
-
-    private int _initialStarCount;
-    private float _previousStarSpawnTime;
-    private float _starSpawnInterval;
 
     private List<Formation> _formations;
 
@@ -111,9 +106,6 @@ public class SpawnManager : MonoBehaviour
         _enemySpawnMinVertDist = Mathf.Min(ShipGameObjectVertSize + 0.05f, _enemySpawnMaxVertDist);
         _enemySpawnMaxHorzDist = PlayerShipColliderHorzSize * 2.0f - 0.01f;
         _enemySpawnMinHorzDist = Mathf.Min(PlayerShipColliderHorzSize * 0.5f, _enemySpawnMaxHorzDist);
-
-        _initialMeteorCount = 30;
-        _initialStarCount = _initialMeteorCount * GameConstants.StarToMeteorRatio;
             
         _waveSpawnInterval = MinWaveSpawnIntervalCoef;
         _previousWaveSpawnTime = Time.time;
@@ -127,13 +119,13 @@ public class SpawnManager : MonoBehaviour
         _negPowerupSpawnInterval = Random.Range(PowerupSpawnBaseInterval, PowerupSpawnBaseInterval * 2);
         _previousNegPowerupSpawnTime = Time.time;
 
-        _meteorSpawnInterval = 1.0f;
-        _previousMeteorSpawnTime = Time.time;
+        //_meteorSpawnInterval = 1.0f;
+        //_previousMeteorSpawnTime = Time.time;
 
-        float meteorToStarSpeedRatio = 
-            MeteorPrefabArray[0].GetComponent<BasicMove>().MoveSpeed / StarPrefab.GetComponent<BasicMove>().MoveSpeed;
-        _starSpawnInterval = (_meteorSpawnInterval / GameConstants.StarToMeteorRatio) * meteorToStarSpeedRatio;
-        _previousStarSpawnTime = Time.time;
+        //float meteorToStarSpeedRatio = 
+        //    MeteorPrefabArray[0].GetComponent<BasicMove>().MoveSpeed / StarPrefab.GetComponent<BasicMove>().MoveSpeed;
+        //_starSpawnInterval = (_meteorSpawnInterval / GameConstants.StarToMeteorRatio) * meteorToStarSpeedRatio;
+        //_previousStarSpawnTime = Time.time;
 
         InitialMeteorAndStarSpawn();
     }
@@ -170,23 +162,6 @@ public class SpawnManager : MonoBehaviour
                 SpawnNewPowerup(false);
                 _previousNegPowerupSpawnTime = Time.time;
             }
-        }
-
-        if (Time.time - _previousMeteorSpawnTime > _meteorSpawnInterval)
-        {
-            int meteorKind = Random.Range(0, MeteorPrefabArray.Length);
-            Vector2 meteorPos = new Vector2(Random.Range(GameConstants.HorizontalMaxCoord - 1.0f, GameConstants.HorizontalMaxCoord),
-                Random.Range(GameConstants.VerticalMinCoord, GameConstants.VerticalMaxCoord));
-            SpawnMeteor(meteorKind, meteorPos);
-            _previousMeteorSpawnTime = Time.time;
-        }
-
-        if (Time.time - _previousStarSpawnTime > _starSpawnInterval)
-        {
-            Vector2 starPos = new Vector2(Random.Range(GameConstants.HorizontalMaxCoord - 0.1f, GameConstants.HorizontalMaxCoord),
-                Random.Range(GameConstants.MinVerticalMovementLimit - 1.0f, GameConstants.MaxVerticalMovementLimit + 1.0f));
-            SpawnStar(starPos);
-            _previousStarSpawnTime = Time.time;
         }
     }
 
@@ -518,18 +493,18 @@ public class SpawnManager : MonoBehaviour
 
     private void InitialMeteorAndStarSpawn()
     {
-        for (int i = 0; i < _initialMeteorCount; i++)
+        for (int i = 0; i < MeteorCount; i++)
         {
             int meteorKind = Random.Range(0, MeteorPrefabArray.Length);
             Vector2 meteorPos = new Vector2(Random.Range(GameConstants.MinHorizontalMovementLimit - 0.5f, GameConstants.HorizontalMaxCoord - 0.5f),
-                Random.Range(GameConstants.MinVerticalMovementLimit, GameConstants.MaxVerticalMovementLimit));
+                Random.Range(GameConstants.VerticalMinCoord, GameConstants.VerticalMaxCoord));
             SpawnMeteor(meteorKind, meteorPos);
         }
 
-        for (int i = 0; i < _initialStarCount; i++)
+        for (int i = 0; i < StarCount; i++)
         {
             Vector2 starPos = new Vector2(Random.Range(GameConstants.MinHorizontalMovementLimit - 0.5f, GameConstants.HorizontalMaxCoord - 0.5f),
-                Random.Range(GameConstants.MinVerticalMovementLimit - 1.0f, GameConstants.MaxVerticalMovementLimit + 1.0f));
+                Random.Range(GameConstants.VerticalMinCoord, GameConstants.VerticalMaxCoord));
             SpawnStar(starPos);
         }
     }
@@ -542,5 +517,11 @@ public class SpawnManager : MonoBehaviour
     private void SpawnStar(Vector2 starPos)
     {
         Instantiate(StarPrefab, starPos, Quaternion.identity);
+    }
+
+    public static Vector2 GetRespawnPos()
+    {
+        return new Vector2(Random.Range(GameConstants.HorizontalMaxCoord - 0.1f, GameConstants.HorizontalMaxCoord),
+                Random.Range(GameConstants.VerticalMinCoord, GameConstants.VerticalMaxCoord));
     }
 }

@@ -190,6 +190,8 @@ MonoBehaviour:
   MinWaveSpawnIntervalCoef: 5
   MaxWaveSpawnIntervalCoef: 10
   PowerupSpawnBaseInterval: 3
+  MeteorCount: 30
+  StarCount: 300
 --- !u!114 &11425842
 MonoBehaviour:
   m_ObjectHideFlags: 1

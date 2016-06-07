@@ -6,7 +6,6 @@
  * Handles basic enemy behaviour
  */
 
-using System.Reflection;
 using UnityEngine;
 using UnityEngine.Assertions;
 

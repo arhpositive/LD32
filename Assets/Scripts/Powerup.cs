@@ -57,9 +57,13 @@ public class Powerup : MonoBehaviour
     {
         if (!_hasCollided)
         {
-            if (other.gameObject.tag == "Player")
+            if (other.gameObject.tag == "Player" || other.gameObject.tag == "Shield")
             {
-                Player playerScript = other.gameObject.GetComponent<Player>();
+                bool collidesWithPlayer = (other.gameObject.tag == "Player");
+
+                Player playerScript = collidesWithPlayer ?
+                    other.gameObject.GetComponent<Player>() :
+                    other.gameObject.GetComponentInParent<Player>();
 
                 if (!playerScript.IsDead)
                 {
@@ -82,10 +86,12 @@ public class Powerup : MonoBehaviour
                             playerScript.TriggerTeleportPickup();
                             break;
                         case PowerupType.PtBomb:
-                            gotPickedUp = playerScript.PlayerGotHit();
+                            gotPickedUp = collidesWithPlayer ? 
+                                playerScript.PlayerGotHit() : 
+                                playerScript.ShieldGotHit();
                             if (gotPickedUp)
                             {
-                                EventLogger.PrintToLog("Bomb Collides v Player");
+                                EventLogger.PrintToLog(collidesWithPlayer ? "Bomb Collides v Player" : "Bomb Collides v Shield");
                             }
                             break;
                     }

@@ -8,7 +8,6 @@
  */
 
 using UnityEngine;
-using UnityEngine.Assertions;
 
 public class BasicMove : MonoBehaviour
 {
@@ -32,20 +31,84 @@ public class BasicMove : MonoBehaviour
     public float RotationSpeed;
     public bool RandomizeRotationSpeed;
     public float RandomizeRotationSpeedCoef;
-
-    public bool BounceOnHorizontalLimits;
+    
     public bool DestroyOnVerticalLimits;
     public bool DestroyOnHorizontalLimits;
     public bool DestroyOnEarlyHorizontalLimits;
 
-    private float _minVerticalBounceLimit;
-    private float _maxVerticalBounceLimit;
+    public bool RespawnOnVerticalLimits;
+    public bool RespawnOnHorizontalLimits;
 
     private void Awake()
     {
-        _minVerticalBounceLimit = GameConstants.MinVerticalMovementLimit;
-        _maxVerticalBounceLimit = GameConstants.MaxVerticalMovementLimit;
+        Initialize();
+    }
+    
+    private void Update()
+    {
+        if (DoesMove)
+        {
+            transform.Translate(_moveDir * MoveSpeed * SpeedCoef * Time.deltaTime, Space.World);
+        }
 
+        if (DoesRotate)
+        {
+            transform.Rotate(Vector3.forward * RotationSpeed * Time.deltaTime, Space.World);
+        }
+
+        if (DestroyOnEarlyHorizontalLimits)
+        {
+            if (transform.position.x < GameConstants.HorizontalMinCoord || 
+                transform.position.x > GameConstants.HorizontalEarlyMaxCoord)
+            {
+                Destroy(gameObject);
+            }
+        }
+        else if (DestroyOnHorizontalLimits)
+        {
+            if (transform.position.x < GameConstants.HorizontalMinCoord || 
+                transform.position.x > GameConstants.HorizontalMaxCoord)
+            {
+                Destroy(gameObject);
+            }
+        }
+
+        if (DestroyOnVerticalLimits)
+        {
+            if (transform.position.y < GameConstants.VerticalMinCoord || 
+                transform.position.y > GameConstants.VerticalMaxCoord)
+            {
+                Destroy(gameObject);
+            }
+        }
+
+        if (RespawnOnHorizontalLimits)
+        {
+            if (transform.position.x < GameConstants.HorizontalMinCoord ||
+                transform.position.x > GameConstants.HorizontalMaxCoord)
+            {
+                transform.position = SpawnManager.GetRespawnPos();
+                Initialize();
+            }
+        }
+        else if (RespawnOnVerticalLimits)
+        {
+            if (transform.position.y < GameConstants.VerticalMinCoord ||
+                transform.position.y > GameConstants.VerticalMaxCoord)
+            {
+                transform.position = SpawnManager.GetRespawnPos();
+                Initialize();
+            }
+        }
+    }
+
+    public void SetMoveDir(Vector2 newMoveDir)
+    {
+        _moveDir = newMoveDir;
+    }
+
+    private void Initialize()
+    {
         _moveDir = new Vector2(MoveDirX, MoveDirY);
         SpeedCoef = 1.0f;
 
@@ -68,65 +131,5 @@ public class BasicMove : MonoBehaviour
             float range = Random.Range(0.0f, 1.0f) * RandomizeRotationSpeedCoef;
             RotationSpeed = Random.Range(-range, range);
         }
-    }
-
-    private void Update()
-    {
-        if (DoesMove)
-        {
-            transform.Translate(_moveDir * MoveSpeed * SpeedCoef * Time.deltaTime, Space.World);
-        }
-
-        if (DoesRotate)
-        {
-            transform.Rotate(Vector3.forward * RotationSpeed * Time.deltaTime, Space.World);
-        }
-
-        if (DestroyOnEarlyHorizontalLimits)
-        {
-            if (transform.position.x < GameConstants.HorizontalMinCoord || transform.position.x > GameConstants.HorizontalEarlyMaxCoord)
-            {
-                Destroy(gameObject);
-            }
-        }
-        else if (DestroyOnHorizontalLimits)
-        {
-            if (transform.position.x < GameConstants.HorizontalMinCoord || transform.position.x > GameConstants.HorizontalMaxCoord)
-            {
-                Destroy(gameObject);
-            }
-        }
-
-        if (DestroyOnVerticalLimits)
-        {
-            if (transform.position.y < GameConstants.VerticalMinCoord || transform.position.y > GameConstants.VerticalMaxCoord)
-            {
-                Destroy(gameObject);
-            }
-        }
-
-        if (BounceOnHorizontalLimits)
-        {
-            if (transform.position.y < _minVerticalBounceLimit && _moveDir.y < -float.Epsilon ||
-                transform.position.y > _maxVerticalBounceLimit && _moveDir.y > float.Epsilon)
-            {
-                _moveDir.y = -_moveDir.y;
-                _moveDir.Normalize();
-            }
-        }
-    }
-
-    public void SetMoveDir(Vector2 newMoveDir)
-    {
-        _moveDir = newMoveDir;
-    }
-
-    public void SetBounceLimits(float minLimit, float maxLimit)
-    {
-        Assert.IsTrue(minLimit >= GameConstants.MinVerticalMovementLimit);
-        Assert.IsTrue(maxLimit <= GameConstants.MaxVerticalMovementLimit);
-
-        _minVerticalBounceLimit = minLimit;
-        _maxVerticalBounceLimit = maxLimit;
     }
 }

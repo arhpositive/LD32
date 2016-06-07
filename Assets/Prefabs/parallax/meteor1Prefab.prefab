@@ -41,7 +41,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DoesMove: 1
-  MoveSpeed: .100000001
+  MoveSpeed: 0.1
   MoveDirX: -1
   RandomizeMoveDirX: 0
   RandomizeMoveDirXCoef: 0
@@ -52,10 +52,11 @@ MonoBehaviour:
   RotationSpeed: 0
   RandomizeRotationSpeed: 1
   RandomizeRotationSpeedCoef: 5
-  BounceOnHorizontalLimits: 0
-  DestroyOnVerticalLimits: 1
-  DestroyOnHorizontalLimits: 1
+  DestroyOnVerticalLimits: 0
+  DestroyOnHorizontalLimits: 0
   DestroyOnEarlyHorizontalLimits: 0
+  RespawnOnVerticalLimits: 1
+  RespawnOnHorizontalLimits: 1
 --- !u!212 &21233740
 SpriteRenderer:
   m_ObjectHideFlags: 1
@@ -74,14 +75,18 @@ SpriteRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_ScaleInLightmap: 1
   m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
-  m_AutoUVMaxDistance: .5
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 38fb3e981d9862546bfc8fb83baefb72, type: 3}
-  m_Color: {r: .392156869, g: .392156869, b: .392156869, a: .196078435}
+  m_Color: {r: 0.39215687, g: 0.39215687, b: 0.39215687, a: 0.19607843}
+  m_FlipX: 0
+  m_FlipY: 0
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1
