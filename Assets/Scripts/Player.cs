@@ -11,17 +11,27 @@ using ui;
 using UnityEngine;
 using UnityEngine.Assertions;
 
+public enum GunType //TODO use gun type in gun struct to categorize
+{
+    GtStun,
+    GtSpeedUp,
+    GtTeleport,
+    GtCount
+}
+
 internal struct Gun
 {
+    public GunType TypeOfGun { get; private set; }
     public GameObject BulletPrefab { get; private set; }
     public float Cooldown { get; private set; }
     public float LastFireTime;
     public int AmmoCount;
     public GameObject LastBullet;
 
-    public Gun(GameObject bulletPrefab, float cooldown, int ammoCount)
+    public Gun(GunType typeOfGun, GameObject bulletPrefab, float cooldown, int ammoCount)
         : this()
     {
+        TypeOfGun = typeOfGun;
         BulletPrefab = bulletPrefab;
         Cooldown = cooldown;
         AmmoCount = ammoCount;
@@ -48,7 +58,6 @@ public class Player : MonoBehaviour
     
     public int PlayerHealth { get; private set; }
     public bool IsDead { get; private set; }
-    public float PlayerAccuracy { get; private set; }
     public int DisplacedActiveEnemyCount { get; private set; }
 
     private bool _isInvulnerable;
@@ -60,8 +69,8 @@ public class Player : MonoBehaviour
 
     private BasicObject _basicObjectScript;
 
-    private int _hitBulletCount;
-    private int _shotBulletCount;
+    //TODO carry over to player stats
+    public PlayerStats Stats { get; private set; }
 
     private const float DeathDuration = 2.0f;
     private float _deathTime;
@@ -92,16 +101,14 @@ public class Player : MonoBehaviour
         _isShielded = false;
         _isInvulnerable = true;
         _invulnerabilityStartTime = Time.time;
-
-        PlayerAccuracy = 0.0f;
-        _hitBulletCount = 0;
-        _shotBulletCount = 0;
         
-        _stunGun = new Gun(StunBulletPrefab, 0.3f, -1);
-        _speedUpGun = new Gun(SpeedUpBulletPrefab, 0.5f, 3);
-        _teleportGun = new Gun(TeleportBulletPrefab, 1.0f, 10);
+        _stunGun = new Gun(GunType.GtStun, StunBulletPrefab, 0.3f, -1);
+        _speedUpGun = new Gun(GunType.GtSpeedUp, SpeedUpBulletPrefab, 0.5f, 3);
+        _teleportGun = new Gun(GunType.GtTeleport, TeleportBulletPrefab, 1.0f, 10);
 
         _basicObjectScript = gameObject.GetComponent<BasicObject>();
+
+        Stats = new PlayerStats();
 
         //find shield object in children
         foreach (Transform tr in transform)
@@ -309,13 +316,7 @@ public class Player : MonoBehaviour
 
     public void OnBulletDestruction(bool bulletHitEnemy)
     {
-        _shotBulletCount++;
-        if (bulletHitEnemy)
-        {
-            _hitBulletCount++;
-        }
-
-        PlayerAccuracy = (float)_hitBulletCount / _shotBulletCount;
+        Stats.OnBulletDestruction(bulletHitEnemy);
     }
 
     public void TriggerEnemyDestruction()

@@ -24,7 +24,7 @@ namespace ui
 
         private void Update()
         {
-            _accuracyText.text = _playerScript.PlayerAccuracy.ToString(CultureInfo.InvariantCulture);
+            _accuracyText.text = _playerScript.Stats.PlayerAccuracy.ToString(CultureInfo.InvariantCulture);
         }
     }
 }
