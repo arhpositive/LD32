@@ -13,17 +13,17 @@ namespace ui
 {
 	public class RefreshDifficultyText : MonoBehaviour
 	{
-	    private Text _difficultyText;
-	    private DifficultyManager _difficultyManagerScript;
+		private Text _difficultyText;
+		private DifficultyManager _difficultyManagerScript;
 
-	    private void Start ()
+		private void Start()
 		{
 			_difficultyText = gameObject.GetComponent<Text>();
 			_difficultyManagerScript = Camera.main.GetComponent<DifficultyManager>();
 		}
 
-	    private void Update ()
-	    {
+		private void Update()
+		{
 			_difficultyText.text = _difficultyManagerScript.GetAverageDifficultyLevel().ToString(CultureInfo.InvariantCulture);
 		}
 	}

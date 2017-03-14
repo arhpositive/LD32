@@ -11,13 +11,13 @@ using UnityEngine.SceneManagement;
 
 public class LoadLevel : MonoBehaviour
 {
-    public void LoadMenuScene()
-    {
-        SceneManager.LoadScene(0);
-    }
+	public void LoadMenuScene()
+	{
+		SceneManager.LoadScene(0);
+	}
 
-    public void LoadGameScene()
-    {
-        SceneManager.LoadScene(1);
-    }
+	public void LoadGameScene()
+	{
+		SceneManager.LoadScene(1);
+	}
 }

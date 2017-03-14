@@ -10,18 +10,18 @@ using UnityEngine.UI;
 
 namespace ui
 {
-    public class RefreshHighScoreText : MonoBehaviour
-    {
-        private Text _highScoreText;
+	public class RefreshHighScoreText : MonoBehaviour
+	{
+		private Text _highScoreText;
 
-        private void Start()
-        {
-            _highScoreText = gameObject.GetComponent<Text>();
-        }
+		private void Start()
+		{
+			_highScoreText = gameObject.GetComponent<Text>();
+		}
 
-        private void Update()
-        {
-            _highScoreText.text = Player.PlayerScore.ToString();
-        }
-    }
+		private void Update()
+		{
+			_highScoreText.text = Player.PlayerScore.ToString();
+		}
+	}
 }

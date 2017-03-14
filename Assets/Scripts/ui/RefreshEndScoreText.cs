@@ -10,23 +10,23 @@ using UnityEngine.UI;
 
 namespace ui
 {
-    public class RefreshEndScoreText : MonoBehaviour
-    {
-        private Text _endScoreText;
+	public class RefreshEndScoreText : MonoBehaviour
+	{
+		private Text _endScoreText;
 
-        private void Start()
-        {
-            _endScoreText = gameObject.GetComponent<Text>();
-        }
+		private void Start()
+		{
+			_endScoreText = gameObject.GetComponent<Text>();
+		}
 
-        private void Update()
-        {
-            _endScoreText.text = "Your Score: " + Player.PlayerScore;
-        }
+		private void Update()
+		{
+			_endScoreText.text = "Your Score: " + Player.PlayerScore;
+		}
 
-        public void SetTextVisible()
-        {
-            _endScoreText.enabled = true;
-        }
-    }
+		public void SetTextVisible()
+		{
+			_endScoreText.enabled = true;
+		}
+	}
 }
