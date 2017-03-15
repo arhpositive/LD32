@@ -6,6 +6,9 @@
  * Handles player movement and actions via given input
  */
 
+using System.Collections;
+using System.Collections.Generic;
+using System.Threading;
 using CnControls;
 using ui;
 using UnityEngine;
@@ -59,6 +62,11 @@ public class Player : MonoBehaviour
 	public bool IsDead { get; private set; }
 	public int DisplacedActiveEnemyCount { get; private set; }
 
+	public List<PlayerStats> AllPlayerStats { get; private set; }
+
+	private const float ShortTermHealthChangeInterval = 10.0f;
+	private const float LongTermHealthChangeInterval = 30.0f;
+
 	private bool _isInvulnerable;
 	private bool _isShielded;
 
@@ -67,8 +75,6 @@ public class Player : MonoBehaviour
 	private GameObject _playerShield;
 
 	private BasicObject _basicObjectScript;
-
-	public PlayerStats Stats { get; private set; }
 
 	private const float DeathDuration = 2.0f;
 	private float _deathTime;
@@ -106,8 +112,13 @@ public class Player : MonoBehaviour
 
 		_basicObjectScript = gameObject.GetComponent<BasicObject>();
 
-		Stats = new PlayerStats();
-
+		AllPlayerStats = new List<PlayerStats>()
+		{
+			new PlayerStats(true, ShortTermHealthChangeInterval),
+			new PlayerStats(true, LongTermHealthChangeInterval),
+			new PlayerStats(false)
+		};
+		
 		//find shield object in children
 		foreach (Transform tr in transform)
 		{
@@ -224,7 +235,7 @@ public class Player : MonoBehaviour
 		if (UseTouchControls)
 		{
 			horizontalMoveDir = CnInputManager.GetAxis("Horizontal");
-			horizontalMoveDir = Mathf.Abs(horizontalMoveDir) < GameConstants.JoystickDeadZoneCoef ?
+			horizontalMoveDir = Mathf.Abs(horizontalMoveDir) < GameConstants.JoystickDeadZoneCoef ? 
 				0.0f : Mathf.Sign(horizontalMoveDir);
 
 			verticalMoveDir = CnInputManager.GetAxis("Vertical");
@@ -248,12 +259,23 @@ public class Player : MonoBehaviour
 		Vector2 inputDir = GetMoveDirFromInput();
 
 		Vector2 movementDir = Vector2.ClampMagnitude(inputDir, 1.0f);
-		movementDir *= PlayerSpeedLimit * Time.deltaTime;
-		transform.Translate(movementDir, Space.World);
+		Vector2 playerMovement = movementDir * PlayerSpeedLimit * Time.deltaTime;
+		Vector3 oldPosition = transform.position;
+		transform.Translate(playerMovement, Space.World);
 
-		transform.position = new Vector3(Mathf.Clamp(transform.position.x, GameConstants.MinHorizontalMovementLimit,
-			GameConstants.MaxHorizontalMovementLimit), Mathf.Clamp(transform.position.y, GameConstants.MinVerticalMovementLimit,
-			GameConstants.MaxVerticalMovementLimit), transform.position.z);
+		Vector3 clampedPlayerPosition = 
+			new Vector3(Mathf.Clamp(transform.position.x, GameConstants.MinHorizontalMovementLimit, GameConstants.MaxHorizontalMovementLimit), 
+			Mathf.Clamp(transform.position.y, GameConstants.MinVerticalMovementLimit, GameConstants.MaxVerticalMovementLimit), 
+			transform.position.z);
+
+		float movementMagnitude = (clampedPlayerPosition - oldPosition).magnitude;
+		foreach(PlayerStats ps in AllPlayerStats)
+		{
+			IEnumerator playerMovementCoroutine = ps.OnPlayerMovement(clampedPlayerPosition, movementMagnitude);
+			StartCoroutine(playerMovementCoroutine);
+		}
+
+		transform.position = clampedPlayerPosition;
 	}
 
 	public bool PlayerGotHit()
@@ -265,6 +287,12 @@ public class Player : MonoBehaviour
 		}
 
 		PlayerHealth--;
+		foreach (PlayerStats ps in AllPlayerStats)
+		{
+			IEnumerator playerHealthLossCoroutine = ps.OnPlayerHealthChange(-1);
+			StartCoroutine(playerHealthLossCoroutine); //start coroutine for stats
+		}
+
 		if (PlayerHealth == 0)
 		{
 			EventLogger.PrintToLog("Player Dies: Game Over");
@@ -314,7 +342,10 @@ public class Player : MonoBehaviour
 
 	public void OnBulletDestruction(bool bulletHitEnemy)
 	{
-		Stats.OnBulletDestruction(bulletHitEnemy);
+		foreach (PlayerStats ps in AllPlayerStats)
+		{
+			ps.OnBulletDestruction(bulletHitEnemy);
+		}
 	}
 
 	public void TriggerEnemyDestruction()
@@ -332,6 +363,12 @@ public class Player : MonoBehaviour
 	{
 		EventLogger.PrintToLog("Player Gains Health");
 		PlayerHealth++;
+
+		foreach (PlayerStats ps in AllPlayerStats)
+		{
+			IEnumerator playerHealthGainCoroutine = ps.OnPlayerHealthChange(1);
+			StartCoroutine(playerHealthGainCoroutine); //start coroutine for stats
+		}
 	}
 
 	public void TriggerSpeedUpPickup()
