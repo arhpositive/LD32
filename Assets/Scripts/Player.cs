@@ -8,7 +8,6 @@
 
 using System.Collections;
 using System.Collections.Generic;
-using System.Threading;
 using CnControls;
 using ui;
 using UnityEngine;
@@ -198,9 +197,11 @@ public class Player : MonoBehaviour
 			teleportInputGiven = Input.GetKeyDown(KeyCode.C);
 		}
 
+		//TODO make gun a class?
 		if (fireInputGiven && Time.time - _stunGun.LastFireTime > _stunGun.Cooldown)
 		{
 			FireStunGun();
+			StartFireGunCoroutine(_stunGun.TypeOfGun);
 		}
 
 		if (speedUpInputGiven &&
@@ -208,6 +209,7 @@ public class Player : MonoBehaviour
 			_speedUpGun.AmmoCount > 0)
 		{
 			FireSpeedUpGun();
+			StartFireGunCoroutine(_speedUpGun.TypeOfGun);
 			//TODO LATER display weapon cooldowns on UI
 			//cooldown can be represented by a bar filling up on the area that shows the weapon type
 		}
@@ -222,10 +224,29 @@ public class Player : MonoBehaviour
 					 _teleportGun.AmmoCount > 0)
 			{
 				FireTeleportGun();
+				StartFireGunCoroutine(_teleportGun.TypeOfGun);
 			}
 		}
 
 		DoMovement();
+	}
+
+	private void StartFireGunCoroutine(GunType gunType)
+	{
+		foreach (PlayerStats ps in AllPlayerStats)
+		{
+			IEnumerator fireGunCoroutine = ps.OnBulletInit(gunType);
+			StartCoroutine(fireGunCoroutine);
+		}
+	}
+
+	private void StartPickupPowerupCoroutine(PowerupType powerupType)
+	{
+		foreach (PlayerStats ps in AllPlayerStats)
+		{
+			IEnumerator pickupPowerupCoroutine = ps.OnPowerupPickup(powerupType);
+			StartCoroutine(pickupPowerupCoroutine);
+		}
 	}
 
 	private Vector2 GetMoveDirFromInput()
@@ -344,7 +365,8 @@ public class Player : MonoBehaviour
 	{
 		foreach (PlayerStats ps in AllPlayerStats)
 		{
-			ps.OnBulletDestruction(bulletHitEnemy);
+			IEnumerator bulletDestructionCoroutine = ps.OnBulletDestruction(bulletHitEnemy);
+			StartCoroutine(bulletDestructionCoroutine);
 		}
 	}
 
@@ -369,18 +391,24 @@ public class Player : MonoBehaviour
 			IEnumerator playerHealthGainCoroutine = ps.OnPlayerHealthChange(1);
 			StartCoroutine(playerHealthGainCoroutine); //start coroutine for stats
 		}
+
+		StartPickupPowerupCoroutine(PowerupType.PtHealth);
 	}
 
 	public void TriggerSpeedUpPickup()
 	{
 		EventLogger.PrintToLog("Player Gains Speedup Powerup");
 		_speedUpGun.AmmoCount++;
+
+		StartPickupPowerupCoroutine(PowerupType.PtSpeedup);
 	}
 
 	public void TriggerResearchPickup()
 	{
 		EventLogger.PrintToLog("Player Gains Research Powerup");
 		PlayerScore += (int)(5 * GameConstants.BaseScoreAddition * DisplacedActiveEnemyCount);
+
+		StartPickupPowerupCoroutine(PowerupType.PtResearch);
 	}
 
 	public void TriggerShieldPickup()
@@ -395,12 +423,16 @@ public class Player : MonoBehaviour
 		{
 			PlayerScore += (int)(GameConstants.BaseScoreAddition * DisplacedActiveEnemyCount);
 		}
+
+		StartPickupPowerupCoroutine(PowerupType.PtShield);
 	}
 
 	public void TriggerTeleportPickup()
 	{
 		EventLogger.PrintToLog("Player Gains Teleport Powerup");
 		_teleportGun.AmmoCount++;
+
+		StartPickupPowerupCoroutine(PowerupType.PtTeleport);
 	}
 
 	public int GetSpeedUpGunAmmo()

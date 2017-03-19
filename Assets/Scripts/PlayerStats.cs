@@ -7,7 +7,6 @@
  */
 
 using System.Collections;
-using System.Runtime.InteropServices;
 using UnityEngine;
 
 public class PlayerStats
@@ -16,48 +15,89 @@ public class PlayerStats
 	private float _statDuration;
 
 	private int _hitBulletCount;
-	private int _shotBulletCount;
+	private int _destroyedBulletCount;
+	private int _totalShotBulletCount;
+	private int[] _shotBulletCountsPerGun;
+	private int _pickedUpPowerupCount;
+	private int[] _pickupCountsPerPowerup;
 	private int _movementUpdateCount;
 
-	//TODO NEXT we should hold several statistics such as:
-	//TODO NEXT how often does the player manouver
-		// calculate player total movement length over time
-
-		// another stat to hold would be where the player hangs out on the screen
-			// if they hang out in the right side, we can change that
-			// if they hug the baseline we can change that aswell
-			// we would try to split the screen into 6 or 9 sections, this should be enough
-			
-	// what types of weapons does the player use often
-
-	//TODO flesh it out, add more parameters
+	//TODO NEXT flesh it out, add more parameters
 	public float PlayerAccuracy { get; private set; }
 	public int HealthDifference { get; private set; }
 	public float MovementAmount { get; private set; }
 	public Vector3 PlayerAveragePosition { get; private set; }
+	public float[] GunUsageFrequencies { get; private set; }
+	public float[] PowerupPickupFrequencies { get; private set; }
+	
 
 	public PlayerStats(bool statsAreTemporary, float statDuration = 0.0f)
 	{
 		_statsAreTemporary = statsAreTemporary;
 		_statDuration = statDuration;
 		_hitBulletCount = 0;
-		_shotBulletCount = 0;
+		_destroyedBulletCount = 0;
+		_totalShotBulletCount = 0;
+		_shotBulletCountsPerGun = new int[(int)GunType.GtCount];
+		_pickedUpPowerupCount = 0;
+		_pickupCountsPerPowerup = new int[(int)PowerupType.PtCount];
 		_movementUpdateCount = 0;
 
 		PlayerAccuracy = 0.0f;
 		HealthDifference = 0;
 		MovementAmount = 0.0f;
 		PlayerAveragePosition = Vector3.zero;
+		GunUsageFrequencies = new float[(int) GunType.GtCount];
+		PowerupPickupFrequencies = new float[(int)PowerupType.PtCount];
 	}
 
-	public void OnBulletDestruction(bool bulletHitEnemy)
+	public IEnumerator OnBulletInit(GunType gunType)
 	{
-		_shotBulletCount++;
+		++_shotBulletCountsPerGun[(int) gunType];
+		++_totalShotBulletCount;
+		CalculateGunUsageFrequencies();
+		if (_statsAreTemporary)
+		{
+			yield return new WaitForSeconds(_statDuration);
+			--_shotBulletCountsPerGun[(int)gunType];
+			--_totalShotBulletCount;
+			CalculateGunUsageFrequencies();
+		}
+	}
+
+	public IEnumerator OnBulletDestruction(bool bulletHitEnemy)
+	{
+		++_destroyedBulletCount;
 		if (bulletHitEnemy)
 		{
-			_hitBulletCount++;
+			++_hitBulletCount;
 		}
-		PlayerAccuracy = (float)_hitBulletCount / _shotBulletCount;
+		PlayerAccuracy = (float)_hitBulletCount / _destroyedBulletCount;
+
+		if (_statsAreTemporary)
+		{
+			yield return new WaitForSeconds(_statDuration);
+			--_destroyedBulletCount;
+			if (bulletHitEnemy)
+			{
+				--_hitBulletCount;
+			}
+			PlayerAccuracy = (float) _hitBulletCount / _destroyedBulletCount;
+		}
+	}
+
+	public IEnumerator OnPowerupPickup(PowerupType powerupType)
+	{
+		++_pickupCountsPerPowerup[(int)powerupType];
+		++_pickedUpPowerupCount;
+		CalculatePowerupPickupFrequencies();
+		if (_statsAreTemporary)
+		{
+			yield return new WaitForSeconds(_statDuration);
+			--_pickupCountsPerPowerup[(int)powerupType];
+			--_pickedUpPowerupCount;
+			CalculatePowerupPickupFrequencies();
+		}
 	}
 
 	public IEnumerator OnPlayerHealthChange(int difference)
@@ -72,23 +112,40 @@ public class PlayerStats
 
 	public IEnumerator OnPlayerMovement(Vector3 playerPosition, float movementMagnitude)
 	{
-		Vector3 positionTotal = _movementUpdateCount * PlayerAveragePosition + playerPosition;
-
-		MovementAmount += movementMagnitude;
-		++_movementUpdateCount;
-
-		PlayerAveragePosition = positionTotal / _movementUpdateCount;
+		CalculateAveragePosition(playerPosition, movementMagnitude, false);
 
 		if (_statsAreTemporary)
 		{
 			yield return new WaitForSeconds(_statDuration);
+			CalculateAveragePosition(playerPosition, movementMagnitude, true);
+		}
+	}
 
-			positionTotal = _movementUpdateCount * PlayerAveragePosition - playerPosition;
+	private void CalculateAveragePosition(Vector3 playerPosition, float movementMagnitude, bool revertChanges)
+	{
+		int multiplier = revertChanges ? -1 : 1;
 
-			MovementAmount -= movementMagnitude;
-			--_movementUpdateCount;
+		Vector3 positionTotal = _movementUpdateCount * PlayerAveragePosition + (playerPosition * multiplier);
 
-			PlayerAveragePosition = positionTotal / _movementUpdateCount;
+		MovementAmount += movementMagnitude * multiplier;
+		_movementUpdateCount = _movementUpdateCount + multiplier;
+
+		PlayerAveragePosition = positionTotal / _movementUpdateCount;
+	}
+
+	private void CalculateGunUsageFrequencies()
+	{
+		for (int i = 0; i < _shotBulletCountsPerGun.Length; ++i)
+		{
+			GunUsageFrequencies[i] = (float)_shotBulletCountsPerGun[i] / _totalShotBulletCount;
+		}
+	}
+
+	private void CalculatePowerupPickupFrequencies()
+	{
+		for (int i = 0; i < _pickupCountsPerPowerup.Length; ++i)
+		{
+			PowerupPickupFrequencies[i] = (float)_pickupCountsPerPowerup[i] / _pickedUpPowerupCount;
 		}
 	}
 }
