@@ -5,19 +5,19 @@ GameObject:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  serializedVersion: 4
+  serializedVersion: 5
   m_Component:
-  - 4: {fileID: 409336}
-  - 20: {fileID: 2054394}
-  - 92: {fileID: 9243626}
-  - 124: {fileID: 12488314}
-  - 81: {fileID: 8143180}
-  - 114: {fileID: 11416166}
-  - 114: {fileID: 11478456}
-  - 82: {fileID: 8295414}
-  - 114: {fileID: 11425842}
-  - 114: {fileID: 11444820}
-  - 114: {fileID: 11435500}
+  - component: {fileID: 409336}
+  - component: {fileID: 2054394}
+  - component: {fileID: 9243626}
+  - component: {fileID: 12488314}
+  - component: {fileID: 8143180}
+  - component: {fileID: 11416166}
+  - component: {fileID: 11478456}
+  - component: {fileID: 8295414}
+  - component: {fileID: 11425842}
+  - component: {fileID: 11444820}
+  - component: {fileID: 11435500}
   m_Layer: 0
   m_Name: mainCameraPrefab
   m_TagString: MainCamera
@@ -37,6 +37,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!20 &2054394
 Camera:
   m_ObjectHideFlags: 1
@@ -94,6 +95,7 @@ AudioSource:
   Loop: 0
   Mute: 0
   Spatialize: 0
+  SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 1
   MinDistance: 1
@@ -106,12 +108,14 @@ AudioSource:
   rolloffCustomCurve:
     serializedVersion: 2
     m_Curve:
-    - time: 0
+    - serializedVersion: 2
+      time: 0
       value: 1
       inSlope: 0
       outSlope: 0
       tangentMode: 0
-    - time: 1
+    - serializedVersion: 2
+      time: 1
       value: 0
       inSlope: 0
       outSlope: 0
@@ -122,7 +126,8 @@ AudioSource:
   panLevelCustomCurve:
     serializedVersion: 2
     m_Curve:
-    - time: 0
+    - serializedVersion: 2
+      time: 0
       value: 0
       inSlope: 0
       outSlope: 0
@@ -133,7 +138,8 @@ AudioSource:
   spreadCustomCurve:
     serializedVersion: 2
     m_Curve:
-    - time: 0
+    - serializedVersion: 2
+      time: 0
       value: 0
       inSlope: 0
       outSlope: 0
@@ -144,7 +150,8 @@ AudioSource:
   reverbZoneMixCustomCurve:
     serializedVersion: 2
     m_Curve:
-    - time: 0
+    - serializedVersion: 2
+      time: 0
       value: 1
       inSlope: 0
       outSlope: 0
@@ -173,6 +180,7 @@ MonoBehaviour:
   IsGameScene: 1
   PlayerPrefab: {fileID: 114074, guid: 58cda14e50f6d8d42a46b3077f960e56, type: 2}
   EnemyPrefabArray:
+  - {fileID: 1834478848205664, guid: a05d495ce9bda314e945751860bed8aa, type: 2}
   - {fileID: 139786, guid: 566fefe5e59b580429b5c12346896bd0, type: 2}
   - {fileID: 190498, guid: a9dbab4630dcdae4ca684a97057da1a1, type: 2}
   PosPowerupPrefabArray:

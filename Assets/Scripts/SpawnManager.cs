@@ -439,7 +439,7 @@ public class SpawnManager : MonoBehaviour
 			Assert.IsNotNull(enemy);
 			BasicMove basicMoveScript = enemy.GetComponent<BasicMove>();
 
-			basicMoveScript.SetMoveDir(selectedFormationEntities[i].MoveDir);
+			basicMoveScript.SetMoveDir(selectedFormationEntities[i].MoveDir, false);
 
 			previousEnemyPos = enemyPos;
 		}

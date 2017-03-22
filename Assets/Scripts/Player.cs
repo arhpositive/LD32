@@ -12,7 +12,7 @@ using CnControls;
 using ui;
 using UnityEngine;
 
-public enum GunType //TODO use gun type in gun struct to categorize
+public enum GunType
 {
 	GtStun,
 	GtSpeedUp,
@@ -182,13 +182,13 @@ public class Player : MonoBehaviour
 		//shooting
 		bool fireInputGiven;
 		bool speedUpInputGiven;
-		bool teleportInputGiven; //teleport device will teleport our ship to wherever the beacon is
+		bool teleportInputGiven;
 
 		if (UseTouchControls)
 		{
 			fireInputGiven = CnInputManager.GetButton("TouchFire");
 			speedUpInputGiven = CnInputManager.GetButtonDown("TouchSpeedUp");
-			teleportInputGiven = false; //TODO LATER touch control for third weapon
+			teleportInputGiven = CnInputManager.GetButtonDown("TouchTeleport");
 		}
 		else
 		{

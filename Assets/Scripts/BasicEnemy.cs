@@ -8,12 +8,14 @@
 
 using UnityEngine;
 using UnityEngine.Assertions;
+using System.Collections.Generic;
 
 public class BasicEnemy : MonoBehaviour
 {
 	public float StunDuration;
 	public float SpeedBoostCoef;
 	public bool CanShoot;
+	public bool ShootsStraightAtPlayer;
 	public float MinFiringInterval;
 	public GameObject BulletPrefab;
 
@@ -25,6 +27,7 @@ public class BasicEnemy : MonoBehaviour
 	private BasicMove _basicMoveScript;
 	private BasicObject _basicObjectScript;
 
+	private List<Vector3> _gunPositions;
 	private bool _hasCollided;
 	private bool _isStunned;
 	private float _lastStunTime;
@@ -46,6 +49,7 @@ public class BasicEnemy : MonoBehaviour
 		_basicMoveScript.MoveSpeed = MoveSpeed;
 		_basicObjectScript = gameObject.GetComponent<BasicObject>();
 
+		InitGunPositions();
 		_hasCollided = false;
 		_isStunned = false;
 		_lastStunTime = 0.0f;
@@ -159,11 +163,20 @@ public class BasicEnemy : MonoBehaviour
 	private void FireGun()
 	{
 		_lastFireTime = Time.time;
-		for (int i = 0; i < transform.childCount; i++)
+		foreach (Vector3 localGunPos in _gunPositions)
 		{
-			if (transform.GetChild(i).CompareTag("BulletStart"))
+			Vector3 globalGunPos = transform.position + localGunPos;
+			GameObject bulletGameObject = Instantiate(BulletPrefab, globalGunPos, Quaternion.identity);
+
+			if (_playerScript)
 			{
-				Instantiate(BulletPrefab, transform.GetChild(i).position, Quaternion.identity);
+				Vector3 playerPos = _playerScript.transform.position;
+				if (ShootsStraightAtPlayer && playerPos.x + 2.0f < globalGunPos.x)
+				{
+					//set bullet direction to match player direction, only if player is *comfortably* in front of the enemy
+					Vector3 bulletDir = playerPos - globalGunPos;
+					bulletGameObject.GetComponent<BasicMove>().SetMoveDir(bulletDir.normalized, true);
+				}
 			}
 		}
 		SetNextFiringInterval();
@@ -194,5 +207,17 @@ public class BasicEnemy : MonoBehaviour
 		_hasCollided = true;
 		_basicObjectScript.OnDestruction();
 		Destroy(gameObject);
+	}
+
+	private void InitGunPositions()
+	{
+		_gunPositions = new List<Vector3>();
+		for (int i = 0; i < transform.childCount; i++)
+		{
+			if (transform.GetChild(i).CompareTag("BulletStart"))
+			{
+				_gunPositions.Add(transform.GetChild(i).localPosition);
+			}
+		}
 	}
 }

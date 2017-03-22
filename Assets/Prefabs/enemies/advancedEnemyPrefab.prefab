@@ -293,6 +293,7 @@ MonoBehaviour:
   StunDuration: 0.16
   SpeedBoostCoef: 1.4
   CanShoot: 1
+  ShootsStraightAtPlayer: 1
   MinFiringInterval: 5
   BulletPrefab: {fileID: 104536, guid: efb3702b3f1e6b140ae6e81f3396926b, type: 2}
 --- !u!212 &21203258

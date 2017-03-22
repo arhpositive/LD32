@@ -100,8 +100,9 @@ public class Bullet : MonoBehaviour
 
 	private void OnDestroy()
 	{
-		if (ShotByPlayer)
+		if (_playerScript && ShotByPlayer)
 		{
+			//TODO shouldn't we still hold stats even if player is destroyed?
 			_playerScript.OnBulletDestruction(_destroyedByCollision);
 		}
 	}

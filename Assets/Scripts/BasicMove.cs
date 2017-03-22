@@ -102,9 +102,14 @@ public class BasicMove : MonoBehaviour
 		}
 	}
 
-	public void SetMoveDir(Vector2 newMoveDir)
+	public void SetMoveDir(Vector2 newMoveDir, bool keepRandomizations)
 	{
 		_moveDir = newMoveDir;
+
+		if (keepRandomizations)
+		{
+			RandomlyAlterMoveDirection();
+		}
 	}
 
 	private void Initialize()
@@ -112,24 +117,29 @@ public class BasicMove : MonoBehaviour
 		_moveDir = new Vector2(MoveDirX, MoveDirY);
 		SpeedCoef = 1.0f;
 
-		if (RandomizeMoveDirX)
-		{
-			float range = Random.Range(0.0f, 1.0f) * RandomizeMoveDirXCoef;
-			_moveDir.x = Random.Range(-range, range);
-		}
-
-		if (RandomizeMoveDirY)
-		{
-			float range = Random.Range(0.0f, 1.0f) * RandomizeMoveDirYCoef;
-			_moveDir.y = Random.Range(-range, range);
-		}
-
-		_moveDir.Normalize();
+		RandomlyAlterMoveDirection();
 
 		if (RandomizeRotationSpeed)
 		{
 			float range = Random.Range(0.0f, 1.0f) * RandomizeRotationSpeedCoef;
 			RotationSpeed = Random.Range(-range, range);
 		}
+	}
+
+	private void RandomlyAlterMoveDirection()
+	{
+		if (RandomizeMoveDirX)
+		{
+			float range = Random.Range(0.0f, 1.0f) * RandomizeMoveDirXCoef;
+			_moveDir.x += Random.Range(-range, range);
+		}
+
+		if (RandomizeMoveDirY)
+		{
+			float range = Random.Range(0.0f, 1.0f) * RandomizeMoveDirYCoef;
+			_moveDir.y += Random.Range(-range, range);
+		}
+
+		_moveDir.Normalize();
 	}
 }
