@@ -18,12 +18,23 @@ namespace ui
 		private void Start()
 		{
 			_healthText = gameObject.GetComponent<Text>();
-			_playerScript = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
+			GameObject playerGameObject = GameObject.FindGameObjectWithTag("Player");
+			if (playerGameObject)
+			{
+				_playerScript = playerGameObject.GetComponent<Player>();
+			}
 		}
 
 		private void Update()
 		{
-			_healthText.text = _playerScript.PlayerHealth.ToString();
+			if (_playerScript)
+			{
+				_healthText.text = _playerScript.PlayerHealth.ToString();
+			}
+			else
+			{
+				_healthText.text = "Dead";
+			}
 		}
 	}
 }

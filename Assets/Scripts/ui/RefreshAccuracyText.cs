@@ -19,13 +19,19 @@ namespace ui
 		private void Start()
 		{
 			_accuracyText = gameObject.GetComponent<Text>();
-			_playerScript = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
+			GameObject playerGameObject = GameObject.FindGameObjectWithTag("Player");
+			if (playerGameObject)
+			{
+				_playerScript = playerGameObject.GetComponent<Player>();
+			}
 		}
 
 		private void Update()
 		{
-			_accuracyText.text = _playerScript.AllPlayerStats[0].PlayerAccuracy.ToString(CultureInfo.InvariantCulture);
-			
+			if (_playerScript)
+			{
+				_accuracyText.text = _playerScript.AllPlayerStats[0].PlayerAccuracy.ToString(CultureInfo.InvariantCulture);
+			}
 		}
 	}
 }

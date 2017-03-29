@@ -5,15 +5,15 @@ GameObject:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  serializedVersion: 4
+  serializedVersion: 5
   m_Component:
-  - 4: {fileID: 434568}
-  - 212: {fileID: 21227272}
-  - 114: {fileID: 11489236}
-  - 50: {fileID: 5035764}
-  - 61: {fileID: 6163940}
-  - 114: {fileID: 11421422}
-  - 114: {fileID: 11430364}
+  - component: {fileID: 434568}
+  - component: {fileID: 21227272}
+  - component: {fileID: 11489236}
+  - component: {fileID: 5035764}
+  - component: {fileID: 6163940}
+  - component: {fileID: 11421422}
+  - component: {fileID: 11430364}
   m_Layer: 0
   m_Name: speedPowerupPrefab
   m_TagString: Powerup
@@ -33,19 +33,23 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!50 &5035764
 Rigidbody2D:
-  serializedVersion: 2
+  serializedVersion: 4
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 195642}
+  m_BodyType: 1
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
   m_Mass: 1
   m_LinearDrag: 0
   m_AngularDrag: 0.05
   m_GravityScale: 1
-  m_IsKinematic: 1
+  m_Material: {fileID: 0}
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
@@ -87,10 +91,18 @@ MonoBehaviour:
   RotationSpeed: 0
   RandomizeRotationSpeed: 0
   RandomizeRotationSpeedCoef: 0
-  BounceOnHorizontalLimits: 1
   DestroyOnVerticalLimits: 1
   DestroyOnHorizontalLimits: 1
+  RespawnOnDestroy: 0
+  VerticalLimits:
+  - -2
+  - 7
+  HorizontalLimits:
+  - -2
+  - 9
   DestroyOnEarlyHorizontalLimits: 0
+  RespawnOnVerticalLimits: 0
+  RespawnOnHorizontalLimits: 0
 --- !u!114 &11430364
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -120,7 +132,6 @@ MonoBehaviour:
   PowerupOccurence: 3
   IsNegativePowerup: 0
   NegativePowerupBlinkColor: {r: 0, g: 0, b: 0, a: 0}
-  GainPowerupClip: {fileID: 8300000, guid: ad88cb7e7d7fa8a49af79977ff10de68, type: 3}
 --- !u!212 &21227272
 SpriteRenderer:
   m_ObjectHideFlags: 1
@@ -130,17 +141,22 @@ SpriteRenderer:
   m_Enabled: 1
   m_CastShadows: 0
   m_ReceiveShadows: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
   m_Materials:
   - {fileID: 2100000, guid: 514faabbc55086c478fd39f80e4a5003, type: 2}
-  m_SubsetIndices: 
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
   m_StaticBatchRoot: {fileID: 0}
-  m_UseLightProbes: 1
-  m_ReflectionProbeUsage: 1
   m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
+  m_SelectedEditorRenderState: 0
   m_MinimumChartSize: 4
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89

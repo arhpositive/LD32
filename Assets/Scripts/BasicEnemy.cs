@@ -18,17 +18,25 @@ public class BasicEnemy : MonoBehaviour
 	public bool ShootsStraightAtPlayer;
 	public float MinFiringInterval;
 	public GameObject BulletPrefab;
+	public float DestructionHorizontalMinCoord;
+
+	//TODO NEXT consider moving to hugeEnemy
+	public float[] VerticalSpawnLimits;
+	public float HorizontalSpawnCoord;
+	public float VerticalColliderBoundary;
 
 	public const float MoveSpeed = 1.2f;
 
+	protected Player PlayerScript;
+	protected bool HasCollided;
+
 	private GameObject _playerGameObject;
-	private Player _playerScript;
 	private DifficultyManager _difficultyManagerScript;
 	private BasicMove _basicMoveScript;
 	private BasicObject _basicObjectScript;
 
 	private List<Vector3> _gunPositions;
-	private bool _hasCollided;
+	private List<Transform> _gunTransforms; 
 	private bool _isStunned;
 	private float _lastStunTime;
 	private bool _speedBoostIsActive;
@@ -37,20 +45,19 @@ public class BasicEnemy : MonoBehaviour
 	private float _displacementLength; //used for scoring
 	private bool _isDisplaced;
 
-	private void Start()
+	protected virtual void Start()
 	{
 		_playerGameObject = GameObject.FindGameObjectWithTag("Player");
 		if (_playerGameObject)
 		{
-			_playerScript = _playerGameObject.GetComponent<Player>();
+			PlayerScript = _playerGameObject.GetComponent<Player>();
 		}
 		_difficultyManagerScript = Camera.main.GetComponent<DifficultyManager>();
 		_basicMoveScript = gameObject.GetComponent<BasicMove>();
-		_basicMoveScript.MoveSpeed = MoveSpeed;
 		_basicObjectScript = gameObject.GetComponent<BasicObject>();
 
 		InitGunPositions();
-		_hasCollided = false;
+		HasCollided = false;
 		_isStunned = false;
 		_lastStunTime = 0.0f;
 		_speedBoostIsActive = false;
@@ -81,26 +88,15 @@ public class BasicEnemy : MonoBehaviour
 				_displacementLength -= Time.deltaTime * _basicMoveScript.MoveSpeed * (_basicMoveScript.SpeedCoef - 1.0f);
 				OnDisplaced();
 			}
-
-			if (transform.position.x < GameConstants.HorizontalMinCoord)
+			
+			if (transform.position.x < DestructionHorizontalMinCoord)
 			{
-				//cash in the points
-				if (_playerScript)
-				{
-					int scoreAddition = (int)(Mathf.Abs(_displacementLength) * GameConstants.BaseScoreAddition);
-					_playerScript.TriggerEnemyDisplacement(scoreAddition);
-					if (_isDisplaced)
-					{
-						_playerScript.DisplacedEnemyGotDestroyed();
-					}
-				}
-
-				Destroy(gameObject);
+				ScoreAndRemoveFromScene();
 			}
 		}
 	}
 
-	public void TriggerStun()
+	public virtual void TriggerStun()
 	{
 		_isStunned = true;
 		_lastStunTime = Time.time;
@@ -116,7 +112,7 @@ public class BasicEnemy : MonoBehaviour
 		OnDisplaced();
 	}
 
-	public void TriggerSpeedBoost()
+	public virtual void TriggerSpeedBoost()
 	{
 		EventLogger.PrintToLog("Enemy Gains Speedup");
 		if (!_speedBoostIsActive)
@@ -128,56 +124,75 @@ public class BasicEnemy : MonoBehaviour
 
 	private void OnTriggerStay2D(Collider2D other)
 	{
-		if (_hasCollided)
+		if (HasCollided)
 		{
 			return;
 		}
 
+		if (CheckForCollision(other))
+		{
+			Explode();
+		}
+	}
+
+	protected bool CheckForCollision(Collider2D other)
+	{
+		bool collisionExists = false;
+
 		if (other.gameObject.tag == "Player")
 		{
-			Assert.IsNotNull(_playerScript);
-			bool playerGotHit = _playerScript.PlayerGotHit();
+			Assert.IsNotNull(PlayerScript);
+			bool playerGotHit = PlayerScript.PlayerGotHit();
 			if (playerGotHit)
 			{
 				EventLogger.PrintToLog("Enemy Collision v Player");
-				Explode();
+				collisionExists = true;
 			}
 		}
 		else if (other.gameObject.tag == "Shield")
 		{
-			Assert.IsNotNull(_playerScript);
-			bool shieldGotHit = _playerScript.ShieldGotHit();
+			Assert.IsNotNull(PlayerScript);
+			bool shieldGotHit = PlayerScript.ShieldGotHit();
 			if (shieldGotHit)
 			{
 				EventLogger.PrintToLog("Enemy Collision v Shield");
-				Explode();
+				collisionExists = true;
 			}
 		}
 		else if (other.gameObject.tag == "Enemy")
 		{
 			EventLogger.PrintToLog("Enemy Collision v Enemy");
-			Explode();
+			collisionExists = true;
 		}
+
+		return collisionExists;
 	}
 
 	private void FireGun()
 	{
 		_lastFireTime = Time.time;
-		foreach (Vector3 localGunPos in _gunPositions)
+		foreach (Transform gunTransform in _gunTransforms)
 		{
-			Vector3 globalGunPos = transform.position + localGunPos;
+			Vector3 globalGunPos = gunTransform.position;
 			GameObject bulletGameObject = Instantiate(BulletPrefab, globalGunPos, Quaternion.identity);
+			Vector3 bulletDir = gunTransform.up;
 
-			if (_playerScript)
+			if (PlayerScript)
 			{
-				Vector3 playerPos = _playerScript.transform.position;
-				if (ShootsStraightAtPlayer && playerPos.x + 2.0f < globalGunPos.x)
+				Vector3 playerPos = PlayerScript.transform.position;
+				Vector3 referenceTargetPos = globalGunPos + bulletDir*2.0f;
+
+				float xSign = Mathf.Sign(bulletDir.x);
+				float ySign = Mathf.Sign(bulletDir.y);
+
+				if (ShootsStraightAtPlayer &&
+					(Mathf.Sign(playerPos.x - referenceTargetPos.x) == xSign || bulletDir.x == 0.0f) && 
+				    (Mathf.Sign(playerPos.y - referenceTargetPos.y) == ySign || bulletDir.y == 0.0f))
 				{
-					//set bullet direction to match player direction, only if player is *comfortably* in front of the enemy
-					Vector3 bulletDir = playerPos - globalGunPos;
-					bulletGameObject.GetComponent<BasicMove>().SetMoveDir(bulletDir.normalized, true);
+					bulletDir = playerPos - globalGunPos;
 				}
 			}
+			bulletGameObject.GetComponent<BasicMove>().SetMoveDir(bulletDir.normalized, true);
 		}
 		SetNextFiringInterval();
 	}
@@ -190,27 +205,51 @@ public class BasicEnemy : MonoBehaviour
 
 	private void OnDisplaced()
 	{
-		if (_playerScript && !_isDisplaced)
+		if (PlayerScript && !_isDisplaced)
 		{
 			_isDisplaced = true;
-			_playerScript.EnemyGotDisplaced();
+			PlayerScript.EnemyGotDisplaced();
 		}
+	}
+
+	protected virtual void ScoreAndRemoveFromScene()
+	{
+		//cash in the points
+		if (PlayerScript)
+		{
+			int scoreAddition = (int)(Mathf.Abs(_displacementLength) * GameConstants.BaseScoreAddition);
+			PlayerScript.TriggerEnemyDisplacement(scoreAddition);
+			if (_isDisplaced)
+			{
+				PlayerScript.DisplacedEnemyGotDestroyed();
+			}
+		}
+		Destroy(gameObject);
 	}
 
 	private void Explode()
 	{
-		if (_playerScript)
+		if (PlayerScript)
 		{
 			//player might not be alive, game might have ended, do not score negative points in this case
-			_playerScript.TriggerEnemyDestruction();
+			PlayerScript.TriggerEnemyDestruction();
 		}
-		_hasCollided = true;
+		HasCollided = true;
 		_basicObjectScript.OnDestruction();
 		Destroy(gameObject);
 	}
 
 	private void InitGunPositions()
 	{
+		_gunTransforms = new List<Transform>();
+		for (int i = 0; i < transform.childCount; ++i)
+		{
+			if (transform.GetChild(i).CompareTag("BulletStart"))
+			{
+				_gunTransforms.Add((transform.GetChild(i).transform));
+			}
+		}
+
 		_gunPositions = new List<Vector3>();
 		for (int i = 0; i < transform.childCount; i++)
 		{

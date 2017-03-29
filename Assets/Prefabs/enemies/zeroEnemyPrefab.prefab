@@ -107,7 +107,7 @@ BoxCollider2D:
   m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_Offset: {x: 0.05, y: -0.135}
   serializedVersion: 2
@@ -121,7 +121,7 @@ BoxCollider2D:
   m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
@@ -135,7 +135,7 @@ BoxCollider2D:
   m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_Offset: {x: 0.05, y: 0.135}
   serializedVersion: 2
@@ -182,9 +182,9 @@ MonoBehaviour:
   RandomizeRotationSpeedCoef: 0
   DestroyOnVerticalLimits: 0
   DestroyOnHorizontalLimits: 0
-  DestroyOnEarlyHorizontalLimits: 0
-  RespawnOnVerticalLimits: 0
-  RespawnOnHorizontalLimits: 0
+  RespawnOnDestroy: 0
+  VerticalLimits: []
+  HorizontalLimits: []
 --- !u!114 &114393591570476314
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -202,6 +202,11 @@ MonoBehaviour:
   ShootsStraightAtPlayer: 0
   MinFiringInterval: 0
   BulletPrefab: {fileID: 0}
+  DestructionHorizontalMinCoord: -2
+  VerticalSpawnLimits:
+  - 0.45
+  - 5.15
+  HorizontalSpawnCoord: 9
 --- !u!114 &114701052502686960
 MonoBehaviour:
   m_ObjectHideFlags: 1

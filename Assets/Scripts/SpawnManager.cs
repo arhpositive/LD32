@@ -40,9 +40,14 @@ public class SpawnManager : MonoBehaviour
 {
 	public bool IsGameScene;
 
+	//TODO temporary
+	public GameObject UpBound;
+	public GameObject DownBound;
+
 	[Header("Prefabs")]
 	public GameObject PlayerPrefab;
 	public GameObject[] EnemyPrefabArray;
+	public GameObject[] HugeEnemyPrefabArray;
 	public GameObject[] PosPowerupPrefabArray;
 	public GameObject[] NegPowerupPrefabArray;
 	public GameObject[] MeteorPrefabArray;
@@ -51,6 +56,8 @@ public class SpawnManager : MonoBehaviour
 	[Header("Interval Properties")]
 	public float MinWaveSpawnIntervalCoef;
 	public float MaxWaveSpawnIntervalCoef;
+	public float MinHugeEnemySpawnIntervalCoef;
+	public float MaxHugeEnemySpawnIntervalCoef;
 	public float PowerupSpawnBaseInterval;
 
 	[Header("Parallax Counts")]
@@ -61,6 +68,8 @@ public class SpawnManager : MonoBehaviour
 
 	private float _previousWaveSpawnTime;
 	private float _waveSpawnInterval;
+	private float _previousHugeEnemySpawnTime;
+	private float _hugeEnemySpawnInterval;
 
 	private float _previousPosPowerupSpawnTime;
 	private float _posPowerupSpawnInterval;
@@ -78,9 +87,10 @@ public class SpawnManager : MonoBehaviour
 	private float _enemySpawnMinHorzDist;
 	private float _enemySpawnMaxHorzDist;
 
-	private const float HSpawnCoord = GameConstants.HorizontalMaxCoord;
-	private const float VMinCoord = GameConstants.MinVerticalMovementLimit;
-	private const float VMaxCoord = GameConstants.MaxVerticalMovementLimit;
+	private float _vertMinShipSpawnCoord;
+	private float _vertMaxShipSpawnCoord;
+
+	private bool _hugeEnemyExists;
 
 	private const float DifficultyDifferenceCoef = 100.0f / (GameConstants.MaxDifficultyMultiplier - GameConstants.MinDifficultyMultiplier);
 
@@ -93,7 +103,7 @@ public class SpawnManager : MonoBehaviour
 
 		//instantiate player
 		Instantiate(PlayerPrefab,
-			new Vector2(0.0f, Random.Range(GameConstants.MinVerticalMovementLimit, GameConstants.MaxVerticalMovementLimit)),
+			new Vector2(0.0f, Random.Range(Player.MinVerticalMovementLimit, Player.MaxVerticalMovementLimit)),
 			Quaternion.identity);
 	}
 
@@ -107,8 +117,13 @@ public class SpawnManager : MonoBehaviour
 		_enemySpawnMaxHorzDist = PlayerShipColliderHorzSize * 2.0f - 0.01f;
 		_enemySpawnMinHorzDist = Mathf.Min(PlayerShipColliderHorzSize * 0.5f, _enemySpawnMaxHorzDist);
 
+		_hugeEnemyExists = false;
+		ResetVerticalSpawnLimits();
+
 		_waveSpawnInterval = MinWaveSpawnIntervalCoef;
 		_previousWaveSpawnTime = Time.time;
+		_hugeEnemySpawnInterval = MinHugeEnemySpawnIntervalCoef;
+		_previousHugeEnemySpawnTime = Time.time;
 		_formations = new List<Formation>();
 
 		PregeneratePossibleWaves();
@@ -132,6 +147,10 @@ public class SpawnManager : MonoBehaviour
 
 	private void Update()
 	{
+		UpBound.transform.position = new Vector3(UpBound.transform.position.x, _vertMaxShipSpawnCoord, UpBound.transform.position.z);
+		DownBound.transform.position = new Vector3(DownBound.transform.position.x, _vertMinShipSpawnCoord, DownBound.transform.position.z);
+
+
 		if (Input.GetKeyDown(KeyCode.U))
 		{
 			Time.timeScale += 0.1f;
@@ -149,6 +168,12 @@ public class SpawnManager : MonoBehaviour
 			{
 				SpawnNewWave();
 				_previousWaveSpawnTime = Time.time;
+			}
+
+			if (Time.time - _previousHugeEnemySpawnTime > _hugeEnemySpawnInterval)
+			{
+				SpawnNewHugeEnemy();
+				_previousHugeEnemySpawnTime = Time.time;
 			}
 
 			if (Time.time - _previousPosPowerupSpawnTime > _posPowerupSpawnInterval)
@@ -297,7 +322,7 @@ public class SpawnManager : MonoBehaviour
 		}
 
 		//III. Determine Vertical Distance Between Enemies
-		float verticalMovementLength = VMaxCoord - VMinCoord;
+		float verticalMovementLength = _vertMaxShipSpawnCoord - _vertMinShipSpawnCoord;
 		float minEnemyVerticalDist = _enemySpawnMinVertDist;
 		if (hasNoExit)
 		{
@@ -336,17 +361,34 @@ public class SpawnManager : MonoBehaviour
 		}
 
 		int actualVerticalIntervalCount = enemyCount - 1;
-		float minVerticalStartCoord = VMinCoord;
-		float maxVerticalStartCoord = VMaxCoord - actualVerticalIntervalCount * enemyVerticalDist;
+		float minVerticalStartCoord = _vertMinShipSpawnCoord;
+		float maxVerticalStartCoord = _vertMaxShipSpawnCoord - actualVerticalIntervalCount * enemyVerticalDist;
 
 		if (maxVerticalStartCoord < minVerticalStartCoord)
 		{
 			//we just went off the line, this is only possible for no exit formations!
 			Assert.IsTrue(hasNoExit);
+			
+			//swap these two
+			maxVerticalStartCoord += minVerticalStartCoord;
+			minVerticalStartCoord = maxVerticalStartCoord - minVerticalStartCoord;
+			maxVerticalStartCoord -= minVerticalStartCoord;
 
-			float difference = minVerticalStartCoord - maxVerticalStartCoord;
-			maxVerticalStartCoord = minVerticalStartCoord + difference;
-			minVerticalStartCoord = maxVerticalStartCoord;
+			if (_hugeEnemyExists)
+			{
+				if (_vertMinShipSpawnCoord != Player.MinVerticalMovementLimit)
+				{
+					minVerticalStartCoord = maxVerticalStartCoord;
+				}
+				else if (_vertMaxShipSpawnCoord != Player.MaxVerticalMovementLimit)
+				{
+					maxVerticalStartCoord = minVerticalStartCoord;
+				}
+				else
+				{
+					Assert.IsTrue(false); //something is fishy, spawning a huge enemy didn't change vertical spawn coords
+				}
+			}
 		}
 		else
 		{
@@ -373,16 +415,21 @@ public class SpawnManager : MonoBehaviour
 		float advancedEnemyPercentage = DifficultyDifferenceCoef * (_difficultyManagerScript.DifficultyCoefs[DifficultyParameter.DpEnemyShipStrength] - GameConstants.MinDifficultyMultiplier);
 
 		int advEnemyTypeIndex = 1;
-		int currentEnemyTypeStep = enemyTypeSteps[advEnemyTypeIndex];
-		while (advancedEnemyPercentage > currentEnemyTypeStep)
+		float percentageOfStrongerEnemy = 0.0f;
+
+		if (enemyTypeSteps.Length > 1)
 		{
-			++advEnemyTypeIndex;
-			Assert.IsTrue(advEnemyTypeIndex < enemyTypeSteps.Length);
-			currentEnemyTypeStep = enemyTypeSteps[advEnemyTypeIndex];
+			int currentEnemyTypeStep = enemyTypeSteps[advEnemyTypeIndex];
+			while (advancedEnemyPercentage > currentEnemyTypeStep)
+			{
+				++advEnemyTypeIndex;
+				Assert.IsTrue(advEnemyTypeIndex < enemyTypeSteps.Length);
+				currentEnemyTypeStep = enemyTypeSteps[advEnemyTypeIndex];
+			}
+			// if we're here, we know which two enemies we're gonna use
+			int previousEnemyTypeStep = enemyTypeSteps[advEnemyTypeIndex - 1];
+			percentageOfStrongerEnemy = (advancedEnemyPercentage - previousEnemyTypeStep) / (currentEnemyTypeStep - previousEnemyTypeStep);
 		}
-		// if we're here, we know which two enemies we're gonna use
-		int previousEnemyTypeStep = enemyTypeSteps[advEnemyTypeIndex - 1];
-		float percentageOfStrongerEnemy = (advancedEnemyPercentage - previousEnemyTypeStep) / (currentEnemyTypeStep - previousEnemyTypeStep);
 
 		int minAdvancedEnemyCount = Mathf.FloorToInt(percentageOfStrongerEnemy * selectedFormationEntities.Count);
 		int maxAdvancedEnemyCount = Mathf.CeilToInt(percentageOfStrongerEnemy * selectedFormationEntities.Count);
@@ -416,6 +463,8 @@ public class SpawnManager : MonoBehaviour
 		for (int i = 0; i < selectedFormationEntities.Count; i++)
 		{
 			int enemyKind = shipTypes[i];
+			GameObject enemyPrefab = EnemyPrefabArray[enemyKind];
+			BasicEnemy enemyPrefabScript = enemyPrefab.GetComponent<BasicEnemy>();
 
 			Vector2 enemyPos;
 			if (i > 0)
@@ -432,13 +481,15 @@ public class SpawnManager : MonoBehaviour
 			}
 			else
 			{
-				enemyPos = new Vector2(HSpawnCoord + selectedFormationEntities[i].Position.x * maxEnemyHorizontalDist, Random.Range(minVerticalStartCoord, maxVerticalStartCoord));
+				enemyPos = new Vector2(enemyPrefabScript.HorizontalSpawnCoord + selectedFormationEntities[i].Position.x * maxEnemyHorizontalDist, 
+					Random.Range(minVerticalStartCoord, maxVerticalStartCoord));
 			}
 
-			GameObject enemy = Instantiate(EnemyPrefabArray[enemyKind], enemyPos, Quaternion.identity);
+			GameObject enemy = Instantiate(enemyPrefab, enemyPos, Quaternion.identity);
 			Assert.IsNotNull(enemy);
 			BasicMove basicMoveScript = enemy.GetComponent<BasicMove>();
 
+			//TODO LATER this might be completely unnecessary, but then again we might need it in the future
 			basicMoveScript.SetMoveDir(selectedFormationEntities[i].MoveDir, false);
 
 			previousEnemyPos = enemyPos;
@@ -456,6 +507,40 @@ public class SpawnManager : MonoBehaviour
 			return 1;
 		}
 		return 0;
+	}
+
+	private void SpawnNewHugeEnemy()
+	{
+		Assert.IsTrue(!_hugeEnemyExists); //we only want one huge enemy at once on the screen
+		EventLogger.PrintToLog("New Huge Enemy Spawn");
+		ResetVerticalSpawnLimits();
+
+		float randomIntervalCoef = Random.Range(MinHugeEnemySpawnIntervalCoef, MaxHugeEnemySpawnIntervalCoef);
+		//TODO spawn rate increase should be separate for huge enemies
+		_hugeEnemySpawnInterval = randomIntervalCoef / _difficultyManagerScript.DifficultyCoefs[DifficultyParameter.DpWaveSpawnRateIncrease]; 
+
+		//randomly select a prefab among available options
+		int hugeEnemyIndex = Random.Range(0, HugeEnemyPrefabArray.Length);
+		GameObject hugeEnemyPrefab = HugeEnemyPrefabArray[hugeEnemyIndex];
+		BasicEnemy hugeEnemyScript = hugeEnemyPrefab.GetComponent<BasicEnemy>();
+
+		//TODO as difficulty is increased, huge enemies should be closer
+		Vector3 hugeEnemyPos = new Vector2(hugeEnemyScript.HorizontalSpawnCoord, Random.Range(hugeEnemyScript.VerticalSpawnLimits[0], hugeEnemyScript.VerticalSpawnLimits[1]));
+		Instantiate(hugeEnemyPrefab, hugeEnemyPos, Quaternion.identity);
+		
+		float colliderBoundary = hugeEnemyScript.VerticalColliderBoundary;
+		if (Mathf.Sign(colliderBoundary) == 1.0f)
+		{
+			//positive collider boundary means we're dealing with a huge enemy below, hence we should limit vMin
+			_vertMinShipSpawnCoord = hugeEnemyPos.y + colliderBoundary + ShipColliderVertSize + 0.01f;
+		}
+		else
+		{
+			//negative collider boundary = huge enemy above = vMax
+			_vertMaxShipSpawnCoord = hugeEnemyPos.y + colliderBoundary - ShipColliderVertSize - 0.01f;
+		}
+
+		SetHugeEnemyExists(true);
 	}
 
 	private void SpawnNewPowerup(bool isPositive)
@@ -486,9 +571,10 @@ public class SpawnManager : MonoBehaviour
 		}
 
 		int powerupIndex = Random.Range(0, occurenceList.Count);
-		Vector3 powerupPos = new Vector2(GameConstants.HorizontalMaxCoord,
-		   Random.Range(GameConstants.MinVerticalMovementLimit, GameConstants.MaxVerticalMovementLimit));
-		Instantiate(powerupPrefabArray[occurenceList[powerupIndex]], powerupPos, Quaternion.identity);
+		GameObject selectedPowerup = powerupPrefabArray[occurenceList[powerupIndex]];
+		BasicMove powerupMoveScript = selectedPowerup.GetComponent<BasicMove>();
+		Vector3 powerupPos = new Vector2(powerupMoveScript.HorizontalLimits[1], Random.Range(powerupMoveScript.VerticalLimits[0], powerupMoveScript.VerticalLimits[1]));
+		Instantiate(selectedPowerup, powerupPos, Quaternion.identity);
 	}
 
 	private void InitialMeteorAndStarSpawn()
@@ -496,32 +582,44 @@ public class SpawnManager : MonoBehaviour
 		for (int i = 0; i < MeteorCount; i++)
 		{
 			int meteorKind = Random.Range(0, MeteorPrefabArray.Length);
-			Vector2 meteorPos = new Vector2(Random.Range(GameConstants.MinHorizontalMovementLimit - 0.5f, GameConstants.HorizontalMaxCoord - 0.5f),
-				Random.Range(GameConstants.VerticalMinCoord, GameConstants.VerticalMaxCoord));
-			SpawnMeteor(meteorKind, meteorPos);
+			GameObject selectedMeteor = MeteorPrefabArray[meteorKind];
+			BasicMove meteorMoveScript = selectedMeteor.GetComponent<BasicMove>();
+			
+			Vector2 meteorPos =
+				new Vector2(Random.Range(meteorMoveScript.HorizontalLimits[0], meteorMoveScript.HorizontalLimits[1]),
+					Random.Range(meteorMoveScript.VerticalLimits[0], meteorMoveScript.VerticalLimits[1]));
+			Instantiate(selectedMeteor, meteorPos, Quaternion.identity);
 		}
 
 		for (int i = 0; i < StarCount; i++)
 		{
-			Vector2 starPos = new Vector2(Random.Range(GameConstants.MinHorizontalMovementLimit - 0.5f, GameConstants.HorizontalMaxCoord - 0.5f),
-				Random.Range(GameConstants.VerticalMinCoord, GameConstants.VerticalMaxCoord));
-			SpawnStar(starPos);
+			BasicMove starMoveScript = StarPrefab.GetComponent<BasicMove>();
+
+			Vector2 starPos =
+				new Vector2(Random.Range(starMoveScript.HorizontalLimits[0], starMoveScript.HorizontalLimits[1]),
+					Random.Range(starMoveScript.VerticalLimits[0], starMoveScript.VerticalLimits[1]));
+			Instantiate(StarPrefab, starPos, Quaternion.identity);
 		}
 	}
-
-	private void SpawnMeteor(int meteorKind, Vector2 meteorPos)
+	
+	public void SetHugeEnemyExists(bool newValue)
 	{
-		Instantiate(MeteorPrefabArray[meteorKind], meteorPos, Quaternion.identity);
+		_hugeEnemyExists = newValue;
 	}
 
-	private void SpawnStar(Vector2 starPos)
+	public void ResetVerticalSpawnLimits()
 	{
-		Instantiate(StarPrefab, starPos, Quaternion.identity);
+		_vertMinShipSpawnCoord = Player.MinVerticalMovementLimit;
+		_vertMaxShipSpawnCoord = Player.MaxVerticalMovementLimit;
 	}
 
-	public static Vector2 GetRespawnPos()
+	public float GetVertMinShipSpawnCoord()
 	{
-		return new Vector2(Random.Range(GameConstants.HorizontalMaxCoord - 0.1f, GameConstants.HorizontalMaxCoord),
-				Random.Range(GameConstants.VerticalMinCoord, GameConstants.VerticalMaxCoord));
+		return _vertMinShipSpawnCoord;
+	}
+
+	public float GetVertMaxShipSpawnCoord()
+	{
+		return _vertMaxShipSpawnCoord;
 	}
 }

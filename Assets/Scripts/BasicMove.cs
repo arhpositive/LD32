@@ -34,10 +34,9 @@ public class BasicMove : MonoBehaviour
 
 	public bool DestroyOnVerticalLimits;
 	public bool DestroyOnHorizontalLimits;
-	public bool DestroyOnEarlyHorizontalLimits;
-
-	public bool RespawnOnVerticalLimits;
-	public bool RespawnOnHorizontalLimits;
+	public bool RespawnOnDestroy;
+	public float[] VerticalLimits;
+	public float[] HorizontalLimits;
 
 	private void Awake()
 	{
@@ -56,48 +55,19 @@ public class BasicMove : MonoBehaviour
 			transform.Rotate(Vector3.forward * RotationSpeed * Time.deltaTime, Space.World);
 		}
 
-		if (DestroyOnEarlyHorizontalLimits)
+		if (DestroyOnHorizontalLimits)
 		{
-			if (transform.position.x < GameConstants.HorizontalMinCoord ||
-				transform.position.x > GameConstants.HorizontalEarlyMaxCoord)
+			if (transform.position.x < HorizontalLimits[0] || transform.position.x > HorizontalLimits[1])
 			{
-				Destroy(gameObject);
-			}
-		}
-		else if (DestroyOnHorizontalLimits)
-		{
-			if (transform.position.x < GameConstants.HorizontalMinCoord ||
-				transform.position.x > GameConstants.HorizontalMaxCoord)
-			{
-				Destroy(gameObject);
+				OnDestroyTrigger();
 			}
 		}
 
 		if (DestroyOnVerticalLimits)
 		{
-			if (transform.position.y < GameConstants.VerticalMinCoord ||
-				transform.position.y > GameConstants.VerticalMaxCoord)
+			if (transform.position.y < VerticalLimits[0] || transform.position.y > VerticalLimits[1])
 			{
-				Destroy(gameObject);
-			}
-		}
-
-		if (RespawnOnHorizontalLimits)
-		{
-			if (transform.position.x < GameConstants.HorizontalMinCoord ||
-				transform.position.x > GameConstants.HorizontalMaxCoord)
-			{
-				transform.position = SpawnManager.GetRespawnPos();
-				Initialize();
-			}
-		}
-		else if (RespawnOnVerticalLimits)
-		{
-			if (transform.position.y < GameConstants.VerticalMinCoord ||
-				transform.position.y > GameConstants.VerticalMaxCoord)
-			{
-				transform.position = SpawnManager.GetRespawnPos();
-				Initialize();
+				OnDestroyTrigger();
 			}
 		}
 	}
@@ -123,6 +93,21 @@ public class BasicMove : MonoBehaviour
 		{
 			float range = Random.Range(0.0f, 1.0f) * RandomizeRotationSpeedCoef;
 			RotationSpeed = Random.Range(-range, range);
+		}
+	}
+
+	private void OnDestroyTrigger()
+	{
+		if (RespawnOnDestroy)
+		{
+			Vector2 respawnPos = new Vector2(Random.Range(HorizontalLimits[1] - 0.1f, HorizontalLimits[1]),
+				Random.Range(VerticalLimits[0], VerticalLimits[1]));
+			transform.position = respawnPos;
+			Initialize();
+		}
+		else
+		{
+			Destroy(gameObject);
 		}
 	}
 

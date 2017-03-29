@@ -183,6 +183,9 @@ MonoBehaviour:
   - {fileID: 1834478848205664, guid: a05d495ce9bda314e945751860bed8aa, type: 2}
   - {fileID: 139786, guid: 566fefe5e59b580429b5c12346896bd0, type: 2}
   - {fileID: 190498, guid: a9dbab4630dcdae4ca684a97057da1a1, type: 2}
+  HugeEnemyPrefabArray:
+  - {fileID: 1433565089170992, guid: bcae63305ebef7d43be5eaac21a1ed6f, type: 2}
+  - {fileID: 1681843747619078, guid: e36ace73e317a5c459ca94fe6ccabfd4, type: 2}
   PosPowerupPrefabArray:
   - {fileID: 186326, guid: 34c4edda1b1fbba4bb38a7f81c642d6b, type: 2}
   - {fileID: 195642, guid: 7e24ad8ee91fea748a9cf394b8bd4c47, type: 2}
@@ -197,6 +200,8 @@ MonoBehaviour:
   StarPrefab: {fileID: 157426, guid: c5f313e4e03d12a4ba060b73e0120301, type: 2}
   MinWaveSpawnIntervalCoef: 5
   MaxWaveSpawnIntervalCoef: 10
+  MinHugeEnemySpawnIntervalCoef: 40
+  MaxHugeEnemySpawnIntervalCoef: 40
   PowerupSpawnBaseInterval: 3
   MeteorCount: 30
   StarCount: 300

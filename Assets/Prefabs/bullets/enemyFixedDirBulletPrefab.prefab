@@ -114,7 +114,14 @@ MonoBehaviour:
   RandomizeRotationSpeed: 0
   RandomizeRotationSpeedCoef: 0
   DestroyOnVerticalLimits: 1
-  DestroyOnHorizontalLimits: 0
+  DestroyOnHorizontalLimits: 1
+  RespawnOnDestroy: 0
+  VerticalLimits:
+  - -2
+  - 7
+  HorizontalLimits:
+  - -2
+  - 7.55
   DestroyOnEarlyHorizontalLimits: 1
   RespawnOnVerticalLimits: 0
   RespawnOnHorizontalLimits: 0

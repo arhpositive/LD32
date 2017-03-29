@@ -5,14 +5,14 @@ GameObject:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  serializedVersion: 4
+  serializedVersion: 5
   m_Component:
-  - 4: {fileID: 457882}
-  - 212: {fileID: 21222816}
-  - 58: {fileID: 5814146}
-  - 50: {fileID: 5098280}
-  - 114: {fileID: 11454824}
-  - 114: {fileID: 11485342}
+  - component: {fileID: 457882}
+  - component: {fileID: 21222816}
+  - component: {fileID: 5814146}
+  - component: {fileID: 5098280}
+  - component: {fileID: 11454824}
+  - component: {fileID: 11485342}
   m_Layer: 8
   m_Name: stunBulletPrefab
   m_TagString: Bullet
@@ -32,18 +32,23 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!50 &5098280
 Rigidbody2D:
-  serializedVersion: 2
+  serializedVersion: 4
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 151552}
+  m_BodyType: 1
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
   m_Mass: 1
   m_LinearDrag: 0
-  m_AngularDrag: .0500000007
+  m_AngularDrag: 0.05
   m_GravityScale: 1
-  m_IsKinematic: 1
+  m_Material: {fileID: 0}
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
@@ -55,12 +60,13 @@ CircleCollider2D:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 151552}
   m_Enabled: 1
+  m_Density: 1
   m_Material: {fileID: 0}
   m_IsTrigger: 1
   m_UsedByEffector: 0
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
-  m_Radius: .0500000007
+  m_Radius: 0.05
 --- !u!114 &11454824
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -98,10 +104,18 @@ MonoBehaviour:
   RotationSpeed: 0
   RandomizeRotationSpeed: 0
   RandomizeRotationSpeedCoef: 0
-  BounceOnHorizontalLimits: 0
   DestroyOnVerticalLimits: 1
-  DestroyOnHorizontalLimits: 0
+  DestroyOnHorizontalLimits: 1
+  RespawnOnDestroy: 0
+  VerticalLimits:
+  - -2
+  - 7
+  HorizontalLimits:
+  - -2
+  - 7.55
   DestroyOnEarlyHorizontalLimits: 1
+  RespawnOnVerticalLimits: 0
+  RespawnOnHorizontalLimits: 0
 --- !u!212 &21222816
 SpriteRenderer:
   m_ObjectHideFlags: 1
@@ -111,23 +125,32 @@ SpriteRenderer:
   m_Enabled: 1
   m_CastShadows: 0
   m_ReceiveShadows: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
   m_Materials:
   - {fileID: 2100000, guid: 514faabbc55086c478fd39f80e4a5003, type: 2}
-  m_SubsetIndices: 
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
   m_StaticBatchRoot: {fileID: 0}
-  m_UseLightProbes: 1
-  m_ReflectionProbeUsage: 1
   m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
   m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
-  m_AutoUVMaxDistance: .5
+  m_SelectedEditorRenderState: 0
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingOrder: 2
   m_Sprite: {fileID: 21300000, guid: 43962687726b87e49a2cf69960a2b842, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_FlipX: 0
+  m_FlipY: 0
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1

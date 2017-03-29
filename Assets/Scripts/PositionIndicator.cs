@@ -10,12 +10,19 @@ public class PositionIndicator : MonoBehaviour
 
 	private void Start()
 	{
-		_playerScript = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
+		GameObject playerGameObject = GameObject.FindGameObjectWithTag("Player");
+		if (playerGameObject)
+		{
+			_playerScript = playerGameObject.GetComponent<Player>();
+		}
 	}
 
 	// Update is called once per frame
 	void Update ()
 	{
-		transform.position = _playerScript.AllPlayerStats[StatsIndex].PlayerAveragePosition;
+		if (_playerScript)
+		{
+			transform.position = _playerScript.AllPlayerStats[StatsIndex].PlayerAveragePosition;
+		}
 	}
 }

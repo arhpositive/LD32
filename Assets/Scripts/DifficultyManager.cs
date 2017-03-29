@@ -16,6 +16,7 @@ public enum DifficultyParameter
 	DpPosPowerupSpawnRateDecrease,
 	DpNegPowerupSpawnRateIncrease,
 	DpEnemyShipStrength,
+	//TODO LATER add huge ship spawn rate
 	DpCount
 }
 
@@ -100,22 +101,24 @@ public class DifficultyManager : MonoBehaviour
 		// how often does the player manouver
 		// what types of weapons does the player use often
 
-		float hpDiffSinceLastAdjustment = _playerScript.PlayerHealth - _previousWavePlayerHealth;
-
-		if (hpDiffSinceLastAdjustment < 0.0f)
+		if (_playerScript)
 		{
-			// player lost hp during last 5 seconds, drop difficulty
-			RandomDiffAdjustment(false);
+			float hpDiffSinceLastAdjustment = _playerScript.PlayerHealth - _previousWavePlayerHealth;
+
+			if (hpDiffSinceLastAdjustment < 0.0f)
+			{
+				// player lost hp during last 5 seconds, drop difficulty
+				RandomDiffAdjustment(false);
+			}
+
+			if (_adjustmentStepCount % 6 == 0 && _playerScript.PlayerHealth > 1)
+			{
+				// increase difficulty every 30 seconds if player is not struggling
+				RandomDiffAdjustment(true);
+			}
+
+			_previousWavePlayerHealth = _playerScript.PlayerHealth;
 		}
-
-		if (_adjustmentStepCount % 6 == 0 && _playerScript.PlayerHealth > 1)
-		{
-			// increase difficulty every 30 seconds if player is not struggling
-			RandomDiffAdjustment(true);
-		}
-
-		_previousWavePlayerHealth = _playerScript.PlayerHealth;
-
 	}
 
 	private void RandomDiffAdjustment(bool isIncrement)

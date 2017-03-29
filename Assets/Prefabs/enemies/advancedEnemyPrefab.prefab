@@ -118,13 +118,13 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 184122}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
   m_LocalPosition: {x: -0.23, y: 0.12, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 461254}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 90}
 --- !u!4 &461254
 Transform:
   m_ObjectHideFlags: 1
@@ -148,13 +148,13 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 141000}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
   m_LocalPosition: {x: -0.12, y: -0.14, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 461254}
   m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 90}
 --- !u!50 &5068776
 Rigidbody2D:
   serializedVersion: 4
@@ -276,9 +276,9 @@ MonoBehaviour:
   RandomizeRotationSpeedCoef: 0
   DestroyOnVerticalLimits: 0
   DestroyOnHorizontalLimits: 0
-  DestroyOnEarlyHorizontalLimits: 0
-  RespawnOnVerticalLimits: 0
-  RespawnOnHorizontalLimits: 0
+  RespawnOnDestroy: 0
+  VerticalLimits: []
+  HorizontalLimits: []
 --- !u!114 &11495518
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -295,7 +295,13 @@ MonoBehaviour:
   CanShoot: 1
   ShootsStraightAtPlayer: 1
   MinFiringInterval: 5
-  BulletPrefab: {fileID: 104536, guid: efb3702b3f1e6b140ae6e81f3396926b, type: 2}
+  BulletPrefab: {fileID: 1829245728384140, guid: 4b732c0cf413c544ca741aa0451488ec,
+    type: 2}
+  DestructionHorizontalMinCoord: -2
+  VerticalSpawnLimits:
+  - 0.45
+  - 5.15
+  HorizontalSpawnCoord: 9
 --- !u!212 &21203258
 SpriteRenderer:
   m_ObjectHideFlags: 1

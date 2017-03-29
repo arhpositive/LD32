@@ -51,6 +51,11 @@ public class Player : MonoBehaviour
 	public GameObject TeleportBulletPrefab;
 	public float PlayerSpeedLimit;
 
+	public const float MinHorizontalMovementLimit = -0.15f;
+	public const float MaxHorizontalMovementLimit = 7.15f;
+	public const float MinVerticalMovementLimit = 0.45f;
+	public const float MaxVerticalMovementLimit = 5.15f;
+
 	public AudioClip FireStunGunClip;
 	public AudioClip FireSpeedUpGunClip;
 	public AudioClip FireTeleportGunClip;
@@ -69,6 +74,7 @@ public class Player : MonoBehaviour
 	private bool _isInvulnerable;
 	private bool _isShielded;
 
+	private SpawnManager _spawnManagerScript;
 	private RefreshEndScoreText _endGameScoreText;
 
 	private GameObject _playerShield;
@@ -92,6 +98,7 @@ public class Player : MonoBehaviour
 	{
 		_spriteRenderer = gameObject.GetComponent<SpriteRenderer>();
 		_childRenderers = gameObject.GetComponentsInChildren<SpriteRenderer>(true);
+		_spawnManagerScript = Camera.main.GetComponent<SpawnManager>();
 		_endGameScoreText = GameObject.FindGameObjectWithTag("ScoreText").GetComponent<RefreshEndScoreText>();
 	}
 
@@ -148,8 +155,7 @@ public class Player : MonoBehaviour
 			EventLogger.PrintToLog("Invulnerability Start");
 
 			//spawn
-			transform.position = new Vector2(0.0f, Random.Range(GameConstants.MinVerticalMovementLimit,
-				GameConstants.MaxVerticalMovementLimit));
+			transform.position = new Vector2(0.0f, Random.Range(_spawnManagerScript.GetVertMinShipSpawnCoord(), _spawnManagerScript.GetVertMaxShipSpawnCoord()));
 			_isInvulnerable = true;
 			_invulnerabilityStartTime = Time.time;
 		}
@@ -285,8 +291,8 @@ public class Player : MonoBehaviour
 		transform.Translate(playerMovement, Space.World);
 
 		Vector3 clampedPlayerPosition = 
-			new Vector3(Mathf.Clamp(transform.position.x, GameConstants.MinHorizontalMovementLimit, GameConstants.MaxHorizontalMovementLimit), 
-			Mathf.Clamp(transform.position.y, GameConstants.MinVerticalMovementLimit, GameConstants.MaxVerticalMovementLimit), 
+			new Vector3(Mathf.Clamp(transform.position.x, MinHorizontalMovementLimit, MaxHorizontalMovementLimit), 
+			Mathf.Clamp(transform.position.y, MinVerticalMovementLimit, MaxVerticalMovementLimit), 
 			transform.position.z);
 
 		float movementMagnitude = (clampedPlayerPosition - oldPosition).magnitude;
@@ -301,7 +307,7 @@ public class Player : MonoBehaviour
 
 	public bool PlayerGotHit()
 	{
-		if (_isInvulnerable || IsDead)
+		if (_isInvulnerable || IsDead || PlayerHealth == 0)
 		{
 			// bullet goes right through player
 			return false;

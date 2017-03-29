@@ -18,12 +18,19 @@ namespace ui
 		private void Start()
 		{
 			_powerupText = gameObject.GetComponent<Text>();
-			_playerScript = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
+			GameObject playerGameObject = GameObject.FindGameObjectWithTag("Player");
+			if (playerGameObject)
+			{
+				_playerScript = playerGameObject.GetComponent<Player>();
+			}
 		}
 
 		private void Update()
 		{
-			_powerupText.text = _playerScript.GetSpeedUpGunAmmo().ToString();
+			if (_playerScript)
+			{
+				_powerupText.text = _playerScript.GetSpeedUpGunAmmo().ToString();
+			}
 		}
 	}
 }

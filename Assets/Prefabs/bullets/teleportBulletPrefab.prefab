@@ -5,12 +5,12 @@ GameObject:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  serializedVersion: 4
+  serializedVersion: 5
   m_Component:
-  - 4: {fileID: 402210}
-  - 212: {fileID: 21206536}
-  - 114: {fileID: 11488132}
-  - 114: {fileID: 11494214}
+  - component: {fileID: 402210}
+  - component: {fileID: 21206536}
+  - component: {fileID: 11488132}
+  - component: {fileID: 11494214}
   m_Layer: 8
   m_Name: teleportBulletPrefab
   m_TagString: Bullet
@@ -30,6 +30,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &11488132
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -53,10 +54,18 @@ MonoBehaviour:
   RotationSpeed: 0
   RandomizeRotationSpeed: 0
   RandomizeRotationSpeedCoef: 0
-  BounceOnHorizontalLimits: 0
   DestroyOnVerticalLimits: 1
-  DestroyOnHorizontalLimits: 0
+  DestroyOnHorizontalLimits: 1
+  RespawnOnDestroy: 0
+  VerticalLimits:
+  - -2
+  - 7
+  HorizontalLimits:
+  - -2
+  - 7.55
   DestroyOnEarlyHorizontalLimits: 1
+  RespawnOnVerticalLimits: 0
+  RespawnOnHorizontalLimits: 0
 --- !u!114 &11494214
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -80,23 +89,32 @@ SpriteRenderer:
   m_Enabled: 1
   m_CastShadows: 0
   m_ReceiveShadows: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
   m_Materials:
   - {fileID: 2100000, guid: 514faabbc55086c478fd39f80e4a5003, type: 2}
-  m_SubsetIndices: 
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
   m_StaticBatchRoot: {fileID: 0}
-  m_UseLightProbes: 1
-  m_ReflectionProbeUsage: 1
   m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
   m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
-  m_AutoUVMaxDistance: .5
+  m_SelectedEditorRenderState: 0
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingOrder: 2
   m_Sprite: {fileID: 21300000, guid: 7b38472b8bb7d1640bd7a467f7331581, type: 3}
   m_Color: {r: 0, g: 1, b: 1, a: 1}
+  m_FlipX: 0
+  m_FlipY: 0
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1
