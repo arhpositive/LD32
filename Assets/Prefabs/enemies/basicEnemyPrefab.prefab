@@ -191,13 +191,13 @@ MonoBehaviour:
   CanShoot: 1
   ShootsStraightAtPlayer: 1
   MinFiringInterval: 3
-  BulletPrefab: {fileID: 1829245728384140, guid: 4b732c0cf413c544ca741aa0451488ec,
-    type: 2}
+  BulletPrefab: {fileID: 104536, guid: efb3702b3f1e6b140ae6e81f3396926b, type: 2}
   DestructionHorizontalMinCoord: -2
   VerticalSpawnLimits:
   - 0.45
   - 5.15
   HorizontalSpawnCoord: 9
+  VerticalColliderBoundary: 0
 --- !u!114 &11483228
 MonoBehaviour:
   m_ObjectHideFlags: 1

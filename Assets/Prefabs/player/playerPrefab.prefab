@@ -366,6 +366,10 @@ MonoBehaviour:
   StunBulletPrefab: {fileID: 151552, guid: c01a9ecebecac134facbcd4665a1a13d, type: 2}
   SpeedUpBulletPrefab: {fileID: 181600, guid: 40481044129877d4a8fb8bc8e9f3acc3, type: 2}
   TeleportBulletPrefab: {fileID: 166356, guid: 30ccdb7f1fa89f949b16bb05e4a8f421, type: 2}
+  TeleportDisappearPrefab: {fileID: 1965899551069390, guid: dec2b88f5a54aea449a03889ee4697dd,
+    type: 2}
+  TeleportAppearPrefab: {fileID: 1680520491319500, guid: da91cd769c190a24fa666998f39aacbb,
+    type: 2}
   PlayerSpeedLimit: 2.5
   FireStunGunClip: {fileID: 8300000, guid: d8dbd1a7727573844b51d2e5e2fe2fed, type: 3}
   FireSpeedUpGunClip: {fileID: 8300000, guid: e4fd3e08cf0dc614d98186276bddbf7d, type: 3}

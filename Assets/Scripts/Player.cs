@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using CnControls;
 using ui;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 public enum GunType
 {
@@ -49,6 +50,8 @@ public class Player : MonoBehaviour
 	public GameObject StunBulletPrefab;
 	public GameObject SpeedUpBulletPrefab;
 	public GameObject TeleportBulletPrefab;
+	public GameObject TeleportDisappearPrefab;
+	public GameObject TeleportAppearPrefab;
 	public float PlayerSpeedLimit;
 
 	public const float MinHorizontalMovementLimit = -0.15f;
@@ -520,8 +523,23 @@ public class Player : MonoBehaviour
 		if (_teleportGun.LastBullet)
 		{
 			EventLogger.PrintToLog("Player Triggers Teleport");
+
+			if (TeleportDisappearPrefab != null)
+			{
+				GameObject disappearEffect = Instantiate(TeleportDisappearPrefab, transform.position, Quaternion.identity);
+				Assert.IsNotNull(disappearEffect);
+				disappearEffect.GetComponent<SpriteRenderer>().material.color = gameObject.GetComponent<SpriteRenderer>().color;
+			}
+
 			transform.position = _teleportGun.LastBullet.transform.position;
 			AudioSource.PlayClipAtPoint(_teleportGun.LastBullet.GetComponent<Bullet>().BulletHitClip, transform.position);
+
+			if (TeleportAppearPrefab != null)
+			{
+				GameObject appearEffect = Instantiate(TeleportAppearPrefab, transform.position, Quaternion.identity);
+				Assert.IsNotNull(appearEffect);
+				appearEffect.GetComponent<SpriteRenderer>().material.color = gameObject.GetComponent<SpriteRenderer>().color;
+			}
 
 			Destroy(_teleportGun.LastBullet.gameObject);
 			_teleportGun.LastBullet = null;
