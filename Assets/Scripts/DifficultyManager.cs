@@ -8,11 +8,13 @@
 
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 public enum DifficultyParameter
 {
 	DpShipFireRateIncrease,
 	DpWaveSpawnRateIncrease,
+	DpWaveHasNoExitCoef,
 	DpPosPowerupSpawnRateDecrease,
 	DpNegPowerupSpawnRateIncrease,
 	DpEnemyShipStrength,
@@ -32,7 +34,7 @@ public class DifficultyManager : MonoBehaviour
 	// at the very beginning of the project, these multipliers can be set to 1.0 * (base_difficulty_level_coef)
 	// base level coef can be 0.6f for easy, 1.0 for normal, 1.4f for hard (this is just an example)
 
-	public Dictionary<DifficultyParameter, float> DifficultyCoefs { get; private set; }
+	public Dictionary<DifficultyParameter, int> DifficultyCoefs { get; private set; }
 
 	// difficulty adjustment steps will be at regular intervals
 	private float _lastDifficultyAdjustmentTime;
@@ -51,12 +53,11 @@ public class DifficultyManager : MonoBehaviour
 
 	private void Start()
 	{
-		//TODO later on, these multipliers have to be pulled out from our learning data
-		float avgDifficulty = (GameConstants.MaxDifficultyMultiplier + GameConstants.MinDifficultyMultiplier) / 2.0f;
-		DifficultyCoefs = new Dictionary<DifficultyParameter, float>((int)DifficultyParameter.DpCount);
+		DifficultyCoefs = new Dictionary<DifficultyParameter, int>((int)DifficultyParameter.DpCount);
 		for (DifficultyParameter curParam = DifficultyParameter.DpShipFireRateIncrease; curParam < DifficultyParameter.DpCount; ++curParam)
 		{
-			DifficultyCoefs.Add(curParam, avgDifficulty);
+			//TODO later on, these multipliers have to be pulled out from our learning data
+			DifficultyCoefs.Add(curParam, GameConstants.StartDifficulty);
 		}
 
 		_lastDifficultyAdjustmentTime = Time.time;
@@ -124,26 +125,27 @@ public class DifficultyManager : MonoBehaviour
 	private void RandomDiffAdjustment(bool isIncrement)
 	{
 		DifficultyParameter selectedDifficultyParameter = (DifficultyParameter)Random.Range((int)DifficultyParameter.DpShipFireRateIncrease, (int)DifficultyParameter.DpCount);
-		float oldValue = DifficultyCoefs[selectedDifficultyParameter];
+		int oldValue = DifficultyCoefs[selectedDifficultyParameter];
 
 		//TODO remove below code after ML is implemented
 		//start
 		int numRetries = 3;
-		for (int i = 0; i < numRetries || (isIncrement ? oldValue <= GameConstants.MinDifficultyMultiplier : oldValue >= GameConstants.MaxDifficultyMultiplier); ++i)
+		for (int i = 0; i < numRetries || (isIncrement ? oldValue <= GameConstants.MinDifficulty : oldValue >= GameConstants.MaxDifficulty); ++i)
 		{
 			selectedDifficultyParameter = (DifficultyParameter)Random.Range((int)DifficultyParameter.DpShipFireRateIncrease, (int)DifficultyParameter.DpCount);
 			oldValue = DifficultyCoefs[selectedDifficultyParameter];
 		}
 		//end
-
-		ChangeDifficultyParameter(selectedDifficultyParameter, oldValue + 0.1f * (isIncrement ? 1 : -1));
+		
+		ChangeDifficultyParameter(selectedDifficultyParameter, oldValue + GameConstants.DifficultyStep * (isIncrement ? 1 : -1));
 	}
 
-	private void ChangeDifficultyParameter(DifficultyParameter difficultyParameter, float newValue)
+	private void ChangeDifficultyParameter(DifficultyParameter difficultyParameter, int newValue)
 	{
-		//Assert.IsTrue(newValue >= GameConstants.MinDifficultyMultiplier && newValue <= GameConstants.MaxDifficultyMultiplier);
-		DifficultyCoefs[difficultyParameter] = Mathf.Clamp(newValue, GameConstants.MinDifficultyMultiplier, GameConstants.MaxDifficultyMultiplier);
+		Assert.IsTrue(newValue >= GameConstants.MinDifficulty && newValue <= GameConstants.MaxDifficulty);
+		DifficultyCoefs[difficultyParameter] = newValue;
 		EventLogger.PrintToLog("Difficulty Changed: " + difficultyParameter + " Value: " + newValue);
+		print("Difficulty Changed: " + difficultyParameter + " Value: " + newValue);
 	}
 
 	public float GetAverageDifficultyLevel()
@@ -156,5 +158,12 @@ public class DifficultyManager : MonoBehaviour
 		avgDifficulty /= (int)DifficultyParameter.DpCount;
 
 		return avgDifficulty;
+	}
+
+	public float GetDifficultyMultiplier(DifficultyParameter difficultyParameter)
+	{
+		int difficultyDifference = DifficultyCoefs[difficultyParameter] - GameConstants.MidDifficulty;
+		float difficultyMultiplier = Mathf.Pow(GameConstants.DifficultyCoef, difficultyDifference);
+		return difficultyMultiplier;
 	}
 }

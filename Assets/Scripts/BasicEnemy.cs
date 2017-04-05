@@ -17,6 +17,7 @@ public class BasicEnemy : MonoBehaviour
 	public bool CanShoot;
 	public bool ShootsStraightAtPlayer;
 	public float MinFiringInterval;
+	public float MaxFiringInterval;
 	public GameObject BulletPrefab;
 	public float DestructionHorizontalMinCoord;
 
@@ -199,8 +200,8 @@ public class BasicEnemy : MonoBehaviour
 
 	private void SetNextFiringInterval()
 	{
-		float randomIntervalCoef = Random.Range(MinFiringInterval, 2 * MinFiringInterval);
-		_nextFiringInterval = randomIntervalCoef / _difficultyManagerScript.DifficultyCoefs[DifficultyParameter.DpShipFireRateIncrease];
+		float randomIntervalCoef = Random.Range(MinFiringInterval, MaxFiringInterval);
+		_nextFiringInterval = randomIntervalCoef / _difficultyManagerScript.GetDifficultyMultiplier(DifficultyParameter.DpShipFireRateIncrease);
 	}
 
 	private void OnDisplaced()

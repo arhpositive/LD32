@@ -92,8 +92,6 @@ public class SpawnManager : MonoBehaviour
 
 	private bool _hugeEnemyExists;
 
-	private const float DifficultyDifferenceCoef = 100.0f / (GameConstants.MaxDifficultyMultiplier - GameConstants.MinDifficultyMultiplier);
-
 	private void Awake()
 	{
 		if (!IsGameScene)
@@ -292,9 +290,15 @@ public class SpawnManager : MonoBehaviour
 		EventLogger.PrintToLog("New Wave Spawn");
 
 		float randomIntervalCoef = Random.Range(MinWaveSpawnIntervalCoef, MaxWaveSpawnIntervalCoef);
-		_waveSpawnInterval = randomIntervalCoef / _difficultyManagerScript.DifficultyCoefs[DifficultyParameter.DpWaveSpawnRateIncrease];
+		_waveSpawnInterval = randomIntervalCoef / _difficultyManagerScript.GetDifficultyMultiplier(DifficultyParameter.DpWaveSpawnRateIncrease);
 
-		bool hasNoExit = Random.Range(0, 100) < DifficultyDifferenceCoef * (_difficultyManagerScript.GetAverageDifficultyLevel() - GameConstants.MinDifficultyMultiplier);
+
+		int randRange = 100;
+		float stepSize = (float)randRange/GameConstants.DifficultyStepCount;
+
+		float noExitProbability = _difficultyManagerScript.DifficultyCoefs[DifficultyParameter.DpWaveHasNoExitCoef] * stepSize - stepSize * 0.5f;
+
+		bool hasNoExit = Random.Range(0, randRange) < noExitProbability;
 
 		//TODO low difficulty = wider spread & less enemies
 		//TODO high difficulty = shorter spread & more enemies
@@ -412,8 +416,8 @@ public class SpawnManager : MonoBehaviour
 			//enemyTypeSteps = {0, 100} for 2 enemies, {0, 50, 100} for 3 enemies, {0, 33, 67, 100} for 4 enemies, and so on
 		}
 
-		float advancedEnemyPercentage = DifficultyDifferenceCoef * (_difficultyManagerScript.DifficultyCoefs[DifficultyParameter.DpEnemyShipStrength] - GameConstants.MinDifficultyMultiplier);
-
+		float advancedEnemyPercentage = _difficultyManagerScript.DifficultyCoefs[DifficultyParameter.DpEnemyShipStrength] * stepSize - stepSize * 0.5f;
+		
 		int advEnemyTypeIndex = 1;
 		float percentageOfStrongerEnemy = 0.0f;
 
@@ -517,7 +521,7 @@ public class SpawnManager : MonoBehaviour
 
 		float randomIntervalCoef = Random.Range(MinHugeEnemySpawnIntervalCoef, MaxHugeEnemySpawnIntervalCoef);
 		//TODO spawn rate increase should be separate for huge enemies
-		_hugeEnemySpawnInterval = randomIntervalCoef / _difficultyManagerScript.DifficultyCoefs[DifficultyParameter.DpWaveSpawnRateIncrease]; 
+		_hugeEnemySpawnInterval = randomIntervalCoef / _difficultyManagerScript.GetDifficultyMultiplier(DifficultyParameter.DpWaveSpawnRateIncrease); 
 
 		//randomly select a prefab among available options
 		int hugeEnemyIndex = Random.Range(0, HugeEnemyPrefabArray.Length);
@@ -550,12 +554,12 @@ public class SpawnManager : MonoBehaviour
 		GameObject[] powerupPrefabArray;
 		if (isPositive)
 		{
-			_posPowerupSpawnInterval = randomIntervalCoef * _difficultyManagerScript.DifficultyCoefs[DifficultyParameter.DpPosPowerupSpawnRateDecrease];
+			_posPowerupSpawnInterval = randomIntervalCoef * _difficultyManagerScript.GetDifficultyMultiplier(DifficultyParameter.DpPosPowerupSpawnRateDecrease);
 			powerupPrefabArray = PosPowerupPrefabArray;
 		}
 		else
 		{
-			_negPowerupSpawnInterval = randomIntervalCoef / _difficultyManagerScript.DifficultyCoefs[DifficultyParameter.DpNegPowerupSpawnRateIncrease];
+			_negPowerupSpawnInterval = randomIntervalCoef / _difficultyManagerScript.GetDifficultyMultiplier(DifficultyParameter.DpNegPowerupSpawnRateIncrease);
 			powerupPrefabArray = NegPowerupPrefabArray;
 		}
 

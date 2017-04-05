@@ -10,7 +10,6 @@ using UnityEngine;
 
 public class Destroyable : MonoBehaviour
 {
-	//TODO remove if not necessary
 	public void DestroyMe()
 	{
 		Destroy(gameObject);

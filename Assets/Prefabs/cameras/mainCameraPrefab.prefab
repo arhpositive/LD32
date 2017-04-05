@@ -178,6 +178,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   IsGameScene: 1
+  UpBound: {fileID: 0}
+  DownBound: {fileID: 0}
   PlayerPrefab: {fileID: 114074, guid: 58cda14e50f6d8d42a46b3077f960e56, type: 2}
   EnemyPrefabArray:
   - {fileID: 1834478848205664, guid: a05d495ce9bda314e945751860bed8aa, type: 2}
@@ -201,7 +203,7 @@ MonoBehaviour:
   MinWaveSpawnIntervalCoef: 5
   MaxWaveSpawnIntervalCoef: 10
   MinHugeEnemySpawnIntervalCoef: 40
-  MaxHugeEnemySpawnIntervalCoef: 40
+  MaxHugeEnemySpawnIntervalCoef: 80
   PowerupSpawnBaseInterval: 3
   MeteorCount: 30
   StarCount: 300
