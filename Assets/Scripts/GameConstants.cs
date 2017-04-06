@@ -6,8 +6,6 @@
  * Holds constant values
  */
 
-using UnityEngine;
-
 public static class GameConstants
 {
 	public const float DifficultyCoef = (2.0f/3.0f);

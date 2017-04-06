@@ -13,12 +13,11 @@ using UnityEngine.Assertions;
 public enum DifficultyParameter
 {
 	DpShipFireRateIncrease,
-	DpWaveSpawnRateIncrease,
+	DpWaveSpawnRateIncrease, //TODO LATER add huge ship spawn rate
 	DpWaveHasNoExitCoef,
 	DpPosPowerupSpawnRateDecrease,
 	DpNegPowerupSpawnRateIncrease,
 	DpEnemyShipStrength,
-	//TODO LATER add huge ship spawn rate
 	DpCount
 }
 

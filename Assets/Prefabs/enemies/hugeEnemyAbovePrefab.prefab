@@ -874,15 +874,15 @@ MonoBehaviour:
   StunDuration: 0
   SpeedBoostCoef: 1
   CanShoot: 1
-  ShootsStraightAtPlayer: 1
+  ShootsStraightAtPlayer: 0
   MinFiringInterval: 10
   MaxFiringInterval: 15
   BulletPrefab: {fileID: 104536, guid: efb3702b3f1e6b140ae6e81f3396926b, type: 2}
   DestructionHorizontalMinCoord: -11
+  HorizontalSpawnCoord: 18.5
   VerticalSpawnLimits:
   - 5
   - 6.8
-  HorizontalSpawnCoord: 18.5
   VerticalColliderBoundary: -1.48
 --- !u!114 &114688543822391264
 MonoBehaviour:

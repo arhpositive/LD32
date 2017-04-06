@@ -520,13 +520,12 @@ public class SpawnManager : MonoBehaviour
 		ResetVerticalSpawnLimits();
 
 		float randomIntervalCoef = Random.Range(MinHugeEnemySpawnIntervalCoef, MaxHugeEnemySpawnIntervalCoef);
-		//TODO spawn rate increase should be separate for huge enemies
 		_hugeEnemySpawnInterval = randomIntervalCoef / _difficultyManagerScript.GetDifficultyMultiplier(DifficultyParameter.DpWaveSpawnRateIncrease); 
 
 		//randomly select a prefab among available options
 		int hugeEnemyIndex = Random.Range(0, HugeEnemyPrefabArray.Length);
 		GameObject hugeEnemyPrefab = HugeEnemyPrefabArray[hugeEnemyIndex];
-		BasicEnemy hugeEnemyScript = hugeEnemyPrefab.GetComponent<BasicEnemy>();
+		HugeEnemy hugeEnemyScript = hugeEnemyPrefab.GetComponent<HugeEnemy>();
 
 		//TODO as difficulty is increased, huge enemies should be closer
 		Vector3 hugeEnemyPos = new Vector2(hugeEnemyScript.HorizontalSpawnCoord, Random.Range(hugeEnemyScript.VerticalSpawnLimits[0], hugeEnemyScript.VerticalSpawnLimits[1]));

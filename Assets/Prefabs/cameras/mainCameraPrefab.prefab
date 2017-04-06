@@ -202,8 +202,8 @@ MonoBehaviour:
   StarPrefab: {fileID: 157426, guid: c5f313e4e03d12a4ba060b73e0120301, type: 2}
   MinWaveSpawnIntervalCoef: 5
   MaxWaveSpawnIntervalCoef: 10
-  MinHugeEnemySpawnIntervalCoef: 40
-  MaxHugeEnemySpawnIntervalCoef: 80
+  MinHugeEnemySpawnIntervalCoef: 90
+  MaxHugeEnemySpawnIntervalCoef: 180
   PowerupSpawnBaseInterval: 3
   MeteorCount: 30
   StarCount: 300

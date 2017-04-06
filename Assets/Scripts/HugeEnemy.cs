@@ -3,7 +3,8 @@ using UnityEngine.Assertions;
 
 public class HugeEnemy : BasicEnemy
 {
-	//TODO work hard play hard work hard play hard
+	public float[] VerticalSpawnLimits;
+	public float VerticalColliderBoundary;
 
 	private SpawnManager _spawnManagerScript;
 

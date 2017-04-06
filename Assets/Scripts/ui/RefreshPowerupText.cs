@@ -12,6 +12,8 @@ namespace ui
 {
 	public class RefreshPowerupText : MonoBehaviour
 	{
+		public GunType GunKind;
+
 		private Text _powerupText;
 		private Player _playerScript;
 
@@ -29,7 +31,7 @@ namespace ui
 		{
 			if (_playerScript)
 			{
-				_powerupText.text = _playerScript.GetSpeedUpGunAmmo().ToString();
+				_powerupText.text = _playerScript.GetGunAmmo(GunKind).ToString();
 			}
 		}
 	}

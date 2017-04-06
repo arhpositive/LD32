@@ -20,11 +20,8 @@ public class BasicEnemy : MonoBehaviour
 	public float MaxFiringInterval;
 	public GameObject BulletPrefab;
 	public float DestructionHorizontalMinCoord;
-
-	//TODO NEXT consider moving to hugeEnemy
-	public float[] VerticalSpawnLimits;
+	
 	public float HorizontalSpawnCoord;
-	public float VerticalColliderBoundary;
 
 	public const float MoveSpeed = 1.2f;
 

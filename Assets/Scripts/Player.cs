@@ -37,7 +37,7 @@ internal struct Gun
 		BulletPrefab = bulletPrefab;
 		Cooldown = cooldown;
 		AmmoCount = ammoCount;
-		LastFireTime = 0.0f;
+		LastFireTime = -cooldown;
 	}
 }
 
@@ -116,8 +116,8 @@ public class Player : MonoBehaviour
 		_invulnerabilityStartTime = Time.time;
 
 		_stunGun = new Gun(GunType.GtStun, StunBulletPrefab, 0.3f, -1);
-		_speedUpGun = new Gun(GunType.GtSpeedUp, SpeedUpBulletPrefab, 0.5f, 3);
-		_teleportGun = new Gun(GunType.GtTeleport, TeleportBulletPrefab, 1.0f, 10);
+		_speedUpGun = new Gun(GunType.GtSpeedUp, SpeedUpBulletPrefab, 5.0f, 3);
+		_teleportGun = new Gun(GunType.GtTeleport, TeleportBulletPrefab, 10.0f, 10);
 
 		_basicObjectScript = gameObject.GetComponent<BasicObject>();
 
@@ -444,14 +444,48 @@ public class Player : MonoBehaviour
 		StartPickupPowerupCoroutine(PowerupType.PtTeleport);
 	}
 
-	public int GetSpeedUpGunAmmo()
+	public float GetGunAmmo(GunType gunType)
 	{
-		return _speedUpGun.AmmoCount;
+		switch (gunType)
+		{
+			case GunType.GtStun:
+				return _stunGun.AmmoCount;
+			case GunType.GtSpeedUp:
+				return _speedUpGun.AmmoCount;
+			case GunType.GtTeleport:
+				return _teleportGun.AmmoCount;
+			default:
+				Assert.IsTrue(false); // gun is not added to the above list
+				return 0.0f;
+		}
 	}
 
-	public int GetTeleportGunAmmo()
+	public float GetGunCooldownPercentage(GunType gunType)
 	{
-		return _teleportGun.AmmoCount;
+		float gunCooldown;
+		float lastFireTime;
+		switch (gunType)
+		{
+			case GunType.GtStun:
+				gunCooldown = _stunGun.Cooldown;
+				lastFireTime = _stunGun.LastFireTime;
+				break;
+			case GunType.GtSpeedUp:
+				gunCooldown = _speedUpGun.Cooldown;
+				lastFireTime = _speedUpGun.LastFireTime;
+				break;
+			case GunType.GtTeleport:
+				gunCooldown = _teleportGun.Cooldown;
+				lastFireTime = _teleportGun.LastFireTime;
+				break;
+			default:
+				Assert.IsTrue(false); // gun is not added to the above list
+				gunCooldown = 0.0f;
+				lastFireTime = 0.0f;
+				break;
+		}
+
+		return (Time.time - lastFireTime)/gunCooldown;
 	}
 
 	private void SetChildRenderers(bool value)
