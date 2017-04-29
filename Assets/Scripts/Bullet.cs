@@ -75,12 +75,10 @@ public class Bullet : MonoBehaviour
 		}
 		else if (other.gameObject.tag == "Shield")
 		{
-			Player playerScript = other.gameObject.GetComponentInParent<Player>();
-
 			switch (CurrentBulletType)
 			{
 				case BulletType.BtKiller:
-					bool shieldGotHit = playerScript.ShieldGotHit();
+					bool shieldGotHit = _playerScript.ShieldGotHit();
 					if (shieldGotHit)
 					{
 						EventLogger.PrintToLog("Bullet Collision v Shield");

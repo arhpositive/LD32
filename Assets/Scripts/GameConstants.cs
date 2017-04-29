@@ -16,5 +16,7 @@ public static class GameConstants
 	public const int StartDifficulty = MidDifficulty;
 	public const int DifficultyStepCount = (MaxDifficulty - MinDifficulty + DifficultyStep) / DifficultyStep;
 	public const float JoystickDeadZoneCoef = 0.19f;
-	public const float BaseScoreAddition = 10;
+	public const int BaseScoreMultiplier = 10;
+	public const float ScoreTextMinClamp = -330.0f; //TODO LATER big magic number here!
+	public const float ScoreTextMaxClamp = 500.0f;
 }

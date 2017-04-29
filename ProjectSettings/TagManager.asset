@@ -10,6 +10,7 @@ TagManager:
   - BulletStart
   - ScoreText
   - Shield
+  - LineRenderer
   layers:
   - Default
   - TransparentFX

@@ -32,7 +32,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 102966}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3.5, y: 2.5, z: -10}
+  m_LocalPosition: {x: 3.5, y: 2.46, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -68,6 +68,8 @@ Camera:
   m_TargetDisplay: 0
   m_TargetEye: 3
   m_HDR: 0
+  m_AllowMSAA: 1
+  m_ForceIntoRT: 0
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
@@ -146,7 +148,7 @@ AudioSource:
       tangentMode: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
-    m_RotationOrder: 4
+    m_RotationOrder: 0
   reverbZoneMixCustomCurve:
     serializedVersion: 2
     m_Curve:
@@ -180,6 +182,8 @@ MonoBehaviour:
   IsGameScene: 1
   UpBound: {fileID: 0}
   DownBound: {fileID: 0}
+  CanvasGameObject: {fileID: 0}
+  CanvasScorePanel: {fileID: 0}
   PlayerPrefab: {fileID: 114074, guid: 58cda14e50f6d8d42a46b3077f960e56, type: 2}
   EnemyPrefabArray:
   - {fileID: 1834478848205664, guid: a05d495ce9bda314e945751860bed8aa, type: 2}
@@ -199,7 +203,13 @@ MonoBehaviour:
   MeteorPrefabArray:
   - {fileID: 105448, guid: 4318761234289f640a7017713d221b7b, type: 2}
   - {fileID: 173280, guid: 8dfdc579ad197d34a8f88fe5a10abd54, type: 2}
-  StarPrefab: {fileID: 157426, guid: c5f313e4e03d12a4ba060b73e0120301, type: 2}
+  StarPrefabArray:
+  - {fileID: 157426, guid: c5f313e4e03d12a4ba060b73e0120301, type: 2}
+  - {fileID: 1130765423015340, guid: d44a5706e471dd1419db2d04cdb79e99, type: 2}
+  ShipConnectionPrefab: {fileID: 1555962352551430, guid: 96ccce5796ddedf43af70c93d2365fe6,
+    type: 2}
+  WaveScoreIndicatorPrefab: {fileID: 1311986553129060, guid: 19b943d9b2a08b343a7d9b41098c96c5,
+    type: 2}
   MinWaveSpawnIntervalCoef: 5
   MaxWaveSpawnIntervalCoef: 10
   MinHugeEnemySpawnIntervalCoef: 90

@@ -21,7 +21,7 @@ public enum GunType
 	GtCount
 }
 
-internal struct Gun
+public struct Gun
 {
 	public GunType TypeOfGun { get; private set; }
 	public GameObject BulletPrefab { get; private set; }
@@ -67,7 +67,6 @@ public class Player : MonoBehaviour
 
 	public int PlayerHealth { get; private set; }
 	public bool IsDead { get; private set; }
-	public int DisplacedActiveEnemyCount { get; private set; }
 
 	public List<PlayerStats> AllPlayerStats { get; private set; }
 
@@ -110,7 +109,6 @@ public class Player : MonoBehaviour
 		PlayerScore = 0;
 		PlayerHealth = PlayerInitialHealth;
 		IsDead = false;
-		DisplacedActiveEnemyCount = 0;
 		_isShielded = false;
 		_isInvulnerable = true;
 		_invulnerabilityStartTime = Time.time;
@@ -219,8 +217,6 @@ public class Player : MonoBehaviour
 		{
 			FireSpeedUpGun();
 			StartFireGunCoroutine(_speedUpGun.TypeOfGun);
-			//TODO LATER display weapon cooldowns on UI
-			//cooldown can be represented by a bar filling up on the area that shows the weapon type
 		}
 
 		if (teleportInputGiven)
@@ -360,16 +356,6 @@ public class Player : MonoBehaviour
 		return true;
 	}
 
-	public void EnemyGotDisplaced()
-	{
-		++DisplacedActiveEnemyCount;
-	}
-
-	public void DisplacedEnemyGotDestroyed()
-	{
-		--DisplacedActiveEnemyCount;
-	}
-
 	public void OnBulletDestruction(bool bulletHitEnemy)
 	{
 		foreach (PlayerStats ps in AllPlayerStats)
@@ -384,10 +370,14 @@ public class Player : MonoBehaviour
 		PlayerScore -= 100;
 	}
 
-	public void TriggerEnemyDisplacement(int scoreAddition)
+	public void TriggerEnemyWaveScoring(int waveBaseScore, int scoreAddition)
 	{
-		PlayerScore += scoreAddition * DisplacedActiveEnemyCount;
-		EventLogger.PrintToLog("Enemy Scored: " + scoreAddition * DisplacedActiveEnemyCount);
+		PlayerScore += scoreAddition;
+		foreach (PlayerStats ps in AllPlayerStats)
+		{
+			ps.OnWaveDestruction(waveBaseScore);
+		}
+		EventLogger.PrintToLog("Enemy Wave Scored: " + scoreAddition);
 	}
 
 	public void TriggerHealthPickup()
@@ -415,7 +405,7 @@ public class Player : MonoBehaviour
 	public void TriggerResearchPickup()
 	{
 		EventLogger.PrintToLog("Player Gains Research Powerup");
-		PlayerScore += (int)(5 * GameConstants.BaseScoreAddition * DisplacedActiveEnemyCount);
+		PlayerScore += 5 * GameConstants.BaseScoreMultiplier; //TODO factor in enemy multipliers?
 
 		StartPickupPowerupCoroutine(PowerupType.PtResearch);
 	}
@@ -430,7 +420,7 @@ public class Player : MonoBehaviour
 		}
 		else
 		{
-			PlayerScore += (int)(GameConstants.BaseScoreAddition * DisplacedActiveEnemyCount);
+			PlayerScore += GameConstants.BaseScoreMultiplier; //TODO factor in enemy multipliers?
 		}
 
 		StartPickupPowerupCoroutine(PowerupType.PtShield);
@@ -578,5 +568,10 @@ public class Player : MonoBehaviour
 			Destroy(_teleportGun.LastBullet.gameObject);
 			_teleportGun.LastBullet = null;
 		}
+	}
+
+	public PlayerStats GetAllTimeStats()
+	{
+		return AllPlayerStats[0];
 	}
 }

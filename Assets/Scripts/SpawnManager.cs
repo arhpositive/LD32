@@ -12,7 +12,7 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using Random = UnityEngine.Random;
 
-internal struct WaveEntity
+public struct WaveEntity
 {
 	public Vector2 Position;
 	public Vector2 MoveDir;
@@ -24,7 +24,7 @@ internal struct WaveEntity
 	}
 };
 
-internal class Formation
+public class Formation
 {
 	public List<WaveEntity> WaveEntities { get; private set; }
 	public int HorizontalShipSpan { get; private set; }
@@ -44,6 +44,9 @@ public class SpawnManager : MonoBehaviour
 	public GameObject UpBound;
 	public GameObject DownBound;
 
+	public GameObject CanvasGameObject;
+	public GameObject CanvasScorePanel;
+
 	[Header("Prefabs")]
 	public GameObject PlayerPrefab;
 	public GameObject[] EnemyPrefabArray;
@@ -51,7 +54,9 @@ public class SpawnManager : MonoBehaviour
 	public GameObject[] PosPowerupPrefabArray;
 	public GameObject[] NegPowerupPrefabArray;
 	public GameObject[] MeteorPrefabArray;
-	public GameObject StarPrefab;
+	public GameObject[] StarPrefabArray;
+	public GameObject ShipConnectionPrefab;
+	public GameObject WaveScoreIndicatorPrefab;
 
 	[Header("Interval Properties")]
 	public float MinWaveSpawnIntervalCoef;
@@ -77,6 +82,9 @@ public class SpawnManager : MonoBehaviour
 	private float _negPowerupSpawnInterval;
 
 	private List<Formation> _formations;
+	private List<EnemyWave> _enemyWaves;
+	private Player _playerScript;
+	private RectTransform _canvasRectTransform;
 
 	private const float ShipColliderVertSize = 0.46f;
 	private const float ShipGameObjectVertSize = 0.5f;
@@ -100,9 +108,10 @@ public class SpawnManager : MonoBehaviour
 		}
 
 		//instantiate player
-		Instantiate(PlayerPrefab,
+		GameObject playerGameObject = Instantiate(PlayerPrefab,
 			new Vector2(0.0f, Random.Range(Player.MinVerticalMovementLimit, Player.MaxVerticalMovementLimit)),
 			Quaternion.identity);
+		_playerScript = playerGameObject.GetComponent<Player>();
 	}
 
 	private void Start()
@@ -123,6 +132,8 @@ public class SpawnManager : MonoBehaviour
 		_hugeEnemySpawnInterval = MinHugeEnemySpawnIntervalCoef;
 		_previousHugeEnemySpawnTime = Time.time;
 		_formations = new List<Formation>();
+		_enemyWaves = new List<EnemyWave>();
+		_canvasRectTransform = CanvasGameObject.GetComponent<RectTransform>();
 
 		PregeneratePossibleWaves();
 
@@ -145,10 +156,16 @@ public class SpawnManager : MonoBehaviour
 
 	private void Update()
 	{
-		UpBound.transform.position = new Vector3(UpBound.transform.position.x, _vertMaxShipSpawnCoord, UpBound.transform.position.z);
-		DownBound.transform.position = new Vector3(DownBound.transform.position.x, _vertMinShipSpawnCoord, DownBound.transform.position.z);
+		if (UpBound)
+		{
+			UpBound.transform.position = new Vector3(UpBound.transform.position.x, _vertMaxShipSpawnCoord, UpBound.transform.position.z);
+		}
+		if (DownBound)
+		{
+			DownBound.transform.position = new Vector3(DownBound.transform.position.x, _vertMinShipSpawnCoord, DownBound.transform.position.z);
+		}
 
-
+		//TODO LATER remove timescale adjustments or hide them under debug mode
 		if (Input.GetKeyDown(KeyCode.U))
 		{
 			Time.timeScale += 0.1f;
@@ -185,6 +202,12 @@ public class SpawnManager : MonoBehaviour
 				SpawnNewPowerup(false);
 				_previousNegPowerupSpawnTime = Time.time;
 			}
+
+			for (int i = 0; i < _enemyWaves.Count; ++i)
+			{
+				_enemyWaves[i].Update();
+			}
+			_enemyWaves.RemoveAll(item => item.IsSetForDestruction());
 		}
 	}
 
@@ -193,12 +216,7 @@ public class SpawnManager : MonoBehaviour
 		// TODO LATER include different movement patterns, might involve waypoints, etc.
 		// waypoint system could make the wave change movement direction after a given amount of time.
 		// be careful about randomizing too much as it will make us lose control over certain difficulty features
-
-		Vector2 leftAndDown = new Vector2(-1.0f, -0.5f);
-		leftAndDown.Normalize();
-		Vector2 leftAndUp = new Vector2(-1.0f, 0.5f);
-		leftAndUp.Normalize();
-
+		
 		List<WaveEntity> straightLine = new List<WaveEntity>
 		{
 			//  5
@@ -304,14 +322,14 @@ public class SpawnManager : MonoBehaviour
 		//TODO high difficulty = shorter spread & more enemies
 
 		//I. Pick a random formation type
-		int randomWaveIndex = Random.Range(0, _formations.Count);
+		Formation selectedFormation = _formations[Random.Range(0, _formations.Count)];
 
 		//II. Determine Horizontal Distance Between Enemies
 		float nextWaveHorizontalDistance = _waveSpawnInterval * BasicEnemy.MoveSpeed;
 		float maxEnemyHorizontalDist = nextWaveHorizontalDistance - _enemySpawnMaxHorzDist;
-		if (_formations[randomWaveIndex].HorizontalShipSpan > 1)
+		if (selectedFormation.HorizontalShipSpan > 1)
 		{
-			maxEnemyHorizontalDist /= _formations[randomWaveIndex].HorizontalShipSpan;
+			maxEnemyHorizontalDist /= selectedFormation.HorizontalShipSpan;
 		}
 
 		float enemyHorizontalDist;
@@ -330,7 +348,7 @@ public class SpawnManager : MonoBehaviour
 		float minEnemyVerticalDist = _enemySpawnMinVertDist;
 		if (hasNoExit)
 		{
-			int maxIntervalCount = _formations[randomWaveIndex].WaveEntities.Count - 1;
+			int maxIntervalCount = selectedFormation.WaveEntities.Count - 1;
 
 			float minVerticalDistance = (verticalMovementLength - ShipColliderVertSize) / maxIntervalCount;
 			if (minVerticalDistance > minEnemyVerticalDist)
@@ -360,7 +378,7 @@ public class SpawnManager : MonoBehaviour
 		else
 		{
 			//no possible no-exits here!
-			int enemyMaxCount = Mathf.Min(maxPossibleShipCount - 1, _formations[randomWaveIndex].WaveEntities.Count);
+			int enemyMaxCount = Mathf.Min(maxPossibleShipCount - 1, selectedFormation.WaveEntities.Count);
 			enemyCount = Random.Range(enemyMaxCount - 2, enemyMaxCount);
 		}
 
@@ -403,7 +421,7 @@ public class SpawnManager : MonoBehaviour
 		List<WaveEntity> selectedFormationEntities = new List<WaveEntity>();
 		for (int i = 0; i < enemyCount; ++i)
 		{
-			selectedFormationEntities.Add(_formations[randomWaveIndex].WaveEntities[i]);
+			selectedFormationEntities.Add(selectedFormation.WaveEntities[i]);
 		}
 		selectedFormationEntities.Sort(FormationComparison);
 
@@ -463,7 +481,12 @@ public class SpawnManager : MonoBehaviour
 		}
 
 		//VII. Spawn Enemies
-		Vector2 previousEnemyPos = Vector2.zero;
+		GameObject waveScoreIndicator = Instantiate(WaveScoreIndicatorPrefab);
+		waveScoreIndicator.transform.SetParent(CanvasScorePanel.transform, false);
+
+		GameObject lineRendererObject = Instantiate(ShipConnectionPrefab, Vector3.zero, Quaternion.identity);
+		EnemyWave curEnemyWave = new EnemyWave(lineRendererObject.GetComponent<LineRenderer>()); //TODO destruct the line renderer, don't forget!
+		curEnemyWave.Initialize(_playerScript, _canvasRectTransform, waveScoreIndicator);
 		for (int i = 0; i < selectedFormationEntities.Count; i++)
 		{
 			int enemyKind = shipTypes[i];
@@ -481,6 +504,8 @@ public class SpawnManager : MonoBehaviour
 				int xIncrement = xPosDiff != 0 ? Math.Sign(xPosDiff) : 0;
 				int yIncrement = yPosDiff != 0 ? Math.Sign(yPosDiff) : 0;
 
+				Vector3 previousEnemyPos = curEnemyWave.GetLastEnemyPosition();
+
 				enemyPos = new Vector2(previousEnemyPos.x + xIncrement * enemyHorizontalDist, previousEnemyPos.y + yIncrement * enemyVerticalDist);
 			}
 			else
@@ -491,13 +516,16 @@ public class SpawnManager : MonoBehaviour
 
 			GameObject enemy = Instantiate(enemyPrefab, enemyPos, Quaternion.identity);
 			Assert.IsNotNull(enemy);
+			
 			BasicMove basicMoveScript = enemy.GetComponent<BasicMove>();
-
 			//TODO LATER this might be completely unnecessary, but then again we might need it in the future
 			basicMoveScript.SetMoveDir(selectedFormationEntities[i].MoveDir, false);
-
-			previousEnemyPos = enemyPos;
+			
+			curEnemyWave.AddNewEnemy(enemy);
+			enemy.GetComponent<BasicEnemy>().Initialize(_playerScript, _difficultyManagerScript, curEnemyWave);
 		}
+		curEnemyWave.FinalizeWidthNodes();
+		_enemyWaves.Add(curEnemyWave);
 	}
 
 	private int FormationComparison(WaveEntity entity1, WaveEntity entity2)
@@ -529,7 +557,8 @@ public class SpawnManager : MonoBehaviour
 
 		//TODO as difficulty is increased, huge enemies should be closer
 		Vector3 hugeEnemyPos = new Vector2(hugeEnemyScript.HorizontalSpawnCoord, Random.Range(hugeEnemyScript.VerticalSpawnLimits[0], hugeEnemyScript.VerticalSpawnLimits[1]));
-		Instantiate(hugeEnemyPrefab, hugeEnemyPos, Quaternion.identity);
+		GameObject hugeEnemy = Instantiate(hugeEnemyPrefab, hugeEnemyPos, Quaternion.identity);
+		hugeEnemy.GetComponent<HugeEnemy>().Initialize(_playerScript, _difficultyManagerScript);
 		
 		float colliderBoundary = hugeEnemyScript.VerticalColliderBoundary;
 		if (Mathf.Sign(colliderBoundary) == 1.0f)
@@ -596,12 +625,14 @@ public class SpawnManager : MonoBehaviour
 
 		for (int i = 0; i < StarCount; i++)
 		{
-			BasicMove starMoveScript = StarPrefab.GetComponent<BasicMove>();
+			int starKind = Random.Range(0, StarPrefabArray.Length);
+			GameObject selectedStar = StarPrefabArray[starKind];
+			BasicMove starMoveScript = selectedStar.GetComponent<BasicMove>();
 
 			Vector2 starPos =
 				new Vector2(Random.Range(starMoveScript.HorizontalLimits[0], starMoveScript.HorizontalLimits[1]),
 					Random.Range(starMoveScript.VerticalLimits[0], starMoveScript.VerticalLimits[1]));
-			Instantiate(StarPrefab, starPos, Quaternion.identity);
+			Instantiate(selectedStar, starPos, Quaternion.identity);
 		}
 	}
 	

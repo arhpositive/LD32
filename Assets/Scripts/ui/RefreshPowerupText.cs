@@ -5,6 +5,7 @@
  * RefreshPowerupText.cs
  */
 
+using System.Globalization;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -31,7 +32,7 @@ namespace ui
 		{
 			if (_playerScript)
 			{
-				_powerupText.text = _playerScript.GetGunAmmo(GunKind).ToString();
+				_powerupText.text = _playerScript.GetGunAmmo(GunKind).ToString(CultureInfo.InvariantCulture);
 			}
 		}
 	}

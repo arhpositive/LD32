@@ -24,7 +24,7 @@ public class HugeEnemy : BasicEnemy
 		
 	}
 
-	protected override void ScoreAndRemoveFromScene()
+	protected override void RemoveFromScene()
 	{
 		_spawnManagerScript.ResetVerticalSpawnLimits();
 		_spawnManagerScript.SetHugeEnemyExists(false);

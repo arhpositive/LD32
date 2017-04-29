@@ -23,7 +23,7 @@ public enum DifficultyParameter
 
 public class DifficultyManager : MonoBehaviour
 {
-	// TODO NEXT we have to define lots of difficulty multipliers here
+	// TODO we have to define lots of difficulty multipliers here
 
 	// these difficulty multipliers will be given their initial value via our learning program
 	// we'll give the players a small questionnaire at the beginning of the game
@@ -129,14 +129,18 @@ public class DifficultyManager : MonoBehaviour
 		//TODO remove below code after ML is implemented
 		//start
 		int numRetries = 3;
-		for (int i = 0; i < numRetries || (isIncrement ? oldValue <= GameConstants.MinDifficulty : oldValue >= GameConstants.MaxDifficulty); ++i)
+		for (int i = 0; i < numRetries; ++i)
 		{
 			selectedDifficultyParameter = (DifficultyParameter)Random.Range((int)DifficultyParameter.DpShipFireRateIncrease, (int)DifficultyParameter.DpCount);
 			oldValue = DifficultyCoefs[selectedDifficultyParameter];
+
+			if (isIncrement ? oldValue < GameConstants.MaxDifficulty : oldValue > GameConstants.MinDifficulty)
+			{
+				ChangeDifficultyParameter(selectedDifficultyParameter, oldValue + GameConstants.DifficultyStep * (isIncrement ? 1 : -1));
+				break;
+			}
 		}
 		//end
-		
-		ChangeDifficultyParameter(selectedDifficultyParameter, oldValue + GameConstants.DifficultyStep * (isIncrement ? 1 : -1));
 	}
 
 	private void ChangeDifficultyParameter(DifficultyParameter difficultyParameter, int newValue)
@@ -161,7 +165,7 @@ public class DifficultyManager : MonoBehaviour
 
 	public float GetDifficultyMultiplier(DifficultyParameter difficultyParameter)
 	{
-		int difficultyDifference = DifficultyCoefs[difficultyParameter] - GameConstants.MidDifficulty;
+		int difficultyDifference = GameConstants.MidDifficulty - DifficultyCoefs[difficultyParameter];
 		float difficultyMultiplier = Mathf.Pow(GameConstants.DifficultyCoef, difficultyDifference);
 		return difficultyMultiplier;
 	}

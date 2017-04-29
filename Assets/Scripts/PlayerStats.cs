@@ -22,10 +22,11 @@ public class PlayerStats
 	private int[] _pickupCountsPerPowerup;
 	private int _movementUpdateCount;
 
-	//TODO NEXT flesh it out, add more parameters
+	//TODO flesh it out, add more parameters
 	public float PlayerAccuracy { get; private set; }
 	public int HealthDifference { get; private set; }
 	public float MovementAmount { get; private set; }
+	public int BestWaveBaseScore { get; private set; } 
 	public Vector3 PlayerAveragePosition { get; private set; }
 	public float[] GunUsageFrequencies { get; private set; }
 	public float[] PowerupPickupFrequencies { get; private set; }
@@ -46,6 +47,7 @@ public class PlayerStats
 		PlayerAccuracy = 0.0f;
 		HealthDifference = 0;
 		MovementAmount = 0.0f;
+		BestWaveBaseScore = 0;
 		PlayerAveragePosition = Vector3.zero;
 		GunUsageFrequencies = new float[(int) GunType.GtCount];
 		PowerupPickupFrequencies = new float[(int)PowerupType.PtCount];
@@ -118,6 +120,15 @@ public class PlayerStats
 		{
 			yield return new WaitForSeconds(_statDuration);
 			CalculateAveragePosition(playerPosition, movementMagnitude, true);
+		}
+	}
+
+	public void OnWaveDestruction(int waveBaseScore)
+	{
+		//this method is not time related, it's equal for all time based stat objects
+		if (BestWaveBaseScore < waveBaseScore)
+		{
+			BestWaveBaseScore = waveBaseScore;
 		}
 	}
 

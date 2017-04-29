@@ -6,6 +6,7 @@
  * Handles basic enemy behaviour
  */
 
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Assertions;
 using System.Collections.Generic;
@@ -25,14 +26,18 @@ public class BasicEnemy : MonoBehaviour
 
 	public const float MoveSpeed = 1.2f;
 
-	protected Player PlayerScript;
+	//enemy displacement is used for scoring
+	public float DisplacementLength { get; private set; }
+	public bool IsDisplaced { get; private set; }
+
+	private Player _playerScript;
 	protected bool HasCollided;
 
-	private GameObject _playerGameObject;
 	private DifficultyManager _difficultyManagerScript;
 	private BasicMove _basicMoveScript;
 	private BasicObject _basicObjectScript;
-
+	private EnemyWave _assignedEnemyWave;
+	
 	private List<Vector3> _gunPositions;
 	private List<Transform> _gunTransforms; 
 	private bool _isStunned;
@@ -40,16 +45,9 @@ public class BasicEnemy : MonoBehaviour
 	private bool _speedBoostIsActive;
 	private float _lastFireTime;
 	private float _nextFiringInterval;
-	private float _displacementLength; //used for scoring
-	private bool _isDisplaced;
 
 	protected virtual void Start()
 	{
-		_playerGameObject = GameObject.FindGameObjectWithTag("Player");
-		if (_playerGameObject)
-		{
-			PlayerScript = _playerGameObject.GetComponent<Player>();
-		}
 		_difficultyManagerScript = Camera.main.GetComponent<DifficultyManager>();
 		_basicMoveScript = gameObject.GetComponent<BasicMove>();
 		_basicObjectScript = gameObject.GetComponent<BasicObject>();
@@ -61,8 +59,8 @@ public class BasicEnemy : MonoBehaviour
 		_speedBoostIsActive = false;
 		_lastFireTime = Time.time;
 		SetNextFiringInterval();
-		_displacementLength = 0.0f;
-		_isDisplaced = false;
+		DisplacementLength = 0.0f;
+		IsDisplaced = false;
 	}
 
 	private void Update()
@@ -83,15 +81,32 @@ public class BasicEnemy : MonoBehaviour
 
 			if (_speedBoostIsActive)
 			{
-				_displacementLength -= Time.deltaTime * _basicMoveScript.MoveSpeed * (_basicMoveScript.SpeedCoef - 1.0f);
-				OnDisplaced();
+				float currentDisplacement = -Time.deltaTime*_basicMoveScript.MoveSpeed*(_basicMoveScript.SpeedCoef - 1.0f);
+				float displacementChange = MakeDisplacementChange(currentDisplacement);
+				OnDisplaced(displacementChange);
+
+				if (_assignedEnemyWave != null)
+				{
+					_assignedEnemyWave.OnEnemyDisplacementChanged();
+				}
 			}
 			
 			if (transform.position.x < DestructionHorizontalMinCoord)
 			{
-				ScoreAndRemoveFromScene();
+				if (_assignedEnemyWave != null)
+				{
+					_assignedEnemyWave.OnEnemyCountChanged();
+				}
+				RemoveFromScene();
 			}
 		}
+	}
+
+	public void Initialize(Player playerScript, DifficultyManager difficultyManagerScript, EnemyWave assignedWave = null)
+	{
+		_playerScript = playerScript;
+		_difficultyManagerScript = difficultyManagerScript;
+		_assignedEnemyWave = assignedWave;
 	}
 
 	public virtual void TriggerStun()
@@ -99,6 +114,11 @@ public class BasicEnemy : MonoBehaviour
 		_isStunned = true;
 		_lastStunTime = Time.time;
 		_basicMoveScript.DoesMove = false;
+
+		if (_assignedEnemyWave != null)
+		{
+			_assignedEnemyWave.OnEnemyDisplacementChanged();
+		}
 	}
 
 	private void RemoveStun()
@@ -106,8 +126,16 @@ public class BasicEnemy : MonoBehaviour
 		_isStunned = false;
 		_lastFireTime = Time.time;
 		_basicMoveScript.DoesMove = true;
-		_displacementLength += StunDuration * _basicMoveScript.MoveSpeed;
-		OnDisplaced();
+		float currentDisplacement = StunDuration*_basicMoveScript.MoveSpeed;
+		DisplacementLength += currentDisplacement;
+
+		float displacementChange = MakeDisplacementChange(currentDisplacement);
+		OnDisplaced(displacementChange);
+
+		if (_assignedEnemyWave != null)
+		{
+			_assignedEnemyWave.OnEnemyDisplacementChanged();
+		}
 	}
 
 	public virtual void TriggerSpeedBoost()
@@ -118,6 +146,18 @@ public class BasicEnemy : MonoBehaviour
 			_speedBoostIsActive = true;
 			_basicMoveScript.SpeedCoef = SpeedBoostCoef;
 		}
+	}
+
+	private float MakeDisplacementChange(float changeToMake)
+	{
+		float oldDisplacement = DisplacementLength;
+		DisplacementLength += changeToMake;
+		return Mathf.Abs(DisplacementLength) - Mathf.Abs(oldDisplacement);
+	}
+
+	protected virtual void RemoveFromScene()
+	{
+		Destroy(gameObject);
 	}
 
 	private void OnTriggerStay2D(Collider2D other)
@@ -139,8 +179,8 @@ public class BasicEnemy : MonoBehaviour
 
 		if (other.gameObject.tag == "Player")
 		{
-			Assert.IsNotNull(PlayerScript);
-			bool playerGotHit = PlayerScript.PlayerGotHit();
+			Assert.IsNotNull(_playerScript);
+			bool playerGotHit = _playerScript.PlayerGotHit();
 			if (playerGotHit)
 			{
 				EventLogger.PrintToLog("Enemy Collision v Player");
@@ -149,8 +189,8 @@ public class BasicEnemy : MonoBehaviour
 		}
 		else if (other.gameObject.tag == "Shield")
 		{
-			Assert.IsNotNull(PlayerScript);
-			bool shieldGotHit = PlayerScript.ShieldGotHit();
+			Assert.IsNotNull(_playerScript);
+			bool shieldGotHit = _playerScript.ShieldGotHit();
 			if (shieldGotHit)
 			{
 				EventLogger.PrintToLog("Enemy Collision v Shield");
@@ -175,9 +215,9 @@ public class BasicEnemy : MonoBehaviour
 			GameObject bulletGameObject = Instantiate(BulletPrefab, globalGunPos, Quaternion.identity);
 			Vector3 bulletDir = gunTransform.up;
 
-			if (PlayerScript)
+			if (_playerScript)
 			{
-				Vector3 playerPos = PlayerScript.transform.position;
+				Vector3 playerPos = _playerScript.transform.position;
 				Vector3 referenceTargetPos = globalGunPos + bulletDir*2.0f;
 
 				float xSign = Mathf.Sign(bulletDir.x);
@@ -201,36 +241,37 @@ public class BasicEnemy : MonoBehaviour
 		_nextFiringInterval = randomIntervalCoef / _difficultyManagerScript.GetDifficultyMultiplier(DifficultyParameter.DpShipFireRateIncrease);
 	}
 
-	private void OnDisplaced()
+	private void OnDisplaced(float displacementChange)
 	{
-		if (PlayerScript && !_isDisplaced)
+		if (!IsDisplaced)
 		{
-			_isDisplaced = true;
-			PlayerScript.EnemyGotDisplaced();
-		}
-	}
-
-	protected virtual void ScoreAndRemoveFromScene()
-	{
-		//cash in the points
-		if (PlayerScript)
-		{
-			int scoreAddition = (int)(Mathf.Abs(_displacementLength) * GameConstants.BaseScoreAddition);
-			PlayerScript.TriggerEnemyDisplacement(scoreAddition);
-			if (_isDisplaced)
+			IsDisplaced = true;
+			if (_assignedEnemyWave != null)
 			{
-				PlayerScript.DisplacedEnemyGotDestroyed();
+				_assignedEnemyWave.IncreaseWaveMultiplier();
+				//TODO NEXT pop with coroutine!!
+				IEnumerator popWaveScoreCoroutine = _assignedEnemyWave.OnWaveMultiplierIncreased();
+				StartCoroutine(popWaveScoreCoroutine);
 			}
 		}
-		Destroy(gameObject);
+
+		if (_assignedEnemyWave != null)
+		{
+			_assignedEnemyWave.AddDisplacementScore(displacementChange);
+		}
 	}
 
 	private void Explode()
 	{
-		if (PlayerScript)
+		if (_assignedEnemyWave != null)
+		{
+			_assignedEnemyWave.OnEnemyCountChanged();
+		}
+
+		if (_playerScript)
 		{
 			//player might not be alive, game might have ended, do not score negative points in this case
-			PlayerScript.TriggerEnemyDestruction();
+			_playerScript.TriggerEnemyDestruction();
 		}
 		HasCollided = true;
 		_basicObjectScript.OnDestruction();
