@@ -97,7 +97,7 @@ public class DifficultyManager : MonoBehaviour
 		//for now, lets put up some examples
 		//do not consider difficulty numbers going off the limits here, they won't be of any problem once ML system is online
 
-		//TODO we should hold several statistics such as 
+		// we hold several statistics such as 
 		// how much health player lost over a certain period of time
 		// how often does the player manouver
 		// what types of weapons does the player use often

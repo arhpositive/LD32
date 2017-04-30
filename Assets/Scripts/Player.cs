@@ -405,7 +405,7 @@ public class Player : MonoBehaviour
 	public void TriggerResearchPickup()
 	{
 		EventLogger.PrintToLog("Player Gains Research Powerup");
-		PlayerScore += 5 * GameConstants.BaseScoreMultiplier; //TODO factor in enemy multipliers?
+		PlayerScore += 5 * GameConstants.BaseScoreMultiplier;
 
 		StartPickupPowerupCoroutine(PowerupType.PtResearch);
 	}
@@ -420,7 +420,7 @@ public class Player : MonoBehaviour
 		}
 		else
 		{
-			PlayerScore += GameConstants.BaseScoreMultiplier; //TODO factor in enemy multipliers?
+			PlayerScore += GameConstants.BaseScoreMultiplier;
 		}
 
 		StartPickupPowerupCoroutine(PowerupType.PtShield);
