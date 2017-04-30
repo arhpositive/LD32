@@ -204,7 +204,6 @@ public class EnemyWave
 	public IEnumerator OnWaveMultiplierIncreased()
 	{
 		int growthRate = 3;
-		//TODO pop pop pop!
 		_waveScoreText.fontSize += growthRate;
 		yield return new WaitForSeconds(0.04f);
 		_waveScoreText.fontSize += growthRate;

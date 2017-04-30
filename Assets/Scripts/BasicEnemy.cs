@@ -249,7 +249,8 @@ public class BasicEnemy : MonoBehaviour
 			if (_assignedEnemyWave != null)
 			{
 				_assignedEnemyWave.IncreaseWaveMultiplier();
-				//TODO NEXT pop with coroutine!!
+
+				//pop with coroutine!
 				IEnumerator popWaveScoreCoroutine = _assignedEnemyWave.OnWaveMultiplierIncreased();
 				StartCoroutine(popWaveScoreCoroutine);
 			}

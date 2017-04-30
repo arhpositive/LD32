@@ -40,7 +40,7 @@ public class SpawnManager : MonoBehaviour
 {
 	public bool IsGameScene;
 
-	//TODO temporary
+	//TODO LATER these bounds are temporary, remove them
 	public GameObject UpBound;
 	public GameObject DownBound;
 
@@ -318,8 +318,7 @@ public class SpawnManager : MonoBehaviour
 
 		bool hasNoExit = Random.Range(0, randRange) < noExitProbability;
 
-		//TODO low difficulty = wider spread & less enemies
-		//TODO high difficulty = shorter spread & more enemies
+		//TODO DIFFICULTY low difficulty = wider spread & less enemies, high difficulty = shorter spread & more enemies
 
 		//I. Pick a random formation type
 		Formation selectedFormation = _formations[Random.Range(0, _formations.Count)];
@@ -485,7 +484,7 @@ public class SpawnManager : MonoBehaviour
 		waveScoreIndicator.transform.SetParent(CanvasScorePanel.transform, false);
 
 		GameObject lineRendererObject = Instantiate(ShipConnectionPrefab, Vector3.zero, Quaternion.identity);
-		EnemyWave curEnemyWave = new EnemyWave(lineRendererObject.GetComponent<LineRenderer>()); //TODO destruct the line renderer, don't forget!
+		EnemyWave curEnemyWave = new EnemyWave(lineRendererObject.GetComponent<LineRenderer>());
 		curEnemyWave.Initialize(_playerScript, _canvasRectTransform, waveScoreIndicator);
 		for (int i = 0; i < selectedFormationEntities.Count; i++)
 		{
@@ -548,14 +547,14 @@ public class SpawnManager : MonoBehaviour
 		ResetVerticalSpawnLimits();
 
 		float randomIntervalCoef = Random.Range(MinHugeEnemySpawnIntervalCoef, MaxHugeEnemySpawnIntervalCoef);
-		_hugeEnemySpawnInterval = randomIntervalCoef / _difficultyManagerScript.GetDifficultyMultiplier(DifficultyParameter.DpWaveSpawnRateIncrease); 
+		_hugeEnemySpawnInterval = randomIntervalCoef / _difficultyManagerScript.GetDifficultyMultiplier(DifficultyParameter.DpHugeEnemySpawnRateIncrease); 
 
 		//randomly select a prefab among available options
 		int hugeEnemyIndex = Random.Range(0, HugeEnemyPrefabArray.Length);
 		GameObject hugeEnemyPrefab = HugeEnemyPrefabArray[hugeEnemyIndex];
 		HugeEnemy hugeEnemyScript = hugeEnemyPrefab.GetComponent<HugeEnemy>();
 
-		//TODO as difficulty is increased, huge enemies should be closer
+		//TODO DIFFICULTY a new difficulty parameter could manage how big a portion of play area a huge enemy obstructs
 		Vector3 hugeEnemyPos = new Vector2(hugeEnemyScript.HorizontalSpawnCoord, Random.Range(hugeEnemyScript.VerticalSpawnLimits[0], hugeEnemyScript.VerticalSpawnLimits[1]));
 		GameObject hugeEnemy = Instantiate(hugeEnemyPrefab, hugeEnemyPos, Quaternion.identity);
 		hugeEnemy.GetComponent<HugeEnemy>().Initialize(_playerScript, _difficultyManagerScript);
