@@ -133,7 +133,11 @@ public class SpawnManager : MonoBehaviour
 		_previousHugeEnemySpawnTime = Time.time;
 		_formations = new List<Formation>();
 		_enemyWaves = new List<EnemyWave>();
-		_canvasRectTransform = CanvasGameObject.GetComponent<RectTransform>();
+
+		if (CanvasGameObject)
+		{
+			_canvasRectTransform = CanvasGameObject.GetComponent<RectTransform>();
+		}
 
 		PregeneratePossibleWaves();
 
