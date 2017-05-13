@@ -15,22 +15,20 @@ namespace ui
 	{
 		private Text _accuracyText;
 		private Player _playerScript;
+		private StatsManager _statsManagerScript;
 
 		private void Start()
 		{
 			_accuracyText = gameObject.GetComponent<Text>();
-			GameObject playerGameObject = GameObject.FindGameObjectWithTag("Player");
-			if (playerGameObject)
-			{
-				_playerScript = playerGameObject.GetComponent<Player>();
-			}
+			_statsManagerScript = Camera.main.GetComponent<StatsManager>();
 		}
 
 		private void Update()
 		{
 			if (_playerScript)
 			{
-				_accuracyText.text = _playerScript.GetAllTimeStats().PlayerAccuracy.ToString(CultureInfo.InvariantCulture);
+
+				_accuracyText.text = _statsManagerScript.GetAllTimeStats().PlayerAccuracy.ToString(CultureInfo.InvariantCulture);
 			}
 		}
 	}

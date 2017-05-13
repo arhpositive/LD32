@@ -1,20 +1,15 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class PositionIndicator : MonoBehaviour
 {
 
 	[Range(0, 2)] public int StatsIndex;
 	private Player _playerScript;
+	private StatsManager _statsManagerScript;
 
 	private void Start()
 	{
-		GameObject playerGameObject = GameObject.FindGameObjectWithTag("Player");
-		if (playerGameObject)
-		{
-			_playerScript = playerGameObject.GetComponent<Player>();
-		}
+		_statsManagerScript = Camera.main.GetComponent<StatsManager>();
 	}
 
 	// Update is called once per frame
@@ -22,7 +17,7 @@ public class PositionIndicator : MonoBehaviour
 	{
 		if (_playerScript)
 		{
-			transform.position = _playerScript.AllPlayerStats[StatsIndex].PlayerAveragePosition;
+			transform.position = _statsManagerScript.AllPlayerStats[StatsIndex].PlayerAveragePosition;
 		}
 	}
 }

@@ -23,12 +23,14 @@ public class Bullet : MonoBehaviour
 	public bool ShotByPlayer;
 	private bool _hasCollided;
 	private bool _destroyedByCollision;
+	private StatsManager _statsManagerScript;
 	private Player _playerScript;
 
 	private void Start()
 	{
 		_hasCollided = false;
 		_destroyedByCollision = false;
+		_statsManagerScript = Camera.main.GetComponent<StatsManager>();
 		GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
 		if (playerObject)
 		{
@@ -98,10 +100,9 @@ public class Bullet : MonoBehaviour
 
 	private void OnDestroy()
 	{
-		if (_playerScript && ShotByPlayer)
+		if (ShotByPlayer)
 		{
-			//TODO shouldn't we still hold stats even if player is destroyed?
-			_playerScript.OnBulletDestruction(_destroyedByCollision);
+			_statsManagerScript.BulletDestructionCoroutine(_destroyedByCollision);
 		}
 	}
 }

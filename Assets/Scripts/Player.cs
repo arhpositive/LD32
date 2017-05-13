@@ -68,8 +68,6 @@ public class Player : MonoBehaviour
 	public int PlayerHealth { get; private set; }
 	public bool IsDead { get; private set; }
 
-	public List<PlayerStats> AllPlayerStats { get; private set; }
-
 	private const float ShortTermHealthChangeInterval = 10.0f;
 	private const float LongTermHealthChangeInterval = 30.0f;
 
@@ -77,6 +75,7 @@ public class Player : MonoBehaviour
 	private bool _isShielded;
 
 	private SpawnManager _spawnManagerScript;
+	private StatsManager _statsManagerScript;
 	private RefreshEndScoreText _endGameScoreText;
 
 	private GameObject _playerShield;
@@ -101,6 +100,7 @@ public class Player : MonoBehaviour
 		_spriteRenderer = gameObject.GetComponent<SpriteRenderer>();
 		_childRenderers = gameObject.GetComponentsInChildren<SpriteRenderer>(true);
 		_spawnManagerScript = Camera.main.GetComponent<SpawnManager>();
+		_statsManagerScript = Camera.main.GetComponent<StatsManager>();
 		_endGameScoreText = GameObject.FindGameObjectWithTag("ScoreText").GetComponent<RefreshEndScoreText>();
 	}
 
@@ -118,13 +118,6 @@ public class Player : MonoBehaviour
 		_teleportGun = new Gun(GunType.GtTeleport, TeleportBulletPrefab, 10.0f, 10);
 
 		_basicObjectScript = gameObject.GetComponent<BasicObject>();
-
-		AllPlayerStats = new List<PlayerStats>()
-		{
-			new PlayerStats(true, ShortTermHealthChangeInterval),
-			new PlayerStats(true, LongTermHealthChangeInterval),
-			new PlayerStats(false)
-		};
 		
 		//find shield object in children
 		foreach (Transform tr in transform)
@@ -208,7 +201,7 @@ public class Player : MonoBehaviour
 		if (fireInputGiven && Time.time - _stunGun.LastFireTime > _stunGun.Cooldown)
 		{
 			FireStunGun();
-			StartFireGunCoroutine(_stunGun.TypeOfGun);
+			_statsManagerScript.StartFireGunCoroutine(_stunGun.TypeOfGun);
 		}
 
 		if (speedUpInputGiven &&
@@ -216,7 +209,7 @@ public class Player : MonoBehaviour
 			_speedUpGun.AmmoCount > 0)
 		{
 			FireSpeedUpGun();
-			StartFireGunCoroutine(_speedUpGun.TypeOfGun);
+			_statsManagerScript.StartFireGunCoroutine(_speedUpGun.TypeOfGun);
 		}
 
 		if (teleportInputGiven)
@@ -229,29 +222,11 @@ public class Player : MonoBehaviour
 					 _teleportGun.AmmoCount > 0)
 			{
 				FireTeleportGun();
-				StartFireGunCoroutine(_teleportGun.TypeOfGun);
+				_statsManagerScript.StartFireGunCoroutine(_teleportGun.TypeOfGun);
 			}
 		}
 
 		DoMovement();
-	}
-
-	private void StartFireGunCoroutine(GunType gunType)
-	{
-		foreach (PlayerStats ps in AllPlayerStats)
-		{
-			IEnumerator fireGunCoroutine = ps.OnBulletInit(gunType);
-			StartCoroutine(fireGunCoroutine);
-		}
-	}
-
-	private void StartPickupPowerupCoroutine(PowerupType powerupType)
-	{
-		foreach (PlayerStats ps in AllPlayerStats)
-		{
-			IEnumerator pickupPowerupCoroutine = ps.OnPowerupPickup(powerupType);
-			StartCoroutine(pickupPowerupCoroutine);
-		}
 	}
 
 	private Vector2 GetMoveDirFromInput()
@@ -295,12 +270,8 @@ public class Player : MonoBehaviour
 			transform.position.z);
 
 		float movementMagnitude = (clampedPlayerPosition - oldPosition).magnitude;
-		foreach(PlayerStats ps in AllPlayerStats)
-		{
-			IEnumerator playerMovementCoroutine = ps.OnPlayerMovement(clampedPlayerPosition, movementMagnitude);
-			StartCoroutine(playerMovementCoroutine);
-		}
-
+		_statsManagerScript.StartMovementCoroutine(clampedPlayerPosition, movementMagnitude);
+		
 		transform.position = clampedPlayerPosition;
 	}
 
@@ -313,11 +284,7 @@ public class Player : MonoBehaviour
 		}
 
 		PlayerHealth--;
-		foreach (PlayerStats ps in AllPlayerStats)
-		{
-			IEnumerator playerHealthLossCoroutine = ps.OnPlayerHealthChange(-1);
-			StartCoroutine(playerHealthLossCoroutine); //start coroutine for stats
-		}
+		_statsManagerScript.HealthChangeCoroutine(-1);
 
 		if (PlayerHealth == 0)
 		{
@@ -356,15 +323,6 @@ public class Player : MonoBehaviour
 		return true;
 	}
 
-	public void OnBulletDestruction(bool bulletHitEnemy)
-	{
-		foreach (PlayerStats ps in AllPlayerStats)
-		{
-			IEnumerator bulletDestructionCoroutine = ps.OnBulletDestruction(bulletHitEnemy);
-			StartCoroutine(bulletDestructionCoroutine);
-		}
-	}
-
 	public void TriggerEnemyDestruction()
 	{
 		PlayerScore -= 100;
@@ -373,10 +331,7 @@ public class Player : MonoBehaviour
 	public void TriggerEnemyWaveScoring(int waveBaseScore, int scoreAddition)
 	{
 		PlayerScore += scoreAddition;
-		foreach (PlayerStats ps in AllPlayerStats)
-		{
-			ps.OnWaveDestruction(waveBaseScore);
-		}
+		_statsManagerScript.OnWaveDestruction(waveBaseScore);
 		EventLogger.PrintToLog("Enemy Wave Scored: " + scoreAddition);
 	}
 
@@ -385,13 +340,8 @@ public class Player : MonoBehaviour
 		EventLogger.PrintToLog("Player Gains Health");
 		PlayerHealth++;
 
-		foreach (PlayerStats ps in AllPlayerStats)
-		{
-			IEnumerator playerHealthGainCoroutine = ps.OnPlayerHealthChange(1);
-			StartCoroutine(playerHealthGainCoroutine); //start coroutine for stats
-		}
-
-		StartPickupPowerupCoroutine(PowerupType.PtHealth);
+		_statsManagerScript.HealthChangeCoroutine(1);
+		_statsManagerScript.PickupPowerupCoroutine(PowerupType.PtHealth);
 	}
 
 	public void TriggerSpeedUpPickup()
@@ -399,7 +349,7 @@ public class Player : MonoBehaviour
 		EventLogger.PrintToLog("Player Gains Speedup Powerup");
 		_speedUpGun.AmmoCount++;
 
-		StartPickupPowerupCoroutine(PowerupType.PtSpeedup);
+		_statsManagerScript.PickupPowerupCoroutine(PowerupType.PtSpeedup);
 	}
 
 	public void TriggerResearchPickup()
@@ -407,7 +357,7 @@ public class Player : MonoBehaviour
 		EventLogger.PrintToLog("Player Gains Research Powerup");
 		PlayerScore += 5 * GameConstants.BaseScoreMultiplier;
 
-		StartPickupPowerupCoroutine(PowerupType.PtResearch);
+		_statsManagerScript.PickupPowerupCoroutine(PowerupType.PtResearch);
 	}
 
 	public void TriggerShieldPickup()
@@ -423,7 +373,7 @@ public class Player : MonoBehaviour
 			PlayerScore += GameConstants.BaseScoreMultiplier;
 		}
 
-		StartPickupPowerupCoroutine(PowerupType.PtShield);
+		_statsManagerScript.PickupPowerupCoroutine(PowerupType.PtShield);
 	}
 
 	public void TriggerTeleportPickup()
@@ -431,7 +381,7 @@ public class Player : MonoBehaviour
 		EventLogger.PrintToLog("Player Gains Teleport Powerup");
 		_teleportGun.AmmoCount++;
 
-		StartPickupPowerupCoroutine(PowerupType.PtTeleport);
+		_statsManagerScript.PickupPowerupCoroutine(PowerupType.PtTeleport);
 	}
 
 	public float GetGunAmmo(GunType gunType)
@@ -568,10 +518,5 @@ public class Player : MonoBehaviour
 			Destroy(_teleportGun.LastBullet.gameObject);
 			_teleportGun.LastBullet = null;
 		}
-	}
-
-	public PlayerStats GetAllTimeStats()
-	{
-		return AllPlayerStats[0];
 	}
 }

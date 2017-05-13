@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
 
+//TODO LATER we may have to increase the number of difficulty multipliers here
 public enum DifficultyParameter
 {
 	DpShipFireRateIncrease,
@@ -24,8 +25,7 @@ public enum DifficultyParameter
 
 public class DifficultyManager : MonoBehaviour
 {
-	// TODO we have to define lots of difficulty multipliers here
-
+	
 	// these difficulty multipliers will be given their initial value via our learning program
 	// we'll give the players a small questionnaire at the beginning of the game
 	// based on the answers to these questions, our learning program will place players into a preset model
@@ -38,11 +38,11 @@ public class DifficultyManager : MonoBehaviour
 
 	// difficulty adjustment steps will be at regular intervals
 	private float _lastDifficultyAdjustmentTime;
-	private const float DifficultyAdjustmentInterval = 5.0f; //TODO set this constant on par with what wave spawns will have for their initial value
+	private const float DifficultyAdjustmentInterval = 5.0f; //TODO set this constant on par with what wave spawn intervals will have for their initial value
 
 	//TODO we also need to define a time interval to measure the effectiveness of our last difficulty adjustment
 
-	//TODO difficulty adjustment coefficients will be determined by learning algorithm for every parameter separately, 
+	//TODO LEARN difficulty adjustment coefficients will be determined by learning algorithm for every parameter separately, 
 	// and they'll change for each adjustment depending on what size of a step the learning algorithm wants to take
 
 	private GameObject _playerGameObject;
@@ -56,7 +56,7 @@ public class DifficultyManager : MonoBehaviour
 		DifficultyCoefs = new Dictionary<DifficultyParameter, int>((int)DifficultyParameter.DpCount);
 		for (DifficultyParameter curParam = DifficultyParameter.DpShipFireRateIncrease; curParam < DifficultyParameter.DpCount; ++curParam)
 		{
-			//TODO later on, these multipliers have to be pulled out from our learning data
+			//TODO LEARN LATER these multipliers have to be pulled out from our learning data
 			DifficultyCoefs.Add(curParam, GameConstants.StartDifficulty);
 		}
 

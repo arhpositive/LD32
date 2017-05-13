@@ -13,6 +13,7 @@ public class EnemyWave
 	private List<BasicEnemy> _enemyScripts;
 	private int _farthestEnemyIndex;
 	private Player _playerScript;
+	private StatsManager _statsManagerScript;
 	private LineRenderer _waveLineRenderer;
 	private RectTransform _mainCanvasTransform;
 	private GameObject _waveScoreIndicator;
@@ -43,6 +44,7 @@ public class EnemyWave
 	public void Initialize(Player playerScript, RectTransform mainCanvasTransform, GameObject waveScoreIndicator)
 	{
 		_playerScript = playerScript;
+		_statsManagerScript = Camera.main.GetComponent<StatsManager>();
 		_mainCanvasTransform = mainCanvasTransform;
 		_waveScoreIndicator = waveScoreIndicator;
 		_waveScoreText = _waveScoreIndicator.GetComponent<Text>();
@@ -93,7 +95,7 @@ public class EnemyWave
 			if (_enemyList.Count == 0)
 			{
 				int baseWaveScore = GetBaseWaveScore();
-				_playerScript.TriggerEnemyWaveScoring(baseWaveScore, baseWaveScore * _waveMultiplier);
+				_playerScript.TriggerEnemyWaveScoring(baseWaveScore, baseWaveScore * _waveMultiplier); //TODO NEXT does this trigger if player is dead? try killing last member by crashing
 				Object.Destroy(_waveScoreIndicator);
 				_setForDestruction = true;
 				return;
@@ -162,10 +164,10 @@ public class EnemyWave
 		_waveScoreText.text = baseWaveScore.ToString(CultureInfo.InvariantCulture) + " x " +
 							  _waveMultiplier.ToString(CultureInfo.InvariantCulture);
 
-		int playerBestWaveBaseScore = _playerScript.GetAllTimeStats().BestWaveBaseScore;
+		int playerBestWaveBaseScore = _statsManagerScript.GetAllTimeStats().BestWaveBaseScore;
 		if (playerBestWaveBaseScore > 0.0f)
 		{
-			float scoreColorMultiplier = (float)baseWaveScore / _playerScript.GetAllTimeStats().BestWaveBaseScore;
+			float scoreColorMultiplier = (float)baseWaveScore / _statsManagerScript.GetAllTimeStats().BestWaveBaseScore;
 			Color textColor = new Color(1.0f - scoreColorMultiplier, 1.0f, 1.0f - scoreColorMultiplier);
 			_waveScoreText.color = textColor;
 		}
