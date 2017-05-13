@@ -116,7 +116,9 @@ public class SpawnManager : MonoBehaviour
 
 	private void Start()
 	{
-		Time.timeScale = 1.35f;
+		print("Tutorial Toggled: " + LoadLevel.TutorialToggleValue); //TODO LATER start a tutorial sequence before jumping into the actual game
+
+		Time.timeScale = 1.35f; //TODO LATER take notice that you adjust timescale here
 		_difficultyManagerScript = Camera.main.GetComponent<DifficultyManager>();
 
 		_enemySpawnMaxVertDist = ShipColliderVertSize * 2.0f - 0.01f;

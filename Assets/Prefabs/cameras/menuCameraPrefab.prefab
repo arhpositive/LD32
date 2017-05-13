@@ -177,6 +177,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4531216ae561308459c6b4f35cc6b52f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  TutorialToggleObject: {fileID: 0}
 --- !u!114 &11465228
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -205,6 +206,8 @@ MonoBehaviour:
   IsGameScene: 0
   UpBound: {fileID: 0}
   DownBound: {fileID: 0}
+  CanvasGameObject: {fileID: 0}
+  CanvasScorePanel: {fileID: 0}
   PlayerPrefab: {fileID: 114074, guid: 58cda14e50f6d8d42a46b3077f960e56, type: 2}
   EnemyPrefabArray:
   - {fileID: 139786, guid: 566fefe5e59b580429b5c12346896bd0, type: 2}
@@ -217,6 +220,7 @@ MonoBehaviour:
   - {fileID: 173280, guid: 8dfdc579ad197d34a8f88fe5a10abd54, type: 2}
   StarPrefabArray: []
   ShipConnectionPrefab: {fileID: 0}
+  WaveScoreIndicatorPrefab: {fileID: 0}
   MinWaveSpawnIntervalCoef: 0
   MaxWaveSpawnIntervalCoef: 0
   MinHugeEnemySpawnIntervalCoef: 0

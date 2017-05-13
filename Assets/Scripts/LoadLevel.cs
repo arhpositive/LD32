@@ -5,19 +5,32 @@
  * LoadLevel.cs
  * Switches between scenes
  */
-
+ 
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class LoadLevel : MonoBehaviour
 {
-	public void LoadMenuScene()
+	public GameObject TutorialToggleObject;
+	
+	public static bool TutorialToggleValue;
+
+	private void Start()
 	{
-		SceneManager.LoadScene(0);
+		if (TutorialToggleObject)
+		{
+			TutorialToggleValue = TutorialToggleObject.GetComponent<Toggle>().isOn;
+		}
 	}
 
-	public void LoadGameScene()
+	public void LoadSceneWithIndex(int levelIndex)
 	{
-		SceneManager.LoadScene(1);
+		SceneManager.LoadScene(levelIndex);
+	}
+
+	public void OnTutorialButtonClick(bool newValue)
+	{
+		TutorialToggleValue = newValue;
 	}
 }
