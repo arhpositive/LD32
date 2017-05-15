@@ -8,6 +8,8 @@ using UnityEngine.UI;
 public class EnemyWave
 {
 	private const float DistanceToBreakConnection = 2.0f;
+	private const float ScoreTextMinClamp = -330.0f; //TODO LATER big magic number here!
+	private const float ScoreTextMaxClamp = 500.0f;
 
 	private List<GameObject> _enemyList;
 	private List<BasicEnemy> _enemyScripts;
@@ -95,7 +97,13 @@ public class EnemyWave
 			if (_enemyList.Count == 0)
 			{
 				int baseWaveScore = GetBaseWaveScore();
-				_playerScript.TriggerEnemyWaveScoring(baseWaveScore, baseWaveScore * _waveMultiplier); //TODO NEXT does this trigger if player is dead? try killing last member by crashing
+				if (_playerScript)
+				{
+					_playerScript.TriggerEnemyWaveScoring(baseWaveScore * _waveMultiplier);
+
+					//this score gets calculated as a stat only if player is alive, hence we do this if _playerScript exists
+					_statsManagerScript.OnWaveDestruction(baseWaveScore);
+				}
 				Object.Destroy(_waveScoreIndicator);
 				_setForDestruction = true;
 				return;
@@ -156,7 +164,7 @@ public class EnemyWave
 		//TODO LATER perhaps we should separate the UI
 		Vector3 enemyScreenPos = Camera.main.WorldToScreenPoint(_enemyList[_farthestEnemyIndex].transform.position);
 		float newPosX = enemyScreenPos.x - _mainCanvasTransform.sizeDelta.x * 0.5f;
-		newPosX = Mathf.Clamp(newPosX, GameConstants.ScoreTextMinClamp, GameConstants.ScoreTextMaxClamp);
+		newPosX = Mathf.Clamp(newPosX, ScoreTextMinClamp, ScoreTextMaxClamp);
 
 		int baseWaveScore = GetBaseWaveScore();
 

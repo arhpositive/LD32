@@ -328,10 +328,9 @@ public class Player : MonoBehaviour
 		PlayerScore -= 100;
 	}
 
-	public void TriggerEnemyWaveScoring(int waveBaseScore, int scoreAddition)
+	public void TriggerEnemyWaveScoring(int scoreAddition)
 	{
 		PlayerScore += scoreAddition;
-		_statsManagerScript.OnWaveDestruction(waveBaseScore);
 		EventLogger.PrintToLog("Enemy Wave Scored: " + scoreAddition);
 	}
 
