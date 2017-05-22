@@ -268,7 +268,7 @@ MonoBehaviour:
         m_CallState: 2
     m_TypeName: UnityEngine.UI.Toggle+ToggleEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
-  m_IsOn: 1
+  m_IsOn: 0
 --- !u!1 &767723349
 GameObject:
   m_ObjectHideFlags: 0
@@ -1107,7 +1107,8 @@ Prefab:
       propertyPath: TutorialToggleObject
       value: 
       objectReference: {fileID: 181375267}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 11471574, guid: 9687ad9becb908342be7a82532c68dcb, type: 2}
   m_ParentPrefab: {fileID: 100100000, guid: 9687ad9becb908342be7a82532c68dcb, type: 2}
   m_IsPrefabParent: 0
 --- !u!114 &1983994510 stripped

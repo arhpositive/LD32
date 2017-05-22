@@ -14,7 +14,6 @@ namespace ui
 	public class RefreshAccuracyText : MonoBehaviour
 	{
 		private Text _accuracyText;
-		private Player _playerScript;
 		private StatsManager _statsManagerScript;
 
 		private void Start()
@@ -25,9 +24,8 @@ namespace ui
 
 		private void Update()
 		{
-			if (_playerScript)
+			if (_statsManagerScript)
 			{
-
 				_accuracyText.text = _statsManagerScript.GetAllTimeStats().PlayerAccuracy.ToString(CultureInfo.InvariantCulture);
 			}
 		}

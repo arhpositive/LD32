@@ -12,6 +12,14 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using Random = UnityEngine.Random;
 
+public enum SpawnType
+{
+	StWave,
+	StPowerup,
+	StHugeEnemy,
+	StCount
+}
+
 public struct WaveEntity
 {
 	public Vector2 Position;
@@ -38,8 +46,6 @@ public class Formation
 
 public class SpawnManager : MonoBehaviour
 {
-	public bool IsGameScene;
-
 	//TODO LATER these bounds are temporary, remove them
 	public GameObject UpBound;
 	public GameObject DownBound;
@@ -53,8 +59,6 @@ public class SpawnManager : MonoBehaviour
 	public GameObject[] HugeEnemyPrefabArray;
 	public GameObject[] PosPowerupPrefabArray;
 	public GameObject[] NegPowerupPrefabArray;
-	public GameObject[] MeteorPrefabArray;
-	public GameObject[] StarPrefabArray;
 	public GameObject ShipConnectionPrefab;
 	public GameObject WaveScoreIndicatorPrefab;
 
@@ -64,10 +68,6 @@ public class SpawnManager : MonoBehaviour
 	public float MinHugeEnemySpawnIntervalCoef;
 	public float MaxHugeEnemySpawnIntervalCoef;
 	public float PowerupSpawnBaseInterval;
-
-	[Header("Parallax Counts")]
-	public int MeteorCount;
-	public int StarCount;
 
 	private DifficultyManager _difficultyManagerScript;
 
@@ -91,22 +91,24 @@ public class SpawnManager : MonoBehaviour
 	private const float PlayerShipColliderHorzSize = 0.38f;
 
 	private float _enemySpawnMinVertDist;
-	private float _enemySpawnMaxVertDist;
+	private float _enemySpawnMaxVertDist = ShipColliderVertSize * 2.0f - 0.01f;
 	private float _enemySpawnMinHorzDist;
-	private float _enemySpawnMaxHorzDist;
+	private float _enemySpawnMaxHorzDist = PlayerShipColliderHorzSize * 2.0f - 0.01f;
 
 	private float _vertMinShipSpawnCoord;
 	private float _vertMaxShipSpawnCoord;
 
 	private bool _hugeEnemyExists;
 
+	//Tutorial Properties
+	private bool _tutorialSequenceIsActive;
+	private float _tutorialSequenceLastEventTime;
+	private float _tutorialSequenceEventInterval;
+	private bool _popupEventUpcoming;
+	private List<TutorialItem> _tutorialSequenceItems;
+
 	private void Awake()
 	{
-		if (!IsGameScene)
-		{
-			return;
-		}
-
 		//instantiate player
 		GameObject playerGameObject = Instantiate(PlayerPrefab,
 			new Vector2(0.0f, Random.Range(Player.MinVerticalMovementLimit, Player.MaxVerticalMovementLimit)),
@@ -116,14 +118,10 @@ public class SpawnManager : MonoBehaviour
 
 	private void Start()
 	{
-		print("Tutorial Toggled: " + LoadLevel.TutorialToggleValue); //TODO LATER start a tutorial sequence before jumping into the actual game
-
 		Time.timeScale = 1.35f; //TODO LATER take notice that you adjust timescale here
 		_difficultyManagerScript = Camera.main.GetComponent<DifficultyManager>();
-
-		_enemySpawnMaxVertDist = ShipColliderVertSize * 2.0f - 0.01f;
+		
 		_enemySpawnMinVertDist = Mathf.Min(ShipGameObjectVertSize + 0.05f, _enemySpawnMaxVertDist);
-		_enemySpawnMaxHorzDist = PlayerShipColliderHorzSize * 2.0f - 0.01f;
 		_enemySpawnMinHorzDist = Mathf.Min(PlayerShipColliderHorzSize * 0.5f, _enemySpawnMaxHorzDist);
 
 		_hugeEnemyExists = false;
@@ -140,6 +138,13 @@ public class SpawnManager : MonoBehaviour
 		{
 			_canvasRectTransform = CanvasGameObject.GetComponent<RectTransform>();
 		}
+		
+		ChangeTutorialSequenceState(LoadLevel.TutorialToggleValue);
+		_popupEventUpcoming = false;
+		if (_tutorialSequenceIsActive)
+		{
+			FillTutorialSequence();
+		}
 
 		PregeneratePossibleWaves();
 
@@ -148,42 +153,33 @@ public class SpawnManager : MonoBehaviour
 
 		_negPowerupSpawnInterval = Random.Range(PowerupSpawnBaseInterval, PowerupSpawnBaseInterval * 2);
 		_previousNegPowerupSpawnTime = Time.time;
-
-		//_meteorSpawnInterval = 1.0f;
-		//_previousMeteorSpawnTime = Time.time;
-
-		//float meteorToStarSpeedRatio = 
-		//    MeteorPrefabArray[0].GetComponent<BasicMove>().MoveSpeed / StarPrefab.GetComponent<BasicMove>().MoveSpeed;
-		//_starSpawnInterval = (_meteorSpawnInterval / GameConstants.StarToMeteorRatio) * meteorToStarSpeedRatio;
-		//_previousStarSpawnTime = Time.time;
-
-		InitialMeteorAndStarSpawn();
 	}
 
 	private void Update()
 	{
-		if (UpBound)
-		{
-			UpBound.transform.position = new Vector3(UpBound.transform.position.x, _vertMaxShipSpawnCoord, UpBound.transform.position.z);
-		}
-		if (DownBound)
-		{
-			DownBound.transform.position = new Vector3(DownBound.transform.position.x, _vertMinShipSpawnCoord, DownBound.transform.position.z);
-		}
+		UpdateDebugStuff();
 
-		//TODO LATER remove timescale adjustments or hide them under debug mode
-		if (Input.GetKeyDown(KeyCode.U))
+		if (_tutorialSequenceIsActive)
 		{
-			Time.timeScale += 0.1f;
-			print("Timescale Up: " + Time.timeScale);
-		}
-		else if (Input.GetKeyDown(KeyCode.J))
-		{
-			Time.timeScale -= 0.1f;
-			print("Timescale Down: " + Time.timeScale);
-		}
+			//check if tutorial sequence timer is up, then spawn the next wave of whatever is necessary
 
-		if (IsGameScene)
+			//TODO implement tutorial sequence timer
+			//implement a simple way of spawning whatever we want instead of randomizing a wave
+			//the ability of adding new items to our tutorial should be trivially simple
+			//a new tutorial item should have a type (specific wave and enemy count, specific powerup) and a time to wait BEFORE spawn
+			//another unique type could be a "pause" and its text
+
+			//1. if tutorial sequence timer is up
+			//2. spawn new tutorial element
+			//3. get next element and set next timer
+
+			//if tutorial timer is up, start next tutorial event
+			if (Time.time - _tutorialSequenceLastEventTime > _tutorialSequenceEventInterval)
+			{
+					PrepareNextTutorialEvent();
+			}
+		}
+		else
 		{
 			if (Time.time - _previousWaveSpawnTime > _waveSpawnInterval)
 			{
@@ -208,12 +204,104 @@ public class SpawnManager : MonoBehaviour
 				SpawnNewPowerup(false);
 				_previousNegPowerupSpawnTime = Time.time;
 			}
+		}
 
-			for (int i = 0; i < _enemyWaves.Count; ++i)
-			{
-				_enemyWaves[i].Update();
-			}
-			_enemyWaves.RemoveAll(item => item.IsSetForDestruction());
+		//update each enemy wave and remove waves which have no remaining enemies
+		foreach (EnemyWave currentWave in _enemyWaves)
+		{
+			currentWave.Update();
+		}
+		_enemyWaves.RemoveAll(item => item.IsSetForDestruction());
+	}
+
+	private void UpdateDebugStuff()
+	{
+		if (UpBound)
+		{
+			UpBound.transform.position = new Vector3(UpBound.transform.position.x, _vertMaxShipSpawnCoord, UpBound.transform.position.z);
+		}
+		if (DownBound)
+		{
+			DownBound.transform.position = new Vector3(DownBound.transform.position.x, _vertMinShipSpawnCoord, DownBound.transform.position.z);
+		}
+
+		//TODO LATER remove timescale adjustments or hide them under debug mode
+		if (Input.GetKeyDown(KeyCode.U))
+		{
+			Time.timeScale += 0.1f;
+			print("Timescale Up: " + Time.timeScale);
+		}
+		else if (Input.GetKeyDown(KeyCode.J))
+		{
+			Time.timeScale -= 0.1f;
+			print("Timescale Down: " + Time.timeScale);
+		}
+	}
+
+	private void FillTutorialSequence()
+	{
+		_tutorialSequenceItems = new List<TutorialItem>();
+		_tutorialSequenceItems.Add(new TutorialItem(SpawnType.StWave, 10.0f, 5.0f));
+		_tutorialSequenceItems.Add(new TutorialItem(SpawnType.StPowerup, 10.0f, 5.0f));
+		_tutorialSequenceItems.Add(new TutorialItem(SpawnType.StHugeEnemy, 10.0f, 5.0f));
+		_tutorialSequenceLastEventTime = Time.time;
+
+		SwitchToNextItemInTutorial();
+	}
+
+	private void SwitchToNextItemInTutorial()
+	{
+		if (_tutorialSequenceItems.Count > 0)
+		{
+			//prepare for next event
+			print("Next event: " + _tutorialSequenceItems[0].SpawnedItemType + " " + _tutorialSequenceItems[0].TimeBeforeInit + " " + _tutorialSequenceItems[0].TimeBeforePopupAndPause);
+			_tutorialSequenceEventInterval = _tutorialSequenceItems[0].TimeBeforeInit;
+		}
+		else
+		{
+			print("Tutorial is finished!");
+			ChangeTutorialSequenceState(false);
+		}
+	}
+
+	private void ChangeTutorialSequenceState(bool newState)
+	{
+		_tutorialSequenceIsActive = newState;
+		_difficultyManagerScript.ChangeTutorialSequenceState(_tutorialSequenceIsActive);
+
+		if (!_tutorialSequenceIsActive)
+		{
+			//also, reset all timers in spawn manager
+			_previousWaveSpawnTime = Time.time;
+			_previousHugeEnemySpawnTime = Time.time;
+			_previousPosPowerupSpawnTime = Time.time;
+			_previousPosPowerupSpawnTime = Time.time;
+		}
+	}
+
+	private void PrepareNextTutorialEvent()
+	{
+		_tutorialSequenceLastEventTime = Time.time;
+
+		//remove finished tutorial event from list
+		if (_popupEventUpcoming)
+		{
+			//TODO popup and pause
+
+
+			//remove current event that we've just finished
+			_tutorialSequenceItems.RemoveAt(0);
+			SwitchToNextItemInTutorial();
+			_popupEventUpcoming = false;
+		}
+		else
+		{
+			//TODO spawn whatever is necessary
+
+			//switch to popup event
+			print("Popup in " + _tutorialSequenceItems[0].TimeBeforePopupAndPause + " seconds.");
+			_tutorialSequenceEventInterval = _tutorialSequenceItems[0].TimeBeforePopupAndPause;
+			_popupEventUpcoming = true;
 		}
 	}
 
@@ -612,33 +700,6 @@ public class SpawnManager : MonoBehaviour
 		BasicMove powerupMoveScript = selectedPowerup.GetComponent<BasicMove>();
 		Vector3 powerupPos = new Vector2(powerupMoveScript.HorizontalLimits[1], Random.Range(powerupMoveScript.VerticalLimits[0], powerupMoveScript.VerticalLimits[1]));
 		Instantiate(selectedPowerup, powerupPos, Quaternion.identity);
-	}
-
-	private void InitialMeteorAndStarSpawn()
-	{
-		for (int i = 0; i < MeteorCount; i++)
-		{
-			int meteorKind = Random.Range(0, MeteorPrefabArray.Length);
-			GameObject selectedMeteor = MeteorPrefabArray[meteorKind];
-			BasicMove meteorMoveScript = selectedMeteor.GetComponent<BasicMove>();
-			
-			Vector2 meteorPos =
-				new Vector2(Random.Range(meteorMoveScript.HorizontalLimits[0], meteorMoveScript.HorizontalLimits[1]),
-					Random.Range(meteorMoveScript.VerticalLimits[0], meteorMoveScript.VerticalLimits[1]));
-			Instantiate(selectedMeteor, meteorPos, Quaternion.identity);
-		}
-
-		for (int i = 0; i < StarCount; i++)
-		{
-			int starKind = Random.Range(0, StarPrefabArray.Length);
-			GameObject selectedStar = StarPrefabArray[starKind];
-			BasicMove starMoveScript = selectedStar.GetComponent<BasicMove>();
-
-			Vector2 starPos =
-				new Vector2(Random.Range(starMoveScript.HorizontalLimits[0], starMoveScript.HorizontalLimits[1]),
-					Random.Range(starMoveScript.VerticalLimits[0], starMoveScript.VerticalLimits[1]));
-			Instantiate(selectedStar, starPos, Quaternion.identity);
-		}
 	}
 	
 	public void SetHugeEnemyExists(bool newValue)

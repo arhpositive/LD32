@@ -12,10 +12,10 @@ GameObject:
   - component: {fileID: 9232832}
   - component: {fileID: 12471222}
   - component: {fileID: 8132520}
-  - component: {fileID: 11471574}
   - component: {fileID: 11465228}
   - component: {fileID: 8225114}
   - component: {fileID: 11435692}
+  - component: {fileID: 114145867316683640}
   m_Layer: 0
   m_Name: menuCameraPrefab
   m_TagString: MainCamera
@@ -192,42 +192,6 @@ MonoBehaviour:
   MusicList:
   - {fileID: 8300000, guid: cce09840d93cc864a84767867c382b01, type: 3}
   - {fileID: 8300000, guid: 5d28e2648c98a324d801b1709322b41d, type: 3}
---- !u!114 &11471574
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 154240}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 36404cded83f6b746b819d834707c786, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  IsGameScene: 0
-  UpBound: {fileID: 0}
-  DownBound: {fileID: 0}
-  CanvasGameObject: {fileID: 0}
-  CanvasScorePanel: {fileID: 0}
-  PlayerPrefab: {fileID: 114074, guid: 58cda14e50f6d8d42a46b3077f960e56, type: 2}
-  EnemyPrefabArray:
-  - {fileID: 139786, guid: 566fefe5e59b580429b5c12346896bd0, type: 2}
-  - {fileID: 190498, guid: a9dbab4630dcdae4ca684a97057da1a1, type: 2}
-  HugeEnemyPrefabArray: []
-  PosPowerupPrefabArray: []
-  NegPowerupPrefabArray: []
-  MeteorPrefabArray:
-  - {fileID: 105448, guid: 4318761234289f640a7017713d221b7b, type: 2}
-  - {fileID: 173280, guid: 8dfdc579ad197d34a8f88fe5a10abd54, type: 2}
-  StarPrefabArray: []
-  ShipConnectionPrefab: {fileID: 0}
-  WaveScoreIndicatorPrefab: {fileID: 0}
-  MinWaveSpawnIntervalCoef: 0
-  MaxWaveSpawnIntervalCoef: 0
-  MinHugeEnemySpawnIntervalCoef: 0
-  MaxHugeEnemySpawnIntervalCoef: 0
-  PowerupSpawnBaseInterval: 0
-  MeteorCount: 0
-  StarCount: 0
 --- !u!124 &12471222
 Behaviour:
   m_ObjectHideFlags: 1
@@ -246,3 +210,22 @@ Prefab:
   m_ParentPrefab: {fileID: 0}
   m_RootGameObject: {fileID: 154240}
   m_IsPrefabParent: 1
+--- !u!114 &114145867316683640
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 154240}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed1a9bb5552f07e4297bd9006cdd8099, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  MeteorPrefabArray:
+  - {fileID: 105448, guid: 4318761234289f640a7017713d221b7b, type: 2}
+  - {fileID: 173280, guid: 8dfdc579ad197d34a8f88fe5a10abd54, type: 2}
+  StarPrefabArray:
+  - {fileID: 157426, guid: c5f313e4e03d12a4ba060b73e0120301, type: 2}
+  - {fileID: 1130765423015340, guid: d44a5706e471dd1419db2d04cdb79e99, type: 2}
+  MeteorCount: 30
+  StarCount: 300

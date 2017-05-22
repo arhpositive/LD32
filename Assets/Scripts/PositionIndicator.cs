@@ -4,7 +4,6 @@ public class PositionIndicator : MonoBehaviour
 {
 
 	[Range(0, 2)] public int StatsIndex;
-	private Player _playerScript;
 	private StatsManager _statsManagerScript;
 
 	private void Start()
@@ -15,7 +14,7 @@ public class PositionIndicator : MonoBehaviour
 	// Update is called once per frame
 	void Update ()
 	{
-		if (_playerScript)
+		if (_statsManagerScript)
 		{
 			transform.position = _statsManagerScript.AllPlayerStats[StatsIndex].PlayerAveragePosition;
 		}

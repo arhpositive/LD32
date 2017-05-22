@@ -18,6 +18,8 @@ GameObject:
   - component: {fileID: 11425842}
   - component: {fileID: 11444820}
   - component: {fileID: 11435500}
+  - component: {fileID: 114368962382954154}
+  - component: {fileID: 114215934451815490}
   m_Layer: 0
   m_Name: mainCameraPrefab
   m_TagString: MainCamera
@@ -228,6 +230,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4531216ae561308459c6b4f35cc6b52f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  TutorialToggleObject: {fileID: 0}
 --- !u!114 &11435500
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -344,3 +347,33 @@ Prefab:
   m_ParentPrefab: {fileID: 0}
   m_RootGameObject: {fileID: 102966}
   m_IsPrefabParent: 1
+--- !u!114 &114215934451815490
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 102966}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed1a9bb5552f07e4297bd9006cdd8099, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  MeteorPrefabArray:
+  - {fileID: 105448, guid: 4318761234289f640a7017713d221b7b, type: 2}
+  - {fileID: 173280, guid: 8dfdc579ad197d34a8f88fe5a10abd54, type: 2}
+  StarPrefabArray:
+  - {fileID: 157426, guid: c5f313e4e03d12a4ba060b73e0120301, type: 2}
+  - {fileID: 1130765423015340, guid: d44a5706e471dd1419db2d04cdb79e99, type: 2}
+  MeteorCount: 30
+  StarCount: 300
+--- !u!114 &114368962382954154
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 102966}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b94c3b43a087594ba3fd2bfa7bc8a69, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

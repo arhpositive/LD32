@@ -25,7 +25,9 @@ public enum DifficultyParameter
 
 public class DifficultyManager : MonoBehaviour
 {
-	
+	//TODO LEARN a questionnaire regarding player preferences and experience level will be implemented to the start of the game, separate and before the tutorial
+	//TODO LEARN player will be placed in one of the preset player models after the questionnaire ends
+
 	// these difficulty multipliers will be given their initial value via our learning program
 	// we'll give the players a small questionnaire at the beginning of the game
 	// based on the answers to these questions, our learning program will place players into a preset model
@@ -50,13 +52,14 @@ public class DifficultyManager : MonoBehaviour
 
 	private int _adjustmentStepCount;
 	private int _previousWavePlayerHealth;
+	private bool _tutorialSequenceIsActive;
 
 	private void Start()
 	{
 		DifficultyCoefs = new Dictionary<DifficultyParameter, int>((int)DifficultyParameter.DpCount);
 		for (DifficultyParameter curParam = DifficultyParameter.DpShipFireRateIncrease; curParam < DifficultyParameter.DpCount; ++curParam)
 		{
-			//TODO LEARN LATER these multipliers have to be pulled out from our learning data
+			//TODO LEARN LATER these multipliers have to be pulled out from our learning data (from existing player models)
 			DifficultyCoefs.Add(curParam, GameConstants.StartDifficulty);
 		}
 
@@ -77,11 +80,25 @@ public class DifficultyManager : MonoBehaviour
 	{
 		//TODO measure the effectiveness of last difficulty adjustment
 
-		//check if we need a new difficulty adjustment step
-		if (Time.time - _lastDifficultyAdjustmentTime > DifficultyAdjustmentInterval)
+		if (!_tutorialSequenceIsActive)
 		{
-			_adjustmentStepCount++;
-			RequestNewDifficultyAdjustment();
+			//check if we need a new difficulty adjustment step
+			if (Time.time - _lastDifficultyAdjustmentTime > DifficultyAdjustmentInterval)
+			{
+				_adjustmentStepCount++;
+				RequestNewDifficultyAdjustment();
+				_lastDifficultyAdjustmentTime = Time.time;
+			}
+		}
+	}
+
+	public void ChangeTutorialSequenceState(bool newState)
+	{
+		_tutorialSequenceIsActive = newState;
+
+		//reset timer after tutorial ends
+		if (!_tutorialSequenceIsActive)
+		{
 			_lastDifficultyAdjustmentTime = Time.time;
 		}
 	}
