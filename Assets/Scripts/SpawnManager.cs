@@ -8,6 +8,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Random = UnityEngine.Random;
@@ -106,6 +107,7 @@ public class SpawnManager : MonoBehaviour
 	private float _tutorialSequenceEventInterval;
 	private bool _popupEventUpcoming;
 	private List<TutorialItem> _tutorialSequenceItems;
+	private bool _tutorialPaused;
 
 	private void Awake()
 	{
@@ -118,7 +120,7 @@ public class SpawnManager : MonoBehaviour
 
 	private void Start()
 	{
-		Time.timeScale = 1.35f; //TODO LATER take notice that you adjust timescale here
+		Time.timeScale = GameConstants.CurrentTimeScale; //TODO LATER take notice that you adjust timescale here
 		_difficultyManagerScript = Camera.main.GetComponent<DifficultyManager>();
 		
 		_enemySpawnMinVertDist = Mathf.Min(ShipGameObjectVertSize + 0.05f, _enemySpawnMaxVertDist);
@@ -141,6 +143,7 @@ public class SpawnManager : MonoBehaviour
 		
 		ChangeTutorialSequenceState(LoadLevel.TutorialToggleValue);
 		_popupEventUpcoming = false;
+		_tutorialPaused = false;
 		if (_tutorialSequenceIsActive)
 		{
 			FillTutorialSequence();
@@ -173,11 +176,22 @@ public class SpawnManager : MonoBehaviour
 			//2. spawn new tutorial element
 			//3. get next element and set next timer
 
+			if (_tutorialPaused)
+			{
+				if (Input.GetKeyDown(KeyCode.Space))
+				{
+					//TODO TUTORIAL close popup aswell
+					ResumeTutorialSequence();
+				}
+			}
+
 			//if tutorial timer is up, start next tutorial event
 			if (Time.time - _tutorialSequenceLastEventTime > _tutorialSequenceEventInterval)
 			{
-					PrepareNextTutorialEvent();
+				PrepareNextTutorialEvent();
 			}
+
+
 		}
 		else
 		{
@@ -238,12 +252,70 @@ public class SpawnManager : MonoBehaviour
 		}
 	}
 
+	private void PregeneratePossibleWaves()
+	{
+		// TODO LATER include different movement patterns, might involve waypoints, etc.
+		// waypoint system could make the wave change movement direction after a given amount of time.
+		// be careful about randomizing too much as it will make us lose control over certain difficulty features
+
+		List<WaveEntity> straightLine = new List<WaveEntity>
+		{
+			//  5
+			//  4
+			//  3
+			//  2
+			//  1
+			//  0
+			new WaveEntity(Vector2.zero, Vector2.left), new WaveEntity(new Vector2(0, 1), Vector2.left), new WaveEntity(new Vector2(0, 2), Vector2.left), new WaveEntity(new Vector2(0, 3), Vector2.left), new WaveEntity(new Vector2(0, 4), Vector2.left), new WaveEntity(new Vector2(0, 5), Vector2.left), new WaveEntity(new Vector2(0, 6), Vector2.left), new WaveEntity(new Vector2(0, 7), Vector2.left), new WaveEntity(new Vector2(0, 8), Vector2.left), new WaveEntity(new Vector2(0, 9), Vector2.left)
+		};
+		_formations.Add(new Formation(straightLine, 0));
+
+		List<WaveEntity> echelonLine = new List<WaveEntity>()
+		{
+			//      5
+			//  4
+			//      3
+			//  2
+			//      1
+			//  0
+			new WaveEntity(Vector2.zero, Vector2.left), new WaveEntity(new Vector2(1, 1), Vector2.left), new WaveEntity(new Vector2(0, 2), Vector2.left), new WaveEntity(new Vector2(1, 3), Vector2.left), new WaveEntity(new Vector2(0, 4), Vector2.left), new WaveEntity(new Vector2(1, 5), Vector2.left), new WaveEntity(new Vector2(0, 6), Vector2.left), new WaveEntity(new Vector2(1, 7), Vector2.left), new WaveEntity(new Vector2(0, 8), Vector2.left), new WaveEntity(new Vector2(1, 9), Vector2.left)
+		};
+		_formations.Add(new Formation(echelonLine, 1));
+
+		List<WaveEntity> forwardsWedge = new List<WaveEntity>
+		{
+			//          1
+			//      3
+			//  5
+			//  4
+			//      2
+			//          0
+			new WaveEntity(new Vector2(4, 0), Vector2.left), new WaveEntity(new Vector2(4, 9), Vector2.left), new WaveEntity(new Vector2(3, 1), Vector2.left), new WaveEntity(new Vector2(3, 8), Vector2.left), new WaveEntity(new Vector2(2, 2), Vector2.left), new WaveEntity(new Vector2(2, 7), Vector2.left), new WaveEntity(new Vector2(1, 3), Vector2.left), new WaveEntity(new Vector2(1, 6), Vector2.left), new WaveEntity(new Vector2(0, 4), Vector2.left), new WaveEntity(new Vector2(0, 5), Vector2.left)
+		};
+		_formations.Add(new Formation(forwardsWedge, 4));
+
+		List<WaveEntity> backwardsWedge = new List<WaveEntity>
+		{
+			//  1
+			//      3
+			//          5
+			//          4
+			//      2
+			//  0
+			new WaveEntity(Vector2.zero, Vector2.left), new WaveEntity(new Vector2(0, 9), Vector2.left), new WaveEntity(new Vector2(1, 1), Vector2.left), new WaveEntity(new Vector2(1, 8), Vector2.left), new WaveEntity(new Vector2(2, 2), Vector2.left), new WaveEntity(new Vector2(2, 7), Vector2.left), new WaveEntity(new Vector2(3, 3), Vector2.left), new WaveEntity(new Vector2(3, 6), Vector2.left), new WaveEntity(new Vector2(4, 4), Vector2.left), new WaveEntity(new Vector2(4, 5), Vector2.left)
+		};
+		_formations.Add(new Formation(backwardsWedge, 4));
+	}
+
 	private void FillTutorialSequence()
 	{
-		_tutorialSequenceItems = new List<TutorialItem>();
-		_tutorialSequenceItems.Add(new TutorialItem(SpawnType.StWave, 10.0f, 5.0f));
-		_tutorialSequenceItems.Add(new TutorialItem(SpawnType.StPowerup, 10.0f, 5.0f));
-		_tutorialSequenceItems.Add(new TutorialItem(SpawnType.StHugeEnemy, 10.0f, 5.0f));
+		_tutorialSequenceItems = new List<TutorialItem>
+		{
+			new TutorialWaveItem(SpawnType.StWave, 10.0f, 5.0f, 2, 0),
+			new TutorialWaveItem(SpawnType.StWave, 10.0f, 5.0f, 2, 1),
+			new TutorialPowerupItem(SpawnType.StPowerup, 10.0f, 5.0f, PowerupType.PtSpeedup),
+			//new TutorialItem(SpawnType.StHugeEnemy, 10.0f, 5.0f) //TODO TUTORIAL
+		};
 		_tutorialSequenceLastEventTime = Time.time;
 
 		SwitchToNextItemInTutorial();
@@ -286,17 +358,11 @@ public class SpawnManager : MonoBehaviour
 		//remove finished tutorial event from list
 		if (_popupEventUpcoming)
 		{
-			//TODO popup and pause
-
-
-			//remove current event that we've just finished
-			_tutorialSequenceItems.RemoveAt(0);
-			SwitchToNextItemInTutorial();
-			_popupEventUpcoming = false;
+			PopupAndPause();
 		}
 		else
 		{
-			//TODO spawn whatever is necessary
+			SpawnNextTutorialItem();
 
 			//switch to popup event
 			print("Popup in " + _tutorialSequenceItems[0].TimeBeforePopupAndPause + " seconds.");
@@ -305,95 +371,104 @@ public class SpawnManager : MonoBehaviour
 		}
 	}
 
-	private void PregeneratePossibleWaves()
+	private void PopupAndPause()
 	{
-		// TODO LATER include different movement patterns, might involve waypoints, etc.
-		// waypoint system could make the wave change movement direction after a given amount of time.
-		// be careful about randomizing too much as it will make us lose control over certain difficulty features
-		
-		List<WaveEntity> straightLine = new List<WaveEntity>
-		{
-			//  5
-			//  4
-			//  3
-			//  2
-			//  1
-			//  0
-			new WaveEntity(Vector2.zero, Vector2.left),
-			new WaveEntity(new Vector2(0, 1), Vector2.left),
-			new WaveEntity(new Vector2(0, 2), Vector2.left),
-			new WaveEntity(new Vector2(0, 3), Vector2.left),
-			new WaveEntity(new Vector2(0, 4), Vector2.left),
-			new WaveEntity(new Vector2(0, 5), Vector2.left),
-			new WaveEntity(new Vector2(0, 6), Vector2.left),
-			new WaveEntity(new Vector2(0, 7), Vector2.left),
-			new WaveEntity(new Vector2(0, 8), Vector2.left),
-			new WaveEntity(new Vector2(0, 9), Vector2.left)
-		};
-		_formations.Add(new Formation(straightLine, 0));
+		Time.timeScale = 0.0f; //pause game
+		_tutorialPaused = true;
 
-		List<WaveEntity> echelonLine = new List<WaveEntity>()
-		{
-			//      5
-			//  4
-			//      3
-			//  2
-			//      1
-			//  0
-			new WaveEntity(Vector2.zero, Vector2.left),
-			new WaveEntity(new Vector2(1, 1), Vector2.left),
-			new WaveEntity(new Vector2(0, 2), Vector2.left),
-			new WaveEntity(new Vector2(1, 3), Vector2.left),
-			new WaveEntity(new Vector2(0, 4), Vector2.left),
-			new WaveEntity(new Vector2(1, 5), Vector2.left),
-			new WaveEntity(new Vector2(0, 6), Vector2.left),
-			new WaveEntity(new Vector2(1, 7), Vector2.left),
-			new WaveEntity(new Vector2(0, 8), Vector2.left),
-			new WaveEntity(new Vector2(1, 9), Vector2.left)
-		};
-		_formations.Add(new Formation(echelonLine, 1));
+		//TODO TUTORIAL display popup and write text
+	}
 
-		List<WaveEntity> forwardsWedge = new List<WaveEntity>
+	private void SpawnNextTutorialItem()
+	{
+		switch (_tutorialSequenceItems[0].SpawnedItemType)
 		{
-			//          1
-			//      3
-			//  5
-			//  4
-			//      2
-			//          0
-			new WaveEntity(new Vector2(4, 0), Vector2.left),
-			new WaveEntity(new Vector2(4, 9), Vector2.left),
-			new WaveEntity(new Vector2(3, 1), Vector2.left),
-			new WaveEntity(new Vector2(3, 8), Vector2.left),
-			new WaveEntity(new Vector2(2, 2), Vector2.left),
-			new WaveEntity(new Vector2(2, 7), Vector2.left),
-			new WaveEntity(new Vector2(1, 3), Vector2.left),
-			new WaveEntity(new Vector2(1, 6), Vector2.left),
-			new WaveEntity(new Vector2(0, 4), Vector2.left),
-			new WaveEntity(new Vector2(0, 5), Vector2.left)
-		};
-		_formations.Add(new Formation(forwardsWedge, 4));
+			case SpawnType.StWave:
+				SpawnTutorialWave((TutorialWaveItem)_tutorialSequenceItems[0]); 
+				break;
+			case SpawnType.StPowerup:
+				SpawnTutorialPowerup((TutorialPowerupItem)_tutorialSequenceItems[0]);
+				break;
+			case SpawnType.StHugeEnemy:
+				//TODO TUTORIAL
 
-		List<WaveEntity> backwardsWedge = new List<WaveEntity>
+				break;
+			default:
+				Assert.IsTrue(false);
+				break;
+		}
+	}
+
+	private void ResumeTutorialSequence()
+	{
+		Time.timeScale = GameConstants.CurrentTimeScale; //resume game operation
+		_tutorialPaused = false;
+
+		//remove current event that we've just finished
+		_tutorialSequenceItems.RemoveAt(0);
+		SwitchToNextItemInTutorial();
+		_popupEventUpcoming = false;
+	}
+	
+	private void SpawnTutorialWave(TutorialWaveItem tutorialWaveItem)
+	{
+		//TODO LATER obvious duplications exist, what to do about them?
+		//TODO TUTORIAL spawn a wave as simple as possible
+		//I. Pick a random formation type
+		Formation selectedFormation = _formations[Random.Range(0, _formations.Count)];
+
+		//V. Select Enemies From Formation List
+		List<WaveEntity> selectedFormationEntities = new List<WaveEntity>();
+		for (int i = 0; i < tutorialWaveItem.EnemyCountInWave; ++i)
 		{
-			//  1
-			//      3
-			//          5
-			//          4
-			//      2
-			//  0
-			new WaveEntity(Vector2.zero, Vector2.left),
-			new WaveEntity(new Vector2(0, 9), Vector2.left),
-			new WaveEntity(new Vector2(1, 1), Vector2.left),
-			new WaveEntity(new Vector2(1, 8), Vector2.left),
-			new WaveEntity(new Vector2(2, 2), Vector2.left),
-			new WaveEntity(new Vector2(2, 7), Vector2.left),
-			new WaveEntity(new Vector2(3, 3), Vector2.left),
-			new WaveEntity(new Vector2(3, 6), Vector2.left),
-			new WaveEntity(new Vector2(4, 4), Vector2.left),
-			new WaveEntity(new Vector2(4, 5), Vector2.left)
-		};
-		_formations.Add(new Formation(backwardsWedge, 4));
+			selectedFormationEntities.Add(selectedFormation.WaveEntities[i]);
+		}
+		selectedFormationEntities.Sort(FormationComparison);
+
+		int enemyKind = tutorialWaveItem.EnemyTypeIndex;
+		GameObject enemyPrefab = EnemyPrefabArray[enemyKind];
+		BasicEnemy enemyPrefabScript = enemyPrefab.GetComponent<BasicEnemy>();
+
+		//VII. Spawn Enemies
+		GameObject waveScoreIndicator = Instantiate(WaveScoreIndicatorPrefab);
+		waveScoreIndicator.transform.SetParent(CanvasScorePanel.transform, false);
+
+		GameObject lineRendererObject = Instantiate(ShipConnectionPrefab, Vector3.zero, Quaternion.identity);
+		EnemyWave curEnemyWave = new EnemyWave(lineRendererObject.GetComponent<LineRenderer>());
+		curEnemyWave.Initialize(_playerScript, _canvasRectTransform, waveScoreIndicator);
+		for (int i = 0; i < selectedFormationEntities.Count; i++)
+		{
+			Vector2 enemyPos;
+			if (i > 0)
+			{
+				Vector2 posDiff = selectedFormationEntities[i].Position - selectedFormationEntities[i - 1].Position;
+
+				int xPosDiff = (int)posDiff.x;
+				int yPosDiff = (int)posDiff.y;
+
+				int xIncrement = xPosDiff != 0 ? Math.Sign(xPosDiff) : 0;
+				int yIncrement = yPosDiff != 0 ? Math.Sign(yPosDiff) : 0;
+
+				Vector3 previousEnemyPos = curEnemyWave.GetLastEnemyPosition();
+
+				enemyPos = new Vector2(previousEnemyPos.x + xIncrement * _enemySpawnMaxHorzDist, previousEnemyPos.y + yIncrement * _enemySpawnMaxVertDist);
+			}
+			else
+			{
+				enemyPos = new Vector2(enemyPrefabScript.HorizontalSpawnCoord + selectedFormationEntities[i].Position.x * _enemySpawnMaxHorzDist, (_vertMinShipSpawnCoord + _vertMaxShipSpawnCoord) * 0.5f);
+			}
+
+			GameObject enemy = Instantiate(enemyPrefab, enemyPos, Quaternion.identity);
+			Assert.IsNotNull(enemy);
+
+			BasicMove basicMoveScript = enemy.GetComponent<BasicMove>();
+			basicMoveScript.SetMoveDir(selectedFormationEntities[i].MoveDir, false);
+
+			curEnemyWave.AddNewEnemy(enemy);
+			enemy.GetComponent<BasicEnemy>().Initialize(_playerScript, _difficultyManagerScript, curEnemyWave);
+		}
+		curEnemyWave.FinalizeWidthNodes();
+		_enemyWaves.Add(curEnemyWave);
 	}
 
 	//Generate new waves and spawn them on scene
@@ -402,13 +477,13 @@ public class SpawnManager : MonoBehaviour
 		EventLogger.PrintToLog("New Wave Spawn");
 
 		float randomIntervalCoef = Random.Range(MinWaveSpawnIntervalCoef, MaxWaveSpawnIntervalCoef);
-		_waveSpawnInterval = randomIntervalCoef / _difficultyManagerScript.GetDifficultyMultiplier(DifficultyParameter.DpWaveSpawnRateIncrease);
+		_waveSpawnInterval = randomIntervalCoef/_difficultyManagerScript.GetDifficultyMultiplier(DifficultyParameter.DpWaveSpawnRateIncrease);
 
 
 		int randRange = 100;
-		float stepSize = (float)randRange/GameConstants.DifficultyStepCount;
+		float stepSize = (float) randRange/GameConstants.DifficultyStepCount;
 
-		float noExitProbability = _difficultyManagerScript.DifficultyCoefs[DifficultyParameter.DpWaveHasNoExitCoef] * stepSize - stepSize * 0.5f;
+		float noExitProbability = _difficultyManagerScript.DifficultyCoefs[DifficultyParameter.DpWaveHasNoExitCoef]*stepSize - stepSize*0.5f;
 
 		bool hasNoExit = Random.Range(0, randRange) < noExitProbability;
 
@@ -418,7 +493,7 @@ public class SpawnManager : MonoBehaviour
 		Formation selectedFormation = _formations[Random.Range(0, _formations.Count)];
 
 		//II. Determine Horizontal Distance Between Enemies
-		float nextWaveHorizontalDistance = _waveSpawnInterval * BasicEnemy.MoveSpeed;
+		float nextWaveHorizontalDistance = _waveSpawnInterval*BasicEnemy.MoveSpeed;
 		float maxEnemyHorizontalDist = nextWaveHorizontalDistance - _enemySpawnMaxHorzDist;
 		if (selectedFormation.HorizontalShipSpan > 1)
 		{
@@ -443,7 +518,7 @@ public class SpawnManager : MonoBehaviour
 		{
 			int maxIntervalCount = selectedFormation.WaveEntities.Count - 1;
 
-			float minVerticalDistance = (verticalMovementLength - ShipColliderVertSize) / maxIntervalCount;
+			float minVerticalDistance = (verticalMovementLength - ShipColliderVertSize)/maxIntervalCount;
 			if (minVerticalDistance > minEnemyVerticalDist)
 			{
 				minEnemyVerticalDist = minVerticalDistance;
@@ -452,14 +527,12 @@ public class SpawnManager : MonoBehaviour
 		float enemyVerticalDist = Random.Range(minEnemyVerticalDist, _enemySpawnMaxVertDist);
 
 		//IV. Determine Number of Enemies
-		int lowerIntervalCount = Mathf.FloorToInt((verticalMovementLength - ShipColliderVertSize) / enemyVerticalDist);
-		int higherIntervalCount = Mathf.FloorToInt(verticalMovementLength / enemyVerticalDist);
+		int lowerIntervalCount = Mathf.FloorToInt((verticalMovementLength - ShipColliderVertSize)/enemyVerticalDist);
+		int higherIntervalCount = Mathf.FloorToInt(verticalMovementLength/enemyVerticalDist);
 
-		int maxPossibleVerticalIntervalCount = (lowerIntervalCount == higherIntervalCount) && !hasNoExit
-			? lowerIntervalCount
-			: lowerIntervalCount + 1;
+		int maxPossibleVerticalIntervalCount = (lowerIntervalCount == higherIntervalCount) && !hasNoExit ? lowerIntervalCount : lowerIntervalCount + 1;
 
-		float distBetweenFirstAndLastShip = enemyVerticalDist * maxPossibleVerticalIntervalCount;
+		float distBetweenFirstAndLastShip = enemyVerticalDist*maxPossibleVerticalIntervalCount;
 		Assert.IsTrue(!hasNoExit || (distBetweenFirstAndLastShip >= verticalMovementLength - ShipColliderVertSize));
 
 		int maxPossibleShipCount = maxPossibleVerticalIntervalCount + 1;
@@ -477,13 +550,13 @@ public class SpawnManager : MonoBehaviour
 
 		int actualVerticalIntervalCount = enemyCount - 1;
 		float minVerticalStartCoord = _vertMinShipSpawnCoord;
-		float maxVerticalStartCoord = _vertMaxShipSpawnCoord - actualVerticalIntervalCount * enemyVerticalDist;
+		float maxVerticalStartCoord = _vertMaxShipSpawnCoord - actualVerticalIntervalCount*enemyVerticalDist;
 
 		if (maxVerticalStartCoord < minVerticalStartCoord)
 		{
 			//we just went off the line, this is only possible for no exit formations!
 			Assert.IsTrue(hasNoExit);
-			
+
 			//swap these two
 			maxVerticalStartCoord += minVerticalStartCoord;
 			minVerticalStartCoord = maxVerticalStartCoord - minVerticalStartCoord;
@@ -523,12 +596,12 @@ public class SpawnManager : MonoBehaviour
 		int[] enemyTypeSteps = new int[enemyTypeCount];
 		for (int i = 0; i < enemyTypeSteps.Length; ++i)
 		{
-			enemyTypeSteps[i] = Mathf.RoundToInt(i * 100.0f / (enemyTypeSteps.Length - 1));
+			enemyTypeSteps[i] = Mathf.RoundToInt(i*100.0f/(enemyTypeSteps.Length - 1));
 			//enemyTypeSteps = {0, 100} for 2 enemies, {0, 50, 100} for 3 enemies, {0, 33, 67, 100} for 4 enemies, and so on
 		}
 
-		float advancedEnemyPercentage = _difficultyManagerScript.DifficultyCoefs[DifficultyParameter.DpEnemyShipStrength] * stepSize - stepSize * 0.5f;
-		
+		float advancedEnemyPercentage = _difficultyManagerScript.DifficultyCoefs[DifficultyParameter.DpEnemyShipStrength]*stepSize - stepSize*0.5f;
+
 		int advEnemyTypeIndex = 1;
 		float percentageOfStrongerEnemy = 0.0f;
 
@@ -543,11 +616,11 @@ public class SpawnManager : MonoBehaviour
 			}
 			// if we're here, we know which two enemies we're gonna use
 			int previousEnemyTypeStep = enemyTypeSteps[advEnemyTypeIndex - 1];
-			percentageOfStrongerEnemy = (advancedEnemyPercentage - previousEnemyTypeStep) / (currentEnemyTypeStep - previousEnemyTypeStep);
+			percentageOfStrongerEnemy = (advancedEnemyPercentage - previousEnemyTypeStep)/(currentEnemyTypeStep - previousEnemyTypeStep);
 		}
 
-		int minAdvancedEnemyCount = Mathf.FloorToInt(percentageOfStrongerEnemy * selectedFormationEntities.Count);
-		int maxAdvancedEnemyCount = Mathf.CeilToInt(percentageOfStrongerEnemy * selectedFormationEntities.Count);
+		int minAdvancedEnemyCount = Mathf.FloorToInt(percentageOfStrongerEnemy*selectedFormationEntities.Count);
+		int maxAdvancedEnemyCount = Mathf.CeilToInt(percentageOfStrongerEnemy*selectedFormationEntities.Count);
 		int advancedEnemyCount = Random.Range(minAdvancedEnemyCount, maxAdvancedEnemyCount + 1);
 
 		//create ship types list
@@ -591,29 +664,28 @@ public class SpawnManager : MonoBehaviour
 			{
 				Vector2 posDiff = selectedFormationEntities[i].Position - selectedFormationEntities[i - 1].Position;
 
-				int xPosDiff = (int)posDiff.x;
-				int yPosDiff = (int)posDiff.y;
+				int xPosDiff = (int) posDiff.x;
+				int yPosDiff = (int) posDiff.y;
 
 				int xIncrement = xPosDiff != 0 ? Math.Sign(xPosDiff) : 0;
 				int yIncrement = yPosDiff != 0 ? Math.Sign(yPosDiff) : 0;
 
 				Vector3 previousEnemyPos = curEnemyWave.GetLastEnemyPosition();
 
-				enemyPos = new Vector2(previousEnemyPos.x + xIncrement * enemyHorizontalDist, previousEnemyPos.y + yIncrement * enemyVerticalDist);
+				enemyPos = new Vector2(previousEnemyPos.x + xIncrement*enemyHorizontalDist, previousEnemyPos.y + yIncrement*enemyVerticalDist);
 			}
 			else
 			{
-				enemyPos = new Vector2(enemyPrefabScript.HorizontalSpawnCoord + selectedFormationEntities[i].Position.x * maxEnemyHorizontalDist, 
-					Random.Range(minVerticalStartCoord, maxVerticalStartCoord));
+				enemyPos = new Vector2(enemyPrefabScript.HorizontalSpawnCoord + selectedFormationEntities[i].Position.x*maxEnemyHorizontalDist, Random.Range(minVerticalStartCoord, maxVerticalStartCoord));
 			}
 
 			GameObject enemy = Instantiate(enemyPrefab, enemyPos, Quaternion.identity);
 			Assert.IsNotNull(enemy);
-			
+
 			BasicMove basicMoveScript = enemy.GetComponent<BasicMove>();
 			//TODO LATER this might be completely unnecessary, but then again we might need it in the future
 			basicMoveScript.SetMoveDir(selectedFormationEntities[i].MoveDir, false);
-			
+
 			curEnemyWave.AddNewEnemy(enemy);
 			enemy.GetComponent<BasicEnemy>().Initialize(_playerScript, _difficultyManagerScript, curEnemyWave);
 		}
@@ -634,6 +706,12 @@ public class SpawnManager : MonoBehaviour
 		return 0;
 	}
 
+	private void SpawnTutorialHugeEnemy()
+	{
+		//TODO TUTORIAL
+
+	}
+
 	private void SpawnNewHugeEnemy()
 	{
 		Assert.IsTrue(!_hugeEnemyExists); //we only want one huge enemy at once on the screen
@@ -641,7 +719,7 @@ public class SpawnManager : MonoBehaviour
 		ResetVerticalSpawnLimits();
 
 		float randomIntervalCoef = Random.Range(MinHugeEnemySpawnIntervalCoef, MaxHugeEnemySpawnIntervalCoef);
-		_hugeEnemySpawnInterval = randomIntervalCoef / _difficultyManagerScript.GetDifficultyMultiplier(DifficultyParameter.DpHugeEnemySpawnRateIncrease); 
+		_hugeEnemySpawnInterval = randomIntervalCoef/_difficultyManagerScript.GetDifficultyMultiplier(DifficultyParameter.DpHugeEnemySpawnRateIncrease);
 
 		//randomly select a prefab among available options
 		int hugeEnemyIndex = Random.Range(0, HugeEnemyPrefabArray.Length);
@@ -652,7 +730,7 @@ public class SpawnManager : MonoBehaviour
 		Vector3 hugeEnemyPos = new Vector2(hugeEnemyScript.HorizontalSpawnCoord, Random.Range(hugeEnemyScript.VerticalSpawnLimits[0], hugeEnemyScript.VerticalSpawnLimits[1]));
 		GameObject hugeEnemy = Instantiate(hugeEnemyPrefab, hugeEnemyPos, Quaternion.identity);
 		hugeEnemy.GetComponent<HugeEnemy>().Initialize(_playerScript, _difficultyManagerScript);
-		
+
 		float colliderBoundary = hugeEnemyScript.VerticalColliderBoundary;
 		if (Mathf.Sign(colliderBoundary) == 1.0f)
 		{
@@ -668,19 +746,37 @@ public class SpawnManager : MonoBehaviour
 		SetHugeEnemyExists(true);
 	}
 
+	private void SpawnTutorialPowerup(TutorialPowerupItem tutorialPowerupItem)
+	{
+		GameObject selectedPowerup;
+		int powerupIndex = (int) tutorialPowerupItem.TypeOfPowerup;
+		if (powerupIndex >= PosPowerupPrefabArray.Length)
+		{
+			powerupIndex -= PosPowerupPrefabArray.Length;
+			selectedPowerup = NegPowerupPrefabArray[powerupIndex];
+		}
+		else
+		{
+			selectedPowerup = PosPowerupPrefabArray[powerupIndex];
+		}
+		BasicMove powerupMoveScript = selectedPowerup.GetComponent<BasicMove>();
+		Vector3 powerupPos = new Vector2(powerupMoveScript.HorizontalLimits[1], (powerupMoveScript.VerticalLimits[0] + powerupMoveScript.VerticalLimits[1]) * 0.5f);
+		Instantiate(selectedPowerup, powerupPos, Quaternion.identity);
+	}
+
 	private void SpawnNewPowerup(bool isPositive)
 	{
-		float randomIntervalCoef = Random.Range(PowerupSpawnBaseInterval, PowerupSpawnBaseInterval * 2);
+		float randomIntervalCoef = Random.Range(PowerupSpawnBaseInterval, PowerupSpawnBaseInterval*2);
 
 		GameObject[] powerupPrefabArray;
 		if (isPositive)
 		{
-			_posPowerupSpawnInterval = randomIntervalCoef * _difficultyManagerScript.GetDifficultyMultiplier(DifficultyParameter.DpPosPowerupSpawnRateDecrease);
+			_posPowerupSpawnInterval = randomIntervalCoef*_difficultyManagerScript.GetDifficultyMultiplier(DifficultyParameter.DpPosPowerupSpawnRateDecrease);
 			powerupPrefabArray = PosPowerupPrefabArray;
 		}
 		else
 		{
-			_negPowerupSpawnInterval = randomIntervalCoef / _difficultyManagerScript.GetDifficultyMultiplier(DifficultyParameter.DpNegPowerupSpawnRateIncrease);
+			_negPowerupSpawnInterval = randomIntervalCoef/_difficultyManagerScript.GetDifficultyMultiplier(DifficultyParameter.DpNegPowerupSpawnRateIncrease);
 			powerupPrefabArray = NegPowerupPrefabArray;
 		}
 
@@ -701,7 +797,7 @@ public class SpawnManager : MonoBehaviour
 		Vector3 powerupPos = new Vector2(powerupMoveScript.HorizontalLimits[1], Random.Range(powerupMoveScript.VerticalLimits[0], powerupMoveScript.VerticalLimits[1]));
 		Instantiate(selectedPowerup, powerupPos, Quaternion.identity);
 	}
-	
+
 	public void SetHugeEnemyExists(bool newValue)
 	{
 		_hugeEnemyExists = newValue;

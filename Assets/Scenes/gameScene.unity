@@ -258,7 +258,7 @@ GameObject:
   - component: {fileID: 252074022}
   - component: {fileID: 252074025}
   m_Layer: 5
-  m_Name: scoreText
+  m_Name: endgameScoreText
   m_TagString: ScoreText
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -313,12 +313,12 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
-  m_Father: {fileID: 677747053}
-  m_RootOrder: 1
+  m_Father: {fileID: 1223241087}
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 360, y: 300}
+  m_AnchoredPosition: {x: 0, y: 24}
   m_SizeDelta: {x: 600, y: 60}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &252074025
@@ -921,7 +921,6 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1155641084}
-  - {fileID: 252074024}
   m_Father: {fileID: 465535740}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1877,6 +1876,7 @@ RectTransform:
   - {fileID: 970339063}
   - {fileID: 2085377632}
   - {fileID: 510968253}
+  - {fileID: 252074024}
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

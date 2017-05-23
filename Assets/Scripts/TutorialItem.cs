@@ -19,3 +19,25 @@ public class TutorialItem
 		TimeBeforePopupAndPause = timeBeforePopupAndPause;
 	}
 }
+
+public class TutorialWaveItem : TutorialItem
+{
+	public int EnemyCountInWave { get; private set; }
+	public int EnemyTypeIndex { get; private set; }
+
+	public TutorialWaveItem(SpawnType spawnedItemType, float timeBeforeInit, float timeBeforePopupAndPause, int enemyCountInWave, int enemyTypeIndex) : base(spawnedItemType, timeBeforeInit, timeBeforePopupAndPause)
+	{
+		EnemyCountInWave = enemyCountInWave;
+		EnemyTypeIndex = enemyTypeIndex;
+	}
+}
+
+public class TutorialPowerupItem : TutorialItem
+{
+	public PowerupType TypeOfPowerup { get; private set; }
+
+	public TutorialPowerupItem(SpawnType spawnedItemType, float timeBeforeInit, float timeBeforePopupAndPause, PowerupType typeOfPowerup) : base(spawnedItemType, timeBeforeInit, timeBeforePopupAndPause)
+	{
+		TypeOfPowerup = typeOfPowerup;
+	}
+}
