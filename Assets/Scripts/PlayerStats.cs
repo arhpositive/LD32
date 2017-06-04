@@ -55,6 +55,7 @@ public class PlayerStats
 
 	public IEnumerator OnBulletInit(GunType gunType)
 	{
+		//TODO change implementation somehow to remove enums being used as indices
 		++_shotBulletCountsPerGun[(int) gunType];
 		++_totalShotBulletCount;
 		CalculateGunUsageFrequencies();

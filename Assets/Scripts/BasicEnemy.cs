@@ -224,8 +224,8 @@ public class BasicEnemy : MonoBehaviour
 				float ySign = Mathf.Sign(bulletDir.y);
 
 				if (ShootsStraightAtPlayer &&
-					(Mathf.Sign(playerPos.x - referenceTargetPos.x) == xSign || bulletDir.x == 0.0f) && 
-				    (Mathf.Sign(playerPos.y - referenceTargetPos.y) == ySign || bulletDir.y == 0.0f))
+					(Mathf.Approximately(xSign, Mathf.Sign(playerPos.x - referenceTargetPos.x)) || Mathf.Approximately(bulletDir.x, 0.0f)) && 
+				    (Mathf.Approximately(ySign, Mathf.Sign(playerPos.y - referenceTargetPos.y)) || Mathf.Approximately(bulletDir.y, 0.0f)))
 				{
 					bulletDir = playerPos - globalGunPos;
 				}

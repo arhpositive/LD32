@@ -8,14 +8,16 @@
 
 public class TutorialItem
 {
-	public SpawnType SpawnedItemType { get; private set; }
-	public float TimeBeforeInit { get; private set; }
+	public TutorialType TutorialType { get; private set; }
+	public float TimeToWaitAfterEnd { get; private set; }
 	public float TimeBeforePopupAndPause { get; private set; }
+	public string PopupInfoText { get; private set; }
 
-	public TutorialItem(SpawnType spawnedItemType, float timeBeforeInit, float timeBeforePopupAndPause)
+	public TutorialItem(TutorialType tutorialType, float timeToWaitAfterEnd, string popupInfoText = "", float timeBeforePopupAndPause = 0.0f)
 	{
-		SpawnedItemType = spawnedItemType;
-		TimeBeforeInit = timeBeforeInit;
+		TutorialType = tutorialType;
+		TimeToWaitAfterEnd = timeToWaitAfterEnd;
+		PopupInfoText = popupInfoText;
 		TimeBeforePopupAndPause = timeBeforePopupAndPause;
 	}
 }
@@ -25,7 +27,8 @@ public class TutorialWaveItem : TutorialItem
 	public int EnemyCountInWave { get; private set; }
 	public int EnemyTypeIndex { get; private set; }
 
-	public TutorialWaveItem(SpawnType spawnedItemType, float timeBeforeInit, float timeBeforePopupAndPause, int enemyCountInWave, int enemyTypeIndex) : base(spawnedItemType, timeBeforeInit, timeBeforePopupAndPause)
+	public TutorialWaveItem(int enemyCountInWave, int enemyTypeIndex, float timeToWaitAfterEnd, string popupInfoText = "", float timeBeforePopupAndPause = 0.0f) 
+		: base(TutorialType.TtWave, timeToWaitAfterEnd, popupInfoText, timeBeforePopupAndPause)
 	{
 		EnemyCountInWave = enemyCountInWave;
 		EnemyTypeIndex = enemyTypeIndex;
@@ -36,8 +39,20 @@ public class TutorialPowerupItem : TutorialItem
 {
 	public PowerupType TypeOfPowerup { get; private set; }
 
-	public TutorialPowerupItem(SpawnType spawnedItemType, float timeBeforeInit, float timeBeforePopupAndPause, PowerupType typeOfPowerup) : base(spawnedItemType, timeBeforeInit, timeBeforePopupAndPause)
+	public TutorialPowerupItem(PowerupType typeOfPowerup, float timeToWaitAfterEnd, string popupInfoText = "", float timeBeforePopupAndPause = 0.0f) 
+		: base(TutorialType.TtPowerup, timeToWaitAfterEnd, popupInfoText, timeBeforePopupAndPause)
 	{
 		TypeOfPowerup = typeOfPowerup;
+	}
+}
+
+public class TutorialActivateGunItem : TutorialItem
+{
+	public GunType TypeOfGun { get; private set; }
+
+	public TutorialActivateGunItem(GunType typeOfGun, float timeToWaitAfterEnd, string popupInfoText = "", float timeBeforePopupAndPause = 0.0f) : 
+		base(TutorialType.TtActivateGun, timeToWaitAfterEnd, popupInfoText, timeBeforePopupAndPause)
+	{
+		TypeOfGun = typeOfGun;
 	}
 }

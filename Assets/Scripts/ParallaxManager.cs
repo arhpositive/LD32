@@ -37,7 +37,9 @@ public class ParallaxManager : MonoBehaviour
 			Vector2 meteorPos =
 				new Vector2(Random.Range(meteorMoveScript.HorizontalLimits[0], meteorMoveScript.HorizontalLimits[1]),
 					Random.Range(meteorMoveScript.VerticalLimits[0], meteorMoveScript.VerticalLimits[1]));
-			Instantiate(selectedMeteor, meteorPos, Quaternion.identity);
+			GameObject instantiatedMeteor = Instantiate(selectedMeteor, meteorPos, Quaternion.identity);
+			instantiatedMeteor.GetComponent<SpriteRenderer>().color = 
+				Random.ColorHSV(0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.3f, 0.3f);
 		}
 
 		for (int i = 0; i < StarCount; i++)
@@ -49,7 +51,9 @@ public class ParallaxManager : MonoBehaviour
 			Vector2 starPos =
 				new Vector2(Random.Range(starMoveScript.HorizontalLimits[0], starMoveScript.HorizontalLimits[1]),
 					Random.Range(starMoveScript.VerticalLimits[0], starMoveScript.VerticalLimits[1]));
-			Instantiate(selectedStar, starPos, Quaternion.identity);
+			GameObject instantiatedStar = Instantiate(selectedStar, starPos, Quaternion.identity);
+			instantiatedStar.GetComponent<SpriteRenderer>().color = 
+				Random.ColorHSV(0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.3f, 0.3f);
 		}
 	}
 }

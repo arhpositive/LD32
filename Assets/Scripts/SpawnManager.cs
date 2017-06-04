@@ -8,17 +8,20 @@
 
 using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using UnityEngine;
 using UnityEngine.Assertions;
+using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
-public enum SpawnType
+public enum TutorialType
 {
-	StWave,
-	StPowerup,
-	StHugeEnemy,
-	StCount
+	TtNone,
+	TtWave,
+	TtPowerup,
+	TtHugeEnemy,
+	TtActivateGun,
+	TtActivateMovement,
+	TtCount
 }
 
 public struct WaveEntity
@@ -53,6 +56,7 @@ public class SpawnManager : MonoBehaviour
 
 	public GameObject CanvasGameObject;
 	public GameObject CanvasScorePanel;
+	public GameObject TutorialPanel;
 
 	[Header("Prefabs")]
 	public GameObject PlayerPrefab;
@@ -107,7 +111,9 @@ public class SpawnManager : MonoBehaviour
 	private float _tutorialSequenceEventInterval;
 	private bool _popupEventUpcoming;
 	private List<TutorialItem> _tutorialSequenceItems;
+	private List<TutorialItem> _tutorialEventItems; //TODO TUTORIAL event items are triggered in someway, they do not have certain time slots that they appear
 	private bool _tutorialPaused;
+	private Text _tutorialText;
 
 	private void Awake()
 	{
@@ -140,13 +146,20 @@ public class SpawnManager : MonoBehaviour
 		{
 			_canvasRectTransform = CanvasGameObject.GetComponent<RectTransform>();
 		}
-		
+
+		if (TutorialPanel)
+		{
+			//TODO LATER this is taking the first text out of two, not really ideal as it could've been random
+			_tutorialText = TutorialPanel.GetComponentInChildren<Text>();
+		}
+
 		ChangeTutorialSequenceState(LoadLevel.TutorialToggleValue);
 		_popupEventUpcoming = false;
 		_tutorialPaused = false;
 		if (_tutorialSequenceIsActive)
 		{
 			FillTutorialSequence();
+			_playerScript.BeginTutorial();
 		}
 
 		PregeneratePossibleWaves();
@@ -180,18 +193,23 @@ public class SpawnManager : MonoBehaviour
 			{
 				if (Input.GetKeyDown(KeyCode.Space))
 				{
-					//TODO TUTORIAL close popup aswell
-					ResumeTutorialSequence();
+					ResumeTutorialAfterPopup(true);
 				}
 			}
 
 			//if tutorial timer is up, start next tutorial event
 			if (Time.time - _tutorialSequenceLastEventTime > _tutorialSequenceEventInterval)
 			{
-				PrepareNextTutorialEvent();
+				if (_popupEventUpcoming)
+				{
+					_tutorialSequenceLastEventTime = Time.time;
+					PopupAndPause();
+				}
+				else
+				{
+					CheckTutorialEventAccomplishment();
+				}
 			}
-
-
 		}
 		else
 		{
@@ -309,14 +327,39 @@ public class SpawnManager : MonoBehaviour
 
 	private void FillTutorialSequence()
 	{
+		//TODO LATER changing key config should also change tutorial
+		//TODO LATER add controller support tooltips
+
+		//TODO TUTORIAL you might want to repeat a wave unless the player succeeds in doing a certain thing
+
 		_tutorialSequenceItems = new List<TutorialItem>
 		{
-			new TutorialWaveItem(SpawnType.StWave, 10.0f, 5.0f, 2, 0),
-			new TutorialWaveItem(SpawnType.StWave, 10.0f, 5.0f, 2, 1),
-			new TutorialPowerupItem(SpawnType.StPowerup, 10.0f, 5.0f, PowerupType.PtSpeedup),
-			//new TutorialItem(SpawnType.StHugeEnemy, 10.0f, 5.0f) //TODO TUTORIAL
+			new TutorialItem(TutorialType.TtNone, 3.0f),
+			new TutorialItem(TutorialType.TtNone, 3.0f, "Welcome to Dislocator Tutorial."),
+			new TutorialItem(TutorialType.TtActivateMovement, 3.0f, "You can move your spaceship with arrow keys or WASD keys."),
+			new TutorialActivateGunItem(GunType.GtStun, 5.0f, "You can fire your Stun Gun with Z key."),
+			new TutorialWaveItem(2, 0, 10.0f, "This is a basic wave of enemies. Try your stun gun on them.", 1.5f),
+			new TutorialWaveItem(2, 1, 10.0f, "This is a more advanced wave with shooting enemies.", 1.5f),
+			new TutorialPowerupItem(PowerupType.PtSpeedup, 10.0f, "This is an ammo for your Speed-Up Gun. Pick it up by moving through it.", 2f),
+			new TutorialActivateGunItem(GunType.GtSpeedUp, 5.0f, "You can fire your Speed-Up Gun with X key."),
+			new TutorialPowerupItem(PowerupType.PtTeleport, 10.0f, "This is an ammo for your teleport gun. Pick it up by moving through it.", 2f),
+			new TutorialActivateGunItem(GunType.GtTeleport, 5.0f, "You can fire your Teleport Gun with C key."),
+			new TutorialItem(TutorialType.TtHugeEnemy, 10.0f, "This is a huge enemy ship that you can not dislocate. Avoid it and its bullets.", 10.0f),
+			new TutorialItem(TutorialType.TtActivateMovement, 3.0f, "You are now free to move into the right side of the gameplay area."),
+			new TutorialItem(TutorialType.TtNone, 17.0f, "You now have every information necessary to start your first play-through. Good luck!", 1.0f)
 		};
-		_tutorialSequenceLastEventTime = Time.time;
+
+		_tutorialEventItems = new List<TutorialItem>
+		{
+			//TODO TUTORIAL NEXT bullet should trigger this event
+			new TutorialItem(TutorialType.TtNone, 0.0f, "The bullet stopped the engine for a short while, pushing your enemy back."),
+		};
+
+		/* TODO TUTORIAL NEXT passing a condition
+		public void Text(Action action, Func<Boolean> condition)
+		{
+			if (condition()) action();
+		}*/
 
 		SwitchToNextItemInTutorial();
 	}
@@ -326,8 +369,26 @@ public class SpawnManager : MonoBehaviour
 		if (_tutorialSequenceItems.Count > 0)
 		{
 			//prepare for next event
-			print("Next event: " + _tutorialSequenceItems[0].SpawnedItemType + " " + _tutorialSequenceItems[0].TimeBeforeInit + " " + _tutorialSequenceItems[0].TimeBeforePopupAndPause);
-			_tutorialSequenceEventInterval = _tutorialSequenceItems[0].TimeBeforeInit;
+			print("Next event: " + _tutorialSequenceItems[0].TutorialType + " " + _tutorialSequenceItems[0].TimeToWaitAfterEnd + " " + _tutorialSequenceItems[0].TimeBeforePopupAndPause);
+
+			_tutorialSequenceLastEventTime = Time.time;
+
+			SpawnNextTutorialItem();
+
+			float timeToPopup = _tutorialSequenceItems[0].TimeBeforePopupAndPause;
+			_popupEventUpcoming = true;
+
+			if (Mathf.Approximately(timeToPopup, 0.0f))
+			{
+				print("Popup now!");
+				PopupAndPause();
+			}
+			else
+			{
+				//switch to popup event
+				print("Popup in " + timeToPopup + " seconds.");
+				_tutorialSequenceEventInterval = timeToPopup;
+			}
 		}
 		else
 		{
@@ -339,10 +400,15 @@ public class SpawnManager : MonoBehaviour
 	private void ChangeTutorialSequenceState(bool newState)
 	{
 		_tutorialSequenceIsActive = newState;
-		_difficultyManagerScript.ChangeTutorialSequenceState(_tutorialSequenceIsActive);
+		_difficultyManagerScript.ChangeTutorialSequenceState(newState);
 
 		if (!_tutorialSequenceIsActive)
 		{
+			//TODO TUTORIAL everything related to the end of the tutorial
+
+			//reset weapons, movement limits, etc.
+			_playerScript.EndTutorial();
+
 			//also, reset all timers in spawn manager
 			_previousWaveSpawnTime = Time.time;
 			_previousHugeEnemySpawnTime = Time.time;
@@ -351,47 +417,43 @@ public class SpawnManager : MonoBehaviour
 		}
 	}
 
-	private void PrepareNextTutorialEvent()
+	private void PopupAndPause()
 	{
-		_tutorialSequenceLastEventTime = Time.time;
+		string popupText = _tutorialSequenceItems[0].PopupInfoText;
 
-		//remove finished tutorial event from list
-		if (_popupEventUpcoming)
+		if (popupText == "")
 		{
-			PopupAndPause();
+			ResumeTutorialAfterPopup(false);
 		}
 		else
 		{
-			SpawnNextTutorialItem();
-
-			//switch to popup event
-			print("Popup in " + _tutorialSequenceItems[0].TimeBeforePopupAndPause + " seconds.");
-			_tutorialSequenceEventInterval = _tutorialSequenceItems[0].TimeBeforePopupAndPause;
-			_popupEventUpcoming = true;
+			Time.timeScale = 0.0f; //pause game
+			_tutorialPaused = true;
+			_tutorialText.text = _tutorialSequenceItems[0].PopupInfoText;
+			TutorialPanel.SetActive(true);
 		}
-	}
-
-	private void PopupAndPause()
-	{
-		Time.timeScale = 0.0f; //pause game
-		_tutorialPaused = true;
-
-		//TODO TUTORIAL display popup and write text
 	}
 
 	private void SpawnNextTutorialItem()
 	{
-		switch (_tutorialSequenceItems[0].SpawnedItemType)
+		switch (_tutorialSequenceItems[0].TutorialType)
 		{
-			case SpawnType.StWave:
+			case TutorialType.TtNone:
+				break;
+			case TutorialType.TtWave:
 				SpawnTutorialWave((TutorialWaveItem)_tutorialSequenceItems[0]); 
 				break;
-			case SpawnType.StPowerup:
+			case TutorialType.TtPowerup:
 				SpawnTutorialPowerup((TutorialPowerupItem)_tutorialSequenceItems[0]);
 				break;
-			case SpawnType.StHugeEnemy:
-				//TODO TUTORIAL
-
+			case TutorialType.TtHugeEnemy:
+				SpawnTutorialHugeEnemy();
+				break;
+			case TutorialType.TtActivateMovement:
+				_playerScript.ActivateMovement();
+				break;
+			case TutorialType.TtActivateGun:
+				_playerScript.ActivateGun(((TutorialActivateGunItem)_tutorialSequenceItems[0]).TypeOfGun);
 				break;
 			default:
 				Assert.IsTrue(false);
@@ -399,29 +461,49 @@ public class SpawnManager : MonoBehaviour
 		}
 	}
 
-	private void ResumeTutorialSequence()
+	private void ResumeTutorialAfterPopup(bool popupTriggered)
 	{
-		Time.timeScale = GameConstants.CurrentTimeScale; //resume game operation
-		_tutorialPaused = false;
-
-		//remove current event that we've just finished
-		_tutorialSequenceItems.RemoveAt(0);
-		SwitchToNextItemInTutorial();
+		if (popupTriggered)
+		{
+			Time.timeScale = GameConstants.CurrentTimeScale; //resume game operation
+			_tutorialPaused = false;
+			TutorialPanel.SetActive(false);
+		}
+		
+		_tutorialSequenceEventInterval = _tutorialSequenceItems[0].TimeToWaitAfterEnd;
 		_popupEventUpcoming = false;
+	}
+
+	private void CheckTutorialEventAccomplishment() //TODO TUTORIAL rename
+	{
+		bool canBeRemoved = true;
+		//TODO TUTORIAL NEXT check if we need trigger here
+		/*if (_tutorialSequenceItems[0].NeedsTrigger)
+		{
+			canBeRemoved = _tutorialSequenceItems[0].CheckTrigger();
+		}*/
+
+		if (canBeRemoved)
+		{
+			//remove current event that we've just finished
+			_tutorialSequenceItems.RemoveAt(0);
+		}
+
+		SwitchToNextItemInTutorial();
 	}
 	
 	private void SpawnTutorialWave(TutorialWaveItem tutorialWaveItem)
 	{
 		//TODO LATER obvious duplications exist, what to do about them?
-		//TODO TUTORIAL spawn a wave as simple as possible
-		//I. Pick a random formation type
-		Formation selectedFormation = _formations[Random.Range(0, _formations.Count)];
+
+		float minVerticalStartCoord = _vertMinShipSpawnCoord;
+		float maxVerticalStartCoord = _vertMaxShipSpawnCoord - (tutorialWaveItem.EnemyCountInWave - 1) * _enemySpawnMaxVertDist;
 
 		//V. Select Enemies From Formation List
 		List<WaveEntity> selectedFormationEntities = new List<WaveEntity>();
 		for (int i = 0; i < tutorialWaveItem.EnemyCountInWave; ++i)
 		{
-			selectedFormationEntities.Add(selectedFormation.WaveEntities[i]);
+			selectedFormationEntities.Add(_formations[0].WaveEntities[i]);
 		}
 		selectedFormationEntities.Sort(FormationComparison);
 
@@ -455,7 +537,7 @@ public class SpawnManager : MonoBehaviour
 			}
 			else
 			{
-				enemyPos = new Vector2(enemyPrefabScript.HorizontalSpawnCoord + selectedFormationEntities[i].Position.x * _enemySpawnMaxHorzDist, (_vertMinShipSpawnCoord + _vertMaxShipSpawnCoord) * 0.5f);
+				enemyPos = new Vector2(enemyPrefabScript.HorizontalSpawnCoord + selectedFormationEntities[i].Position.x * _enemySpawnMaxHorzDist, Random.Range(minVerticalStartCoord, maxVerticalStartCoord));
 			}
 
 			GameObject enemy = Instantiate(enemyPrefab, enemyPos, Quaternion.identity);
@@ -564,11 +646,11 @@ public class SpawnManager : MonoBehaviour
 
 			if (_hugeEnemyExists)
 			{
-				if (_vertMinShipSpawnCoord != Player.MinVerticalMovementLimit)
+				if (!Mathf.Approximately(_vertMinShipSpawnCoord, Player.MinVerticalMovementLimit))
 				{
 					minVerticalStartCoord = maxVerticalStartCoord;
 				}
-				else if (_vertMaxShipSpawnCoord != Player.MaxVerticalMovementLimit)
+				else if (!Mathf.Approximately(_vertMaxShipSpawnCoord, Player.MaxVerticalMovementLimit))
 				{
 					maxVerticalStartCoord = minVerticalStartCoord;
 				}
@@ -708,8 +790,10 @@ public class SpawnManager : MonoBehaviour
 
 	private void SpawnTutorialHugeEnemy()
 	{
-		//TODO TUTORIAL
-
+		GameObject hugeEnemyPrefab = HugeEnemyPrefabArray[0];
+		HugeEnemy hugeEnemyScript = hugeEnemyPrefab.GetComponent<HugeEnemy>();
+		Vector3 hugeEnemyPos = new Vector2(hugeEnemyScript.HorizontalSpawnCoord, (hugeEnemyScript.VerticalSpawnLimits[0] + hugeEnemyScript.VerticalSpawnLimits[1]) * 0.5f);
+		SpawnHugeEnemyOnPosition(hugeEnemyPrefab, hugeEnemyScript, hugeEnemyPos);
 	}
 
 	private void SpawnNewHugeEnemy()
@@ -728,19 +812,24 @@ public class SpawnManager : MonoBehaviour
 
 		//TODO DIFFICULTY a new difficulty parameter could manage how big a portion of play area a huge enemy obstructs
 		Vector3 hugeEnemyPos = new Vector2(hugeEnemyScript.HorizontalSpawnCoord, Random.Range(hugeEnemyScript.VerticalSpawnLimits[0], hugeEnemyScript.VerticalSpawnLimits[1]));
-		GameObject hugeEnemy = Instantiate(hugeEnemyPrefab, hugeEnemyPos, Quaternion.identity);
+		SpawnHugeEnemyOnPosition(hugeEnemyPrefab, hugeEnemyScript, hugeEnemyPos);
+	}
+
+	private void SpawnHugeEnemyOnPosition(GameObject hugeEnemyPrefab, HugeEnemy hugeEnemyScript, Vector2 spawnPos)
+	{
+		GameObject hugeEnemy = Instantiate(hugeEnemyPrefab, spawnPos, Quaternion.identity);
 		hugeEnemy.GetComponent<HugeEnemy>().Initialize(_playerScript, _difficultyManagerScript);
 
 		float colliderBoundary = hugeEnemyScript.VerticalColliderBoundary;
-		if (Mathf.Sign(colliderBoundary) == 1.0f)
+		if (Mathf.Approximately(Mathf.Sign(colliderBoundary), 1.0f))
 		{
 			//positive collider boundary means we're dealing with a huge enemy below, hence we should limit vMin
-			_vertMinShipSpawnCoord = hugeEnemyPos.y + colliderBoundary + ShipColliderVertSize + 0.01f;
+			_vertMinShipSpawnCoord = spawnPos.y + colliderBoundary + ShipColliderVertSize + 0.01f;
 		}
 		else
 		{
 			//negative collider boundary = huge enemy above = vMax
-			_vertMaxShipSpawnCoord = hugeEnemyPos.y + colliderBoundary - ShipColliderVertSize - 0.01f;
+			_vertMaxShipSpawnCoord = spawnPos.y + colliderBoundary - ShipColliderVertSize - 0.01f;
 		}
 
 		SetHugeEnemyExists(true);
@@ -761,7 +850,8 @@ public class SpawnManager : MonoBehaviour
 		}
 		BasicMove powerupMoveScript = selectedPowerup.GetComponent<BasicMove>();
 		Vector3 powerupPos = new Vector2(powerupMoveScript.HorizontalLimits[1], (powerupMoveScript.VerticalLimits[0] + powerupMoveScript.VerticalLimits[1]) * 0.5f);
-		Instantiate(selectedPowerup, powerupPos, Quaternion.identity);
+		GameObject instantiatedPowerup = Instantiate(selectedPowerup, powerupPos, Quaternion.identity);
+		instantiatedPowerup.GetComponent<BasicMove>().SetMoveDir(Vector2.left, false);
 	}
 
 	private void SpawnNewPowerup(bool isPositive)

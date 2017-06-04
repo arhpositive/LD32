@@ -47,6 +47,7 @@ public class Bullet : MonoBehaviour
 
 		if (other.gameObject.tag == "Enemy")
 		{
+			//TODO TUTORIAL NEXT this is where a bullet collides with the enemy
 			BasicEnemy enemyScript = other.gameObject.GetComponent<BasicEnemy>();
 
 			switch (CurrentBulletType)

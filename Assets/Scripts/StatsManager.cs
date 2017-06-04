@@ -27,12 +27,6 @@ public class StatsManager : MonoBehaviour
 			new PlayerStats(false)
 		};
 	}
-	
-	// Update is called once per frame
-	void Update ()
-	{
-		
-	}
 
 	public void StartFireGunCoroutine(GunType typeOfGun)
 	{

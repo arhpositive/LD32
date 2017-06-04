@@ -6,12 +6,13 @@
  * Handles player movement and actions via given input
  */
 
-using System.Collections;
+using System;
 using System.Collections.Generic;
 using CnControls;
 using ui;
 using UnityEngine;
 using UnityEngine.Assertions;
+using Random = UnityEngine.Random;
 
 public enum GunType
 {
@@ -21,23 +22,22 @@ public enum GunType
 	GtCount
 }
 
-public struct Gun
+public class Gun
 {
-	public GunType TypeOfGun { get; private set; }
 	public GameObject BulletPrefab { get; private set; }
 	public float Cooldown { get; private set; }
 	public float LastFireTime;
 	public int AmmoCount;
 	public GameObject LastBullet;
+	public bool CanBeFired;
 
-	public Gun(GunType typeOfGun, GameObject bulletPrefab, float cooldown, int ammoCount)
-		: this()
+	public Gun(GameObject bulletPrefab, float cooldown, int ammoCount)
 	{
-		TypeOfGun = typeOfGun;
 		BulletPrefab = bulletPrefab;
 		Cooldown = cooldown;
 		AmmoCount = ammoCount;
 		LastFireTime = -cooldown;
+		CanBeFired = true;
 	}
 }
 
@@ -71,6 +71,8 @@ public class Player : MonoBehaviour
 	private const float ShortTermHealthChangeInterval = 10.0f;
 	private const float LongTermHealthChangeInterval = 30.0f;
 
+	private float _currentMaxHorizontalMovementLimit;
+
 	private bool _isInvulnerable;
 	private bool _isShielded;
 
@@ -91,9 +93,8 @@ public class Player : MonoBehaviour
 	private SpriteRenderer _spriteRenderer;
 	private SpriteRenderer[] _childRenderers;
 
-	private Gun _stunGun;
-	private Gun _speedUpGun;
-	private Gun _teleportGun;
+	private Dictionary<GunType, Gun> _guns;
+	private bool _canDoMovement;
 
 	private void Awake()
 	{
@@ -102,6 +103,15 @@ public class Player : MonoBehaviour
 		_spawnManagerScript = Camera.main.GetComponent<SpawnManager>();
 		_statsManagerScript = Camera.main.GetComponent<StatsManager>();
 		_endGameScoreText = GameObject.FindGameObjectWithTag("ScoreText").GetComponent<RefreshEndScoreText>();
+
+		_guns = new Dictionary<GunType, Gun>
+		{
+			{GunType.GtStun, new Gun(StunBulletPrefab, 0.3f, -1)},
+			{GunType.GtSpeedUp, new Gun(SpeedUpBulletPrefab, 5.0f, 3)},
+			{GunType.GtTeleport, new Gun(TeleportBulletPrefab, 10.0f, 10)}
+		};
+		_canDoMovement = true;
+		_currentMaxHorizontalMovementLimit = MaxHorizontalMovementLimit;
 	}
 
 	private void Start()
@@ -112,10 +122,6 @@ public class Player : MonoBehaviour
 		_isShielded = false;
 		_isInvulnerable = true;
 		_invulnerabilityStartTime = Time.time;
-
-		_stunGun = new Gun(GunType.GtStun, StunBulletPrefab, 0.3f, -1);
-		_speedUpGun = new Gun(GunType.GtSpeedUp, SpeedUpBulletPrefab, 5.0f, 3);
-		_teleportGun = new Gun(GunType.GtTeleport, TeleportBulletPrefab, 10.0f, 10);
 
 		_basicObjectScript = gameObject.GetComponent<BasicObject>();
 		
@@ -196,37 +202,41 @@ public class Player : MonoBehaviour
 			speedUpInputGiven = Input.GetKeyDown(KeyCode.X);
 			teleportInputGiven = Input.GetKeyDown(KeyCode.C);
 		}
-
-		//TODO make gun a class?
-		if (fireInputGiven && Time.time - _stunGun.LastFireTime > _stunGun.Cooldown)
+		
+		if (fireInputGiven && _guns[GunType.GtStun].CanBeFired && Time.time - _guns[GunType.GtStun].LastFireTime > _guns[GunType.GtStun].Cooldown)
 		{
-			FireStunGun();
-			_statsManagerScript.StartFireGunCoroutine(_stunGun.TypeOfGun);
+			FireGun(GunType.GtStun);
+			_statsManagerScript.StartFireGunCoroutine(GunType.GtStun);
 		}
 
-		if (speedUpInputGiven &&
-			Time.time - _speedUpGun.LastFireTime > _speedUpGun.Cooldown &&
-			_speedUpGun.AmmoCount > 0)
+		if (speedUpInputGiven && _guns[GunType.GtSpeedUp].CanBeFired &&
+			Time.time - _guns[GunType.GtSpeedUp].LastFireTime > _guns[GunType.GtSpeedUp].Cooldown &&
+			_guns[GunType.GtSpeedUp].AmmoCount > 0)
 		{
-			FireSpeedUpGun();
-			_statsManagerScript.StartFireGunCoroutine(_speedUpGun.TypeOfGun);
+			FireGun(GunType.GtSpeedUp);
+			_statsManagerScript.StartFireGunCoroutine(GunType.GtSpeedUp);
 		}
 
 		if (teleportInputGiven)
 		{
-			if (_teleportGun.LastBullet)
+			if (_guns[GunType.GtTeleport].CanBeFired)
 			{
-				TriggerTeleportBullet();
-			}
-			else if (Time.time - _teleportGun.LastFireTime > _teleportGun.Cooldown &&
-					 _teleportGun.AmmoCount > 0)
-			{
-				FireTeleportGun();
-				_statsManagerScript.StartFireGunCoroutine(_teleportGun.TypeOfGun);
+				if (_guns[GunType.GtTeleport].LastBullet)
+				{
+					TriggerTeleportBullet();
+				}
+				else if (Time.time - _guns[GunType.GtTeleport].LastFireTime > _guns[GunType.GtTeleport].Cooldown &&
+						 _guns[GunType.GtTeleport].AmmoCount > 0)
+				{
+					FireGun(GunType.GtTeleport);
+					_statsManagerScript.StartFireGunCoroutine(GunType.GtTeleport);
+				}
 			}
 		}
-
-		DoMovement();
+		if (_canDoMovement)
+		{
+			DoMovement();
+		}
 	}
 
 	private Vector2 GetMoveDirFromInput()
@@ -265,7 +275,7 @@ public class Player : MonoBehaviour
 		transform.Translate(playerMovement, Space.World);
 
 		Vector3 clampedPlayerPosition = 
-			new Vector3(Mathf.Clamp(transform.position.x, MinHorizontalMovementLimit, MaxHorizontalMovementLimit), 
+			new Vector3(Mathf.Clamp(transform.position.x, MinHorizontalMovementLimit, _currentMaxHorizontalMovementLimit), 
 			Mathf.Clamp(transform.position.y, MinVerticalMovementLimit, MaxVerticalMovementLimit), 
 			transform.position.z);
 
@@ -346,7 +356,7 @@ public class Player : MonoBehaviour
 	public void TriggerSpeedUpPickup()
 	{
 		EventLogger.PrintToLog("Player Gains Speedup Powerup");
-		_speedUpGun.AmmoCount++;
+		_guns[GunType.GtSpeedUp].AmmoCount++;
 
 		_statsManagerScript.PickupPowerupCoroutine(PowerupType.PtSpeedup);
 	}
@@ -378,53 +388,69 @@ public class Player : MonoBehaviour
 	public void TriggerTeleportPickup()
 	{
 		EventLogger.PrintToLog("Player Gains Teleport Powerup");
-		_teleportGun.AmmoCount++;
+		_guns[GunType.GtTeleport].AmmoCount++;
 
 		_statsManagerScript.PickupPowerupCoroutine(PowerupType.PtTeleport);
 	}
 
 	public float GetGunAmmo(GunType gunType)
 	{
-		switch (gunType)
-		{
-			case GunType.GtStun:
-				return _stunGun.AmmoCount;
-			case GunType.GtSpeedUp:
-				return _speedUpGun.AmmoCount;
-			case GunType.GtTeleport:
-				return _teleportGun.AmmoCount;
-			default:
-				Assert.IsTrue(false); // gun is not added to the above list
-				return 0.0f;
-		}
+		Assert.IsTrue(_guns.ContainsKey(gunType));
+		return _guns[gunType].AmmoCount;
 	}
 
 	public float GetGunCooldownPercentage(GunType gunType)
 	{
-		float gunCooldown;
-		float lastFireTime;
-		switch (gunType)
-		{
-			case GunType.GtStun:
-				gunCooldown = _stunGun.Cooldown;
-				lastFireTime = _stunGun.LastFireTime;
-				break;
-			case GunType.GtSpeedUp:
-				gunCooldown = _speedUpGun.Cooldown;
-				lastFireTime = _speedUpGun.LastFireTime;
-				break;
-			case GunType.GtTeleport:
-				gunCooldown = _teleportGun.Cooldown;
-				lastFireTime = _teleportGun.LastFireTime;
-				break;
-			default:
-				Assert.IsTrue(false); // gun is not added to the above list
-				gunCooldown = 0.0f;
-				lastFireTime = 0.0f;
-				break;
-		}
-
+		Assert.IsTrue(_guns.ContainsKey(gunType));
+		float gunCooldown = _guns[gunType].Cooldown;
+		float lastFireTime = _guns[gunType].LastFireTime;
 		return (Time.time - lastFireTime)/gunCooldown;
+	}
+
+	public void BeginTutorial()
+	{
+		_canDoMovement = false;
+		DeactivateAllGuns(); //TODO TUTORIAL undo deactivating guns step by step during tutorial
+		SetCurrentMaxHorizontalMovementLimit((MaxHorizontalMovementLimit + MinHorizontalMovementLimit) * 0.5f);
+	}
+
+	public void EndTutorial()
+	{
+		//TODO TUTORIAL anything?
+	}
+
+	public void ActivateMovement()
+	{
+		if (!_canDoMovement)
+		{
+			//first call will enable movement
+			_canDoMovement = true;
+		}
+		else
+		{
+			//second call will set movement limit as whole screen
+			SetCurrentMaxHorizontalMovementLimit(MaxHorizontalMovementLimit);
+		}
+	}
+
+	public void ActivateGun(GunType gunType)
+	{
+		Assert.IsTrue(_guns.ContainsKey(gunType));
+		_guns[gunType].CanBeFired = true;
+	}
+
+	private void DeactivateAllGuns()
+	{
+		//TODO TUTORIAL potentially, we might want to reset gun ammo counts here!
+		foreach (var element in _guns)
+		{
+			element.Value.CanBeFired = false;
+		}
+	}
+
+	private void SetCurrentMaxHorizontalMovementLimit(float newMaxLimit)
+	{
+		_currentMaxHorizontalMovementLimit = newMaxLimit;
 	}
 
 	private void SetChildRenderers(bool value)
@@ -445,16 +471,35 @@ public class Player : MonoBehaviour
 		}
 	}
 
+	private void FireGun(GunType gunType)
+	{
+		switch (gunType)
+		{
+			case GunType.GtStun:
+				FireStunGun();
+				break;
+			case GunType.GtSpeedUp:
+				FireSpeedUpGun();
+				break;
+			case GunType.GtTeleport:
+				FireTeleportGun();
+				break;
+			default:
+				//TODO LATER perhaps you'll learn how to catch an exception properly
+				throw new ArgumentOutOfRangeException("gunType", gunType, null);
+		}
+	}
+
 	private void FireStunGun()
 	{
-		_stunGun.LastFireTime = Time.time;
+		_guns[GunType.GtStun].LastFireTime = Time.time;
 
 		for (int i = 0; i < transform.childCount; i++)
 		{
 			if (transform.GetChild(i).CompareTag("BulletStart"))
 			{
 				Vector3 bulletStartPoint = transform.GetChild(i).position;
-				Instantiate(_stunGun.BulletPrefab, bulletStartPoint, Quaternion.identity);
+				Instantiate(_guns[GunType.GtStun].BulletPrefab, bulletStartPoint, Quaternion.identity);
 				AudioSource.PlayClipAtPoint(FireStunGunClip, transform.GetChild(i).position);
 			}
 		}
@@ -462,15 +507,15 @@ public class Player : MonoBehaviour
 
 	private void FireSpeedUpGun()
 	{
-		_speedUpGun.LastFireTime = Time.time;
+		_guns[GunType.GtSpeedUp].LastFireTime = Time.time;
 
 		for (int i = 0; i < transform.childCount; i++)
 		{
 			if (transform.GetChild(i).CompareTag("BulletStart"))
 			{
 				Vector3 bulletStartPoint = transform.GetChild(i).position;
-				Instantiate(_speedUpGun.BulletPrefab, bulletStartPoint, Quaternion.identity);
-				_speedUpGun.AmmoCount--;
+				Instantiate(_guns[GunType.GtSpeedUp].BulletPrefab, bulletStartPoint, Quaternion.identity);
+				_guns[GunType.GtSpeedUp].AmmoCount--;
 				AudioSource.PlayClipAtPoint(FireSpeedUpGunClip, bulletStartPoint);
 			}
 		}
@@ -478,14 +523,14 @@ public class Player : MonoBehaviour
 
 	private void FireTeleportGun()
 	{
-		_teleportGun.LastFireTime = Time.time;
+		_guns[GunType.GtTeleport].LastFireTime = Time.time;
 		for (int i = 0; i < transform.childCount; i++)
 		{
 			if (transform.GetChild(i).CompareTag("BulletStart"))
 			{
 				Vector3 bulletStartPoint = transform.GetChild(i).position;
-				_teleportGun.LastBullet = Instantiate(_teleportGun.BulletPrefab, bulletStartPoint, Quaternion.identity);
-				_teleportGun.AmmoCount--;
+				_guns[GunType.GtTeleport].LastBullet = Instantiate(_guns[GunType.GtTeleport].BulletPrefab, bulletStartPoint, Quaternion.identity);
+				_guns[GunType.GtTeleport].AmmoCount--;
 				AudioSource.PlayClipAtPoint(FireTeleportGunClip, bulletStartPoint);
 			}
 		}
@@ -493,7 +538,7 @@ public class Player : MonoBehaviour
 
 	private void TriggerTeleportBullet()
 	{
-		if (_teleportGun.LastBullet)
+		if (_guns[GunType.GtTeleport].LastBullet)
 		{
 			EventLogger.PrintToLog("Player Triggers Teleport");
 
@@ -504,8 +549,8 @@ public class Player : MonoBehaviour
 				disappearEffect.GetComponent<SpriteRenderer>().material.color = gameObject.GetComponent<SpriteRenderer>().color;
 			}
 
-			transform.position = _teleportGun.LastBullet.transform.position;
-			AudioSource.PlayClipAtPoint(_teleportGun.LastBullet.GetComponent<Bullet>().BulletHitClip, transform.position);
+			transform.position = _guns[GunType.GtTeleport].LastBullet.transform.position;
+			AudioSource.PlayClipAtPoint(_guns[GunType.GtTeleport].LastBullet.GetComponent<Bullet>().BulletHitClip, transform.position);
 
 			if (TeleportAppearPrefab != null)
 			{
@@ -514,8 +559,8 @@ public class Player : MonoBehaviour
 				appearEffect.GetComponent<SpriteRenderer>().material.color = gameObject.GetComponent<SpriteRenderer>().color;
 			}
 
-			Destroy(_teleportGun.LastBullet.gameObject);
-			_teleportGun.LastBullet = null;
+			Destroy(_guns[GunType.GtTeleport].LastBullet.gameObject);
+			_guns[GunType.GtTeleport].LastBullet = null;
 		}
 	}
 }
