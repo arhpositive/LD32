@@ -68,8 +68,9 @@ public class Player : MonoBehaviour
 	public int PlayerHealth { get; private set; }
 	public bool IsDead { get; private set; }
 
-	private const float ShortTermHealthChangeInterval = 10.0f;
-	private const float LongTermHealthChangeInterval = 30.0f;
+    //TODO LATER remove if unnecessary
+	//private const float ShortTermHealthChangeInterval = 10.0f;
+	//private const float LongTermHealthChangeInterval = 30.0f;
 
 	private float _currentMaxHorizontalMovementLimit;
 
@@ -128,7 +129,7 @@ public class Player : MonoBehaviour
 		//find shield object in children
 		foreach (Transform tr in transform)
 		{
-			if (tr.tag == "Shield")
+			if (tr.CompareTag("Shield"))
 			{
 				_playerShield = tr.gameObject;
 				break;

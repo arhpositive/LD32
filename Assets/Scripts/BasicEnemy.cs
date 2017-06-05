@@ -38,7 +38,6 @@ public class BasicEnemy : MonoBehaviour
 	private BasicObject _basicObjectScript;
 	private EnemyWave _assignedEnemyWave;
 	
-	private List<Vector3> _gunPositions;
 	private List<Transform> _gunTransforms; 
 	private bool _isStunned;
 	private float _lastStunTime;
@@ -287,15 +286,6 @@ public class BasicEnemy : MonoBehaviour
 			if (transform.GetChild(i).CompareTag("BulletStart"))
 			{
 				_gunTransforms.Add((transform.GetChild(i).transform));
-			}
-		}
-
-		_gunPositions = new List<Vector3>();
-		for (int i = 0; i < transform.childCount; i++)
-		{
-			if (transform.GetChild(i).CompareTag("BulletStart"))
-			{
-				_gunPositions.Add(transform.GetChild(i).localPosition);
 			}
 		}
 	}

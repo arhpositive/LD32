@@ -141,16 +141,13 @@ public class DifficultyManager : MonoBehaviour
 
 	private void RandomDiffAdjustment(bool isIncrement)
 	{
-		DifficultyParameter selectedDifficultyParameter = (DifficultyParameter)Random.Range((int)DifficultyParameter.DpShipFireRateIncrease, (int)DifficultyParameter.DpCount);
-		int oldValue = DifficultyCoefs[selectedDifficultyParameter];
-
 		//TODO remove below code after ML is implemented
 		//start
 		int numRetries = 3;
 		for (int i = 0; i < numRetries; ++i)
 		{
-			selectedDifficultyParameter = (DifficultyParameter)Random.Range((int)DifficultyParameter.DpShipFireRateIncrease, (int)DifficultyParameter.DpCount);
-			oldValue = DifficultyCoefs[selectedDifficultyParameter];
+		    DifficultyParameter selectedDifficultyParameter = (DifficultyParameter)Random.Range((int)DifficultyParameter.DpShipFireRateIncrease, (int)DifficultyParameter.DpCount);
+		    int oldValue = DifficultyCoefs[selectedDifficultyParameter];
 
 			if (isIncrement ? oldValue < GameConstants.MaxDifficulty : oldValue > GameConstants.MinDifficulty)
 			{

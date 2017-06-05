@@ -6,8 +6,6 @@
  * Handles parallax spawn in the game
  */
 
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class ParallaxManager : MonoBehaviour
