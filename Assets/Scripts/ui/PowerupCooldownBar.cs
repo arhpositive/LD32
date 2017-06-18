@@ -23,7 +23,7 @@ namespace ui
 		// Update is called once per frame
 		void Update()
 		{
-			_powerupCooldownSlider.value = _playerScript ? _playerScript.GetGunCooldownPercentage(GunKind) : 0.0f;
+			_powerupCooldownSlider.value = _playerScript ? _playerScript.GetGun(GunKind).GetCooldownPercentage() : 0.0f;
 		}
 	}
 }

@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.UI;
@@ -23,12 +24,14 @@ public class EnemyWave
 	private RectTransform _waveScoreIndicatorTransform;
 	private float _initialWidth;
 	private bool _enemyCountChanged;
-	private bool _enemyDisplacementChanged;
-	private bool _setForDestruction;
+	
 	private float _waveScore;
 	private int _waveMultiplier;
 
-	public EnemyWave(LineRenderer waveLineRenderer)
+    public bool EnemyDisplacementChanged { get; private set; }
+    public bool SetForDestruction { get; private set; }
+
+    public EnemyWave(LineRenderer waveLineRenderer)
 	{
 		_enemyList = new List<GameObject>();
 		_waveLineRenderer = waveLineRenderer;
@@ -36,11 +39,11 @@ public class EnemyWave
 		_enemyScripts = new List<BasicEnemy>();
 		_farthestEnemyIndex = 0;
 		_enemyCountChanged = false;
-		_enemyDisplacementChanged = false;
-		_setForDestruction = false;
+		EnemyDisplacementChanged = false;
+		SetForDestruction = false;
 
 		_waveScore = 0.0f;
-		_waveMultiplier = 1;
+		_waveMultiplier = 0;
 	}
 
 	public void Initialize(Player playerScript, RectTransform mainCanvasTransform, GameObject waveScoreIndicator)
@@ -51,11 +54,6 @@ public class EnemyWave
 		_waveScoreIndicator = waveScoreIndicator;
 		_waveScoreText = _waveScoreIndicator.GetComponent<Text>();
 		_waveScoreIndicatorTransform = _waveScoreIndicator.GetComponent<RectTransform>();
-	}
-
-	public bool IsSetForDestruction()
-	{
-		return _setForDestruction;
 	}
 
 	public void AddNewEnemy(GameObject newEnemy)
@@ -76,12 +74,12 @@ public class EnemyWave
 			_waveLineRenderer.widthCurve.AddKey(keyTime, i % 2 == 0 ? _initialWidth : 0.0f);
 		}
 		_enemyCountChanged = true;
-		_enemyDisplacementChanged = true;
+		EnemyDisplacementChanged = true;
 	}
 
 	public void Update()
 	{
-		if (_setForDestruction)
+		if (SetForDestruction)
 		{
 			return;
 		}
@@ -105,11 +103,11 @@ public class EnemyWave
 					_statsManagerScript.OnWaveDestruction(baseWaveScore);
 				}
 				Object.Destroy(_waveScoreIndicator);
-				_setForDestruction = true;
+				SetForDestruction = true;
 				return;
 			}
 			
-			_enemyDisplacementChanged = true;
+			EnemyDisplacementChanged = true;
 			_enemyCountChanged = false;
 		}
 
@@ -127,7 +125,7 @@ public class EnemyWave
 			enemyDistancesFromStart[i] = lineRendererLength;
 		}
 
-		if (_enemyDisplacementChanged)
+		if (EnemyDisplacementChanged)
 		{
 			Keyframe[] keys = new Keyframe[enemyCount];
 
@@ -140,7 +138,7 @@ public class EnemyWave
 
 			UpdateFarthestEnemyIndex();
 
-			_enemyDisplacementChanged = false;
+			EnemyDisplacementChanged = false;
 		}
 		UpdateWaveScoreIndicator();
 	}
@@ -193,7 +191,7 @@ public class EnemyWave
 
 	public void OnEnemyDisplacementChanged()
 	{
-		_enemyDisplacementChanged = true;
+		EnemyDisplacementChanged = true;
 	}
 
 	public Vector3 GetLastEnemyPosition()
@@ -226,4 +224,9 @@ public class EnemyWave
 		yield return new WaitForSeconds(0.04f);
 		_waveScoreText.fontSize -= growthRate;
 	}
+
+    public bool HasSpedUpEnemy()
+    {
+        return _enemyScripts.Any(enemy => enemy.SpeedBoostIsActive);
+    }
 }

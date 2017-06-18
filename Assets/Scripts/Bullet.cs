@@ -45,9 +45,8 @@ public class Bullet : MonoBehaviour
 			return;
 		}
 
-		if (other.gameObject.tag == "Enemy")
+		if (other.gameObject.CompareTag("Enemy"))
 		{
-			//TODO TUTORIAL NEXT this is where a bullet collides with the enemy
 			BasicEnemy enemyScript = other.gameObject.GetComponent<BasicEnemy>();
 
 			switch (CurrentBulletType)
@@ -62,7 +61,7 @@ public class Bullet : MonoBehaviour
 			_destroyedByCollision = true;
 			Hit();
 		}
-		else if (other.gameObject.tag == "Player")
+		else if (other.gameObject.CompareTag("Player"))
 		{
 			switch (CurrentBulletType)
 			{
@@ -76,7 +75,7 @@ public class Bullet : MonoBehaviour
 					break;
 			}
 		}
-		else if (other.gameObject.tag == "Shield")
+		else if (other.gameObject.CompareTag("Shield"))
 		{
 			switch (CurrentBulletType)
 			{

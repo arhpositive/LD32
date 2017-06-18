@@ -13,17 +13,6 @@ using UnityEngine.Assertions;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
-public enum TutorialType
-{
-	TtNone,
-	TtWave,
-	TtPowerup,
-	TtHugeEnemy,
-	TtActivateGun,
-	TtActivateMovement,
-	TtCount
-}
-
 public struct WaveEntity
 {
 	public Vector2 Position;
@@ -111,7 +100,6 @@ public class SpawnManager : MonoBehaviour
 	private float _tutorialSequenceEventInterval;
 	private bool _popupEventUpcoming;
 	private List<TutorialItem> _tutorialSequenceItems;
-	private List<TutorialItem> _tutorialEventItems; //TODO TUTORIAL event items are triggered in someway, they do not have certain time slots that they appear
 	private bool _tutorialPaused;
 	private Text _tutorialText;
 
@@ -158,8 +146,8 @@ public class SpawnManager : MonoBehaviour
 		_tutorialPaused = false;
 		if (_tutorialSequenceIsActive)
 		{
-			FillTutorialSequence();
-			_playerScript.BeginTutorial();
+		    _playerScript.BeginTutorial();
+            FillTutorialSequence();
 		}
 
 		PregeneratePossibleWaves();
@@ -194,22 +182,33 @@ public class SpawnManager : MonoBehaviour
 				if (Input.GetKeyDown(KeyCode.Space))
 				{
 					ResumeTutorialAfterPopup(true);
-				}
+				    _tutorialSequenceEventInterval = _tutorialSequenceItems[0].TimeToWaitAfterEnd;
+                }
 			}
 
 			//if tutorial timer is up, start next tutorial event
-			if (Time.time - _tutorialSequenceLastEventTime > _tutorialSequenceEventInterval)
-			{
-				if (_popupEventUpcoming)
-				{
-					_tutorialSequenceLastEventTime = Time.time;
-					PopupAndPause();
-				}
-				else
-				{
-					CheckTutorialEventAccomplishment();
-				}
-			}
+		    if (Time.time - _tutorialSequenceLastEventTime > _tutorialSequenceEventInterval)
+		    {
+		        if (_popupEventUpcoming)
+		        {
+		            _tutorialSequenceLastEventTime = Time.time;
+		            PopupAndPause(_tutorialSequenceItems[0].StandardPopupText);
+		            _tutorialSequenceEventInterval = _tutorialSequenceItems[0].TimeToWaitAfterEnd;
+                }
+		        else
+		        {
+		            CheckTutorialEventAccomplishment();
+		        }
+		    }
+		    else if (_tutorialSequenceItems.Count > 0 && !_tutorialSequenceItems[0].EventTriggered)
+		    {
+		        //check if event is triggered
+		        if (_tutorialSequenceItems[0].CheckTrigger())
+		        {
+                    PopupAndPause(_tutorialSequenceItems[0].TriggerPopupText);
+		            print("Voila!");
+                }
+		    }
 		}
 		else
 		{
@@ -243,7 +242,7 @@ public class SpawnManager : MonoBehaviour
 		{
 			currentWave.Update();
 		}
-		_enemyWaves.RemoveAll(item => item.IsSetForDestruction());
+		_enemyWaves.RemoveAll(item => item.SetForDestruction);
 	}
 
 	private void UpdateDebugStuff()
@@ -325,46 +324,114 @@ public class SpawnManager : MonoBehaviour
 		_formations.Add(new Formation(backwardsWedge, 4));
 	}
 
-	private void FillTutorialSequence()
-	{
-		//TODO LATER changing key config should also change tutorial
-		//TODO LATER add controller support tooltips
+    private bool FirstWaveIsDisrupted()
+    {
+        return _enemyWaves.Count > 0 && _enemyWaves[0].EnemyDisplacementChanged;
+    }
 
-		//TODO TUTORIAL you might want to repeat a wave unless the player succeeds in doing a certain thing
+    private bool SpeedUpGunHasAmmo()
+    {
+        return _playerScript.GetGun(GunType.GtSpeedUp).CurrentAmmoCount > 0;
+    }
+
+    private bool TeleportGunHasAmmo()
+    {
+        return _playerScript.GetGun(GunType.GtTeleport).CurrentAmmoCount > 0;
+    }
+
+    private bool TeleportIsPossible()
+    {
+        return _playerScript.GetGun(GunType.GtTeleport).LastBullet != null;
+    }
+
+    private bool TeleportSucceeded()
+    {
+        return _playerScript.TeleportedWithLastTrigger;
+    }
+
+    private bool EnemyHitWithSpeedUp()
+    {
+        return _enemyWaves.Count > 0 && _enemyWaves[0].HasSpedUpEnemy();
+    }
+
+    private bool PlayerHasShield()
+    {
+        return _playerScript.IsShielded;
+    }
+
+    private bool PlayerIncreasedHealth()
+    {
+        return _playerScript.PlayerHealth > Player.PlayerInitialHealth;
+    }
+
+    private bool PlayerCollectedResearch()
+    {
+        return _playerScript.TotalResearchPickedUp > 0;
+    }
+
+    public void TutorialOnPlayerDeath()
+    {
+        PopupAndPause("Whoops! You got hit. A few more hits and it might mean game over. Try not to hit enemies, bullets or bombs.");
+    }
+
+    private void FillTutorialSequence()
+    {
+        float powerupTimer = 10.0f;
+        float waveTimer = 10.0f;
+
+        //TODO LATER changing key config should also change tutorial
+        //TODO LATER add controller support tooltips
 
 		_tutorialSequenceItems = new List<TutorialItem>
 		{
 			new TutorialItem(TutorialType.TtNone, 3.0f),
 			new TutorialItem(TutorialType.TtNone, 3.0f, "Welcome to Dislocator Tutorial."),
-			new TutorialItem(TutorialType.TtActivateMovement, 3.0f, "You can move your spaceship with arrow keys or WASD keys."),
-			new TutorialActivateGunItem(GunType.GtStun, 5.0f, "You can fire your Stun Gun with Z key."),
-			new TutorialWaveItem(2, 0, 10.0f, "This is a basic wave of enemies. Try your stun gun on them.", 1.5f),
-			new TutorialWaveItem(2, 1, 10.0f, "This is a more advanced wave with shooting enemies.", 1.5f),
-			new TutorialPowerupItem(PowerupType.PtSpeedup, 10.0f, "This is an ammo for your Speed-Up Gun. Pick it up by moving through it.", 2f),
-			new TutorialActivateGunItem(GunType.GtSpeedUp, 5.0f, "You can fire your Speed-Up Gun with X key."),
-			new TutorialPowerupItem(PowerupType.PtTeleport, 10.0f, "This is an ammo for your teleport gun. Pick it up by moving through it.", 2f),
-			new TutorialActivateGunItem(GunType.GtTeleport, 5.0f, "You can fire your Teleport Gun with C key."),
-			new TutorialItem(TutorialType.TtHugeEnemy, 10.0f, "This is a huge enemy ship that you can not dislocate. Avoid it and its bullets.", 10.0f),
-			new TutorialItem(TutorialType.TtActivateMovement, 3.0f, "You are now free to move into the right side of the gameplay area."),
+
+			new TutorialItem(TutorialType.TtActivateMovement, 3.0f, "You can move your spaceship up or down with arrow keys or W and S keys."),
+		    new TutorialWaveItem(2, 0, waveTimer, "This is a basic wave of enemies. Avoid colliding with them.", 1.5f),
+		    new TutorialWaveItem(4, 1, waveTimer, "This is a more advanced wave. Be careful, these ships can shoot bullets.", 1.5f),
+
+		    new TutorialPowerupItem(PowerupType.PtHealth, powerupTimer, "This is a health power-up to give you an additional life. Pick it up.", 2f,
+		        "Great! Try to collect as much health power-ups as you can.", PlayerIncreasedHealth),
+
+            new TutorialActivateGunItem(GunType.GtStun, 5.0f, "You can fire your Stun Gun with Z key."),
+			new TutorialWaveItem(3, 1, waveTimer, "Try your Stun Gun on these enemies. It will stop their engines for a short time.", 1.5f,
+			    "Good shot! Enemies shot by a stun bullet won't be able to shoot bullets for a while.", FirstWaveIsDisrupted),
+
+            new TutorialPowerupItem(PowerupType.PtShield, powerupTimer, "This is a shield which can protect you from a hit. Pick it up.", 2f,
+		        "Shield only protects you from a single hit coming to the front side.", PlayerHasShield),
+
+            new TutorialPowerupItem(PowerupType.PtSpeedup, powerupTimer, "This is an ammo for your Speed-Up Gun. Pick it up by moving through it.", 2f, 
+                "", SpeedUpGunHasAmmo),
+		    new TutorialActivateGunItem(GunType.GtSpeedUp, 5.0f, "You can fire your Speed-Up Gun with X key."),
+
+            new TutorialWaveItem(3, 1, waveTimer, "Try your Speed-Up Gun on these enemies. It will make them go much faster.", 1.5f,
+		        "Nice! Notice that as the connection between enemy ships gets thinner, you get more points.", EnemyHitWithSpeedUp),
+
+		    new TutorialPowerupItem(PowerupType.PtResearch, powerupTimer, "This is a research power-up which gives you additional points. Pick it up.", 2f,
+		        "Nice work! Each research collected will result in more and more points.", PlayerCollectedResearch),
+
+            new TutorialPowerupItem(PowerupType.PtBomb, powerupTimer, "This is a bomb and it should be avoided as it will explode on impact.", 2f),
+
+            new TutorialItem(TutorialType.TtActivateMovement, 3.0f, "You can move your spaceship left or right with arrow keys or A and D keys."),
+            
+            new TutorialPowerupItem(PowerupType.PtTeleport, powerupTimer, "This is an ammo for your Teleport Gun. Pick it up.", 2f,
+			    "", TeleportGunHasAmmo),
+		    new TutorialActivateGunItem(GunType.GtTeleport, 3.0f, "You can fire your Teleport Gun with C key.", 0f, "", TeleportIsPossible),
+            new TutorialItem(TutorialType.TtNone, 5.0f, "Pressing C if there's a teleport beacon on the scene will beam you to its location.", 0f, 
+                "Good job! You can avoid enemies by teleporting.", TeleportSucceeded),
+            
+            new TutorialWaveItem(7, 1, waveTimer, "Try to use your weapons to get through this wave of enemies without getting hit.", 1.5f),
+
+            new TutorialItem(TutorialType.TtHugeEnemy, 10.0f, "This is a huge enemy ship that you can not dislocate. Avoid it and its bullets.", 10.0f),
+			
 			new TutorialItem(TutorialType.TtNone, 17.0f, "You now have every information necessary to start your first play-through. Good luck!", 1.0f)
 		};
-
-		_tutorialEventItems = new List<TutorialItem>
-		{
-			//TODO TUTORIAL NEXT bullet should trigger this event
-			new TutorialItem(TutorialType.TtNone, 0.0f, "The bullet stopped the engine for a short while, pushing your enemy back."),
-		};
-
-		/* TODO TUTORIAL NEXT passing a condition
-		public void Text(Action action, Func<Boolean> condition)
-		{
-			if (condition()) action();
-		}*/
 
 		SwitchToNextItemInTutorial();
 	}
 
-	private void SwitchToNextItemInTutorial()
+    private void SwitchToNextItemInTutorial()
 	{
 		if (_tutorialSequenceItems.Count > 0)
 		{
@@ -381,8 +448,9 @@ public class SpawnManager : MonoBehaviour
 			if (Mathf.Approximately(timeToPopup, 0.0f))
 			{
 				print("Popup now!");
-				PopupAndPause();
-			}
+				PopupAndPause(_tutorialSequenceItems[0].StandardPopupText);
+			    _tutorialSequenceEventInterval = _tutorialSequenceItems[0].TimeToWaitAfterEnd;
+            }
 			else
 			{
 				//switch to popup event
@@ -404,8 +472,6 @@ public class SpawnManager : MonoBehaviour
 
 		if (!_tutorialSequenceIsActive)
 		{
-			//TODO TUTORIAL everything related to the end of the tutorial
-
 			//reset weapons, movement limits, etc.
 			_playerScript.EndTutorial();
 
@@ -417,19 +483,17 @@ public class SpawnManager : MonoBehaviour
 		}
 	}
 
-	private void PopupAndPause()
+	private void PopupAndPause(string popupText)
 	{
-		string popupText = _tutorialSequenceItems[0].PopupInfoText;
-
 		if (popupText == "")
 		{
 			ResumeTutorialAfterPopup(false);
-		}
+        }
 		else
 		{
 			Time.timeScale = 0.0f; //pause game
 			_tutorialPaused = true;
-			_tutorialText.text = _tutorialSequenceItems[0].PopupInfoText;
+			_tutorialText.text = popupText;
 			TutorialPanel.SetActive(true);
 		}
 	}
@@ -453,7 +517,7 @@ public class SpawnManager : MonoBehaviour
 				_playerScript.ActivateMovement();
 				break;
 			case TutorialType.TtActivateGun:
-				_playerScript.ActivateGun(((TutorialActivateGunItem)_tutorialSequenceItems[0]).TypeOfGun);
+				_playerScript.GetGun(((TutorialActivateGunItem)_tutorialSequenceItems[0]).TypeOfGun).SetCanBeFired(true);
 				break;
 			default:
 				Assert.IsTrue(false);
@@ -470,25 +534,18 @@ public class SpawnManager : MonoBehaviour
 			TutorialPanel.SetActive(false);
 		}
 		
-		_tutorialSequenceEventInterval = _tutorialSequenceItems[0].TimeToWaitAfterEnd;
+		
 		_popupEventUpcoming = false;
 	}
 
-	private void CheckTutorialEventAccomplishment() //TODO TUTORIAL rename
+	private void CheckTutorialEventAccomplishment()
 	{
-		bool canBeRemoved = true;
-		//TODO TUTORIAL NEXT check if we need trigger here
-		/*if (_tutorialSequenceItems[0].NeedsTrigger)
-		{
-			canBeRemoved = _tutorialSequenceItems[0].CheckTrigger();
-		}*/
-
-		if (canBeRemoved)
-		{
-			//remove current event that we've just finished
-			_tutorialSequenceItems.RemoveAt(0);
-		}
-
+	    if (_tutorialSequenceItems[0].EventTriggered)
+	    {
+	        //remove current event that we've just finished
+            _tutorialSequenceItems.RemoveAt(0);
+	    }
+        //if the current event is not yet removed (triggered succesfully) we'll repeat it
 		SwitchToNextItemInTutorial();
 	}
 	

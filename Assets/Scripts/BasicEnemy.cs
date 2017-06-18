@@ -29,8 +29,9 @@ public class BasicEnemy : MonoBehaviour
 	//enemy displacement is used for scoring
 	public float DisplacementLength { get; private set; }
 	public bool IsDisplaced { get; private set; }
+    public bool SpeedBoostIsActive { get; private set; }
 
-	private Player _playerScript;
+    private Player _playerScript;
 	protected bool HasCollided;
 
 	private DifficultyManager _difficultyManagerScript;
@@ -41,7 +42,6 @@ public class BasicEnemy : MonoBehaviour
 	private List<Transform> _gunTransforms; 
 	private bool _isStunned;
 	private float _lastStunTime;
-	private bool _speedBoostIsActive;
 	private float _lastFireTime;
 	private float _nextFiringInterval;
 
@@ -55,7 +55,7 @@ public class BasicEnemy : MonoBehaviour
 		HasCollided = false;
 		_isStunned = false;
 		_lastStunTime = 0.0f;
-		_speedBoostIsActive = false;
+		SpeedBoostIsActive = false;
 		_lastFireTime = Time.time;
 		SetNextFiringInterval();
 		DisplacementLength = 0.0f;
@@ -78,7 +78,7 @@ public class BasicEnemy : MonoBehaviour
 				FireGun();
 			}
 
-			if (_speedBoostIsActive)
+			if (SpeedBoostIsActive)
 			{
 				float currentDisplacement = -Time.deltaTime*_basicMoveScript.MoveSpeed*(_basicMoveScript.SpeedCoef - 1.0f);
 				float displacementChange = MakeDisplacementChange(currentDisplacement);
@@ -140,9 +140,9 @@ public class BasicEnemy : MonoBehaviour
 	public virtual void TriggerSpeedBoost()
 	{
 		EventLogger.PrintToLog("Enemy Gains Speedup");
-		if (!_speedBoostIsActive)
+		if (!SpeedBoostIsActive)
 		{
-			_speedBoostIsActive = true;
+			SpeedBoostIsActive = true;
 			_basicMoveScript.SpeedCoef = SpeedBoostCoef;
 		}
 	}

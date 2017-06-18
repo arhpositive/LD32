@@ -32,7 +32,7 @@ namespace ui
 		{
 			if (_playerScript)
 			{
-				_powerupText.text = _playerScript.GetGunAmmo(GunKind).ToString(CultureInfo.InvariantCulture);
+				_powerupText.text = _playerScript.GetGun(GunKind).CurrentAmmoCount.ToString(CultureInfo.InvariantCulture);
 			}
 		}
 	}

@@ -74,7 +74,7 @@ public class Powerup : MonoBehaviour
 							playerScript.TriggerHealthPickup();
 							break;
 						case PowerupType.PtSpeedup:
-							playerScript.TriggerSpeedUpPickup();
+							playerScript.TriggerAmmoPickup(GunType.GtSpeedUp, PowerupType);
 							break;
 						case PowerupType.PtResearch:
 							playerScript.TriggerResearchPickup();
@@ -83,7 +83,7 @@ public class Powerup : MonoBehaviour
 							playerScript.TriggerShieldPickup();
 							break;
 						case PowerupType.PtTeleport:
-							playerScript.TriggerTeleportPickup();
+							playerScript.TriggerAmmoPickup(GunType.GtTeleport, PowerupType);
 							break;
 						case PowerupType.PtBomb:
 							gotPickedUp = collidesWithPlayer ?

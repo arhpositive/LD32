@@ -6,7 +6,6 @@
  * Handles player movement and actions via given input
  */
 
-using System;
 using System.Collections.Generic;
 using CnControls;
 using ui;
@@ -14,31 +13,11 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using Random = UnityEngine.Random;
 
-public enum GunType
+public enum MovementState
 {
-	GtStun,
-	GtSpeedUp,
-	GtTeleport,
-	GtCount
-}
-
-public class Gun
-{
-	public GameObject BulletPrefab { get; private set; }
-	public float Cooldown { get; private set; }
-	public float LastFireTime;
-	public int AmmoCount;
-	public GameObject LastBullet;
-	public bool CanBeFired;
-
-	public Gun(GameObject bulletPrefab, float cooldown, int ammoCount)
-	{
-		BulletPrefab = bulletPrefab;
-		Cooldown = cooldown;
-		AmmoCount = ammoCount;
-		LastFireTime = -cooldown;
-		CanBeFired = true;
-	}
+    MsNoMovement,
+    MsVerticalMovement,
+    MsFreeMovement
 }
 
 public class Player : MonoBehaviour
@@ -66,16 +45,17 @@ public class Player : MonoBehaviour
 	public const int PlayerInitialHealth = 3;
 
 	public int PlayerHealth { get; private set; }
+    public int TotalResearchPickedUp { get; private set; }
 	public bool IsDead { get; private set; }
+    public bool IsShielded { get; private set; }
+    public bool TeleportedWithLastTrigger { get; private set; }
 
     //TODO LATER remove if unnecessary
-	//private const float ShortTermHealthChangeInterval = 10.0f;
-	//private const float LongTermHealthChangeInterval = 30.0f;
-
-	private float _currentMaxHorizontalMovementLimit;
+    //private const float ShortTermHealthChangeInterval = 10.0f;
+    //private const float LongTermHealthChangeInterval = 30.0f;
 
 	private bool _isInvulnerable;
-	private bool _isShielded;
+    private bool _losesHealth;
 
 	private SpawnManager _spawnManagerScript;
 	private StatsManager _statsManagerScript;
@@ -95,7 +75,7 @@ public class Player : MonoBehaviour
 	private SpriteRenderer[] _childRenderers;
 
 	private Dictionary<GunType, Gun> _guns;
-	private bool _canDoMovement;
+    private MovementState _currentMovementState;
 
 	private void Awake()
 	{
@@ -107,20 +87,22 @@ public class Player : MonoBehaviour
 
 		_guns = new Dictionary<GunType, Gun>
 		{
-			{GunType.GtStun, new Gun(StunBulletPrefab, 0.3f, -1)},
-			{GunType.GtSpeedUp, new Gun(SpeedUpBulletPrefab, 5.0f, 3)},
-			{GunType.GtTeleport, new Gun(TeleportBulletPrefab, 10.0f, 10)}
+			{GunType.GtStun, new Gun(StunBulletPrefab, FireStunGunClip, 0.3f)},
+			{GunType.GtSpeedUp, new Gun(SpeedUpBulletPrefab, FireSpeedUpGunClip, 5.0f, true, 3)},
+			{GunType.GtTeleport, new Gun(TeleportBulletPrefab, FireTeleportGunClip, 10.0f, true, 10)}
 		};
-		_canDoMovement = true;
-		_currentMaxHorizontalMovementLimit = MaxHorizontalMovementLimit;
+        _currentMovementState = MovementState.MsFreeMovement;
+	    _losesHealth = true;
 	}
 
 	private void Start()
 	{
 		PlayerScore = 0;
 		PlayerHealth = PlayerInitialHealth;
+	    TotalResearchPickedUp = 0;
 		IsDead = false;
-		_isShielded = false;
+		IsShielded = false;
+	    TeleportedWithLastTrigger = false;
 		_isInvulnerable = true;
 		_invulnerabilityStartTime = Time.time;
 
@@ -185,79 +167,92 @@ public class Player : MonoBehaviour
 			_spriteRenderer.enabled = true;
 			SetChildRenderers(true);
 		}
+        
+	    if (!Mathf.Approximately(Time.timeScale, 0.0f)) //TODO LATER find an elegant solution to pause a game, rather than just forbidding some commands
+	    {
+	        //shooting
+	        Gun stunGun = _guns[GunType.GtStun];
+	        Gun speedUpGun = _guns[GunType.GtSpeedUp];
+	        Gun teleportGun = _guns[GunType.GtTeleport];
+	        bool fireInputGiven;
+	        bool speedUpInputGiven;
+	        bool teleportInputGiven;
 
-		//shooting
-		bool fireInputGiven;
-		bool speedUpInputGiven;
-		bool teleportInputGiven;
+	        if (UseTouchControls)
+	        {
+	            fireInputGiven = CnInputManager.GetButton("TouchFire");
+	            speedUpInputGiven = CnInputManager.GetButtonDown("TouchSpeedUp");
+	            teleportInputGiven = CnInputManager.GetButtonDown("TouchTeleport");
+	        }
+	        else
+	        {
+	            fireInputGiven = Input.GetKey(KeyCode.Z);
+	            speedUpInputGiven = Input.GetKeyDown(KeyCode.X);
+	            teleportInputGiven = Input.GetKeyDown(KeyCode.C);
+	        }
 
-		if (UseTouchControls)
-		{
-			fireInputGiven = CnInputManager.GetButton("TouchFire");
-			speedUpInputGiven = CnInputManager.GetButtonDown("TouchSpeedUp");
-			teleportInputGiven = CnInputManager.GetButtonDown("TouchTeleport");
-		}
-		else
-		{
-			fireInputGiven = Input.GetKey(KeyCode.Z);
-			speedUpInputGiven = Input.GetKeyDown(KeyCode.X);
-			teleportInputGiven = Input.GetKeyDown(KeyCode.C);
-		}
-		
-		if (fireInputGiven && _guns[GunType.GtStun].CanBeFired && Time.time - _guns[GunType.GtStun].LastFireTime > _guns[GunType.GtStun].Cooldown)
-		{
-			FireGun(GunType.GtStun);
-			_statsManagerScript.StartFireGunCoroutine(GunType.GtStun);
-		}
+	        if (fireInputGiven && stunGun.CanBeFired && Time.time - stunGun.LastFireTime > stunGun.Cooldown)
+	        {
+	            FireGun(stunGun);
+	            _statsManagerScript.StartFireGunCoroutine(GunType.GtStun);
+	        }
 
-		if (speedUpInputGiven && _guns[GunType.GtSpeedUp].CanBeFired &&
-			Time.time - _guns[GunType.GtSpeedUp].LastFireTime > _guns[GunType.GtSpeedUp].Cooldown &&
-			_guns[GunType.GtSpeedUp].AmmoCount > 0)
-		{
-			FireGun(GunType.GtSpeedUp);
-			_statsManagerScript.StartFireGunCoroutine(GunType.GtSpeedUp);
-		}
+	        if (speedUpInputGiven && speedUpGun.CanBeFired && Time.time - speedUpGun.LastFireTime > speedUpGun.Cooldown && speedUpGun.CurrentAmmoCount > 0)
+	        {
+	            FireGun(speedUpGun);
+	            _statsManagerScript.StartFireGunCoroutine(GunType.GtSpeedUp);
+	        }
 
-		if (teleportInputGiven)
-		{
-			if (_guns[GunType.GtTeleport].CanBeFired)
-			{
-				if (_guns[GunType.GtTeleport].LastBullet)
-				{
-					TriggerTeleportBullet();
-				}
-				else if (Time.time - _guns[GunType.GtTeleport].LastFireTime > _guns[GunType.GtTeleport].Cooldown &&
-						 _guns[GunType.GtTeleport].AmmoCount > 0)
-				{
-					FireGun(GunType.GtTeleport);
-					_statsManagerScript.StartFireGunCoroutine(GunType.GtTeleport);
-				}
-			}
-		}
-		if (_canDoMovement)
-		{
-			DoMovement();
-		}
-	}
+	        if (teleportInputGiven)
+	        {
+	            if (teleportGun.CanBeFired)
+	            {
+	                if (teleportGun.LastBullet)
+	                {
+	                    TriggerTeleportBullet();
+	                }
+	                else if (Time.time - teleportGun.LastFireTime > teleportGun.Cooldown && teleportGun.CurrentAmmoCount > 0)
+	                {
+	                    FireGun(teleportGun);
+	                    TeleportedWithLastTrigger = false;
+	                    _statsManagerScript.StartFireGunCoroutine(GunType.GtTeleport);
+	                }
+	            }
+	        }
+        }
+
+	    DoMovement();
+    }
 
 	private Vector2 GetMoveDirFromInput()
 	{
-		float horizontalMoveDir;
-		float verticalMoveDir;
+		float horizontalMoveDir = 0.0f;
+		float verticalMoveDir = 0.0f;
 		if (UseTouchControls)
 		{
-			horizontalMoveDir = CnInputManager.GetAxis("Horizontal");
-			horizontalMoveDir = Mathf.Abs(horizontalMoveDir) < GameConstants.JoystickDeadZoneCoef ? 
-				0.0f : Mathf.Sign(horizontalMoveDir);
-
-			verticalMoveDir = CnInputManager.GetAxis("Vertical");
-			verticalMoveDir = Mathf.Abs(verticalMoveDir) < GameConstants.JoystickDeadZoneCoef ?
-				0.0f : Mathf.Sign(verticalMoveDir);
+		    if (_currentMovementState == MovementState.MsFreeMovement)
+		    {
+		        horizontalMoveDir = CnInputManager.GetAxis("Horizontal");
+		        horizontalMoveDir = Mathf.Abs(horizontalMoveDir) < GameConstants.JoystickDeadZoneCoef ?
+		            0.0f : Mathf.Sign(horizontalMoveDir);
+            }
+		    if (_currentMovementState >= MovementState.MsVerticalMovement)
+		    {
+		        verticalMoveDir = CnInputManager.GetAxis("Vertical");
+		        verticalMoveDir = Mathf.Abs(verticalMoveDir) < GameConstants.JoystickDeadZoneCoef ?
+		            0.0f : Mathf.Sign(verticalMoveDir);
+            }
 		}
 		else
 		{
-			horizontalMoveDir = Input.GetAxisRaw("Horizontal");
-			verticalMoveDir = Input.GetAxisRaw("Vertical");
+		    if (_currentMovementState == MovementState.MsFreeMovement)
+		    {
+		        horizontalMoveDir = Input.GetAxisRaw("Horizontal");
+		    }
+		    if (_currentMovementState >= MovementState.MsVerticalMovement)
+		    {
+		        verticalMoveDir = Input.GetAxisRaw("Vertical");
+            }
 		}
 
 		Vector2 moveDir = new Vector2(horizontalMoveDir, verticalMoveDir);
@@ -276,7 +271,7 @@ public class Player : MonoBehaviour
 		transform.Translate(playerMovement, Space.World);
 
 		Vector3 clampedPlayerPosition = 
-			new Vector3(Mathf.Clamp(transform.position.x, MinHorizontalMovementLimit, _currentMaxHorizontalMovementLimit), 
+			new Vector3(Mathf.Clamp(transform.position.x, MinHorizontalMovementLimit, MaxHorizontalMovementLimit), 
 			Mathf.Clamp(transform.position.y, MinVerticalMovementLimit, MaxVerticalMovementLimit), 
 			transform.position.z);
 
@@ -294,8 +289,15 @@ public class Player : MonoBehaviour
 			return false;
 		}
 
-		PlayerHealth--;
-		_statsManagerScript.HealthChangeCoroutine(-1);
+	    if (_losesHealth)
+	    {
+	        --PlayerHealth;
+	        _statsManagerScript.HealthChangeCoroutine(-1);
+	    }
+	    else
+	    {
+	        _spawnManagerScript.TutorialOnPlayerDeath(); //TODO LATER kinda bad code to call this here 
+        }
 
 		if (PlayerHealth == 0)
 		{
@@ -306,7 +308,7 @@ public class Player : MonoBehaviour
 		else
 		{
 			EventLogger.PrintToLog("Player Loses Health");
-			if (_isShielded)
+			if (IsShielded)
 			{
 				//shield also disappears
 				ShieldGotHit();
@@ -329,7 +331,7 @@ public class Player : MonoBehaviour
 
 		EventLogger.PrintToLog("Player Loses Shield");
 
-		_isShielded = false;
+		IsShielded = false;
 		_playerShield.SetActive(false);
 		return true;
 	}
@@ -348,24 +350,26 @@ public class Player : MonoBehaviour
 	public void TriggerHealthPickup()
 	{
 		EventLogger.PrintToLog("Player Gains Health");
-		PlayerHealth++;
+		++PlayerHealth;
 
 		_statsManagerScript.HealthChangeCoroutine(1);
 		_statsManagerScript.PickupPowerupCoroutine(PowerupType.PtHealth);
 	}
 
-	public void TriggerSpeedUpPickup()
-	{
-		EventLogger.PrintToLog("Player Gains Speedup Powerup");
-		_guns[GunType.GtSpeedUp].AmmoCount++;
+    public void TriggerAmmoPickup(GunType gunType, PowerupType powerupType)
+    {
+        EventLogger.PrintToLog("Player Gains Ammo Powerup: " + gunType);
+        Assert.IsTrue(_guns.ContainsKey(gunType));
+        _guns[gunType].PickupAmmo();
 
-		_statsManagerScript.PickupPowerupCoroutine(PowerupType.PtSpeedup);
-	}
+        _statsManagerScript.PickupPowerupCoroutine(powerupType);
+    }
 
-	public void TriggerResearchPickup()
+    public void TriggerResearchPickup()
 	{
 		EventLogger.PrintToLog("Player Gains Research Powerup");
-		PlayerScore += 5 * GameConstants.BaseScoreMultiplier;
+	    ++TotalResearchPickedUp;
+		PlayerScore += 5 * GameConstants.BaseScoreMultiplier * TotalResearchPickedUp;
 
 		_statsManagerScript.PickupPowerupCoroutine(PowerupType.PtResearch);
 	}
@@ -373,9 +377,9 @@ public class Player : MonoBehaviour
 	public void TriggerShieldPickup()
 	{
 		EventLogger.PrintToLog("Player Gains Shield");
-		if (!_isShielded)
+		if (!IsShielded)
 		{
-			_isShielded = true;
+			IsShielded = true;
 			_playerShield.SetActive(true);
 		}
 		else
@@ -386,81 +390,56 @@ public class Player : MonoBehaviour
 		_statsManagerScript.PickupPowerupCoroutine(PowerupType.PtShield);
 	}
 
-	public void TriggerTeleportPickup()
-	{
-		EventLogger.PrintToLog("Player Gains Teleport Powerup");
-		_guns[GunType.GtTeleport].AmmoCount++;
+    public Gun GetGun(GunType gunType)
+    {
+        Assert.IsTrue(_guns.ContainsKey(gunType));
+        return _guns[gunType];
+    }
 
-		_statsManagerScript.PickupPowerupCoroutine(PowerupType.PtTeleport);
+    public void BeginTutorial()
+	{
+        _currentMovementState = MovementState.MsNoMovement;
+	    _losesHealth = false;
+
+	    foreach (var gun in _guns.Values)
+	    {
+	        gun.SetCanBeFired(false);
+            gun.DepleteAmmo();
+            gun.SetAmmoUsage(false);
+	    }
 	}
 
-	public float GetGunAmmo(GunType gunType)
-	{
-		Assert.IsTrue(_guns.ContainsKey(gunType));
-		return _guns[gunType].AmmoCount;
-	}
+    public void EndTutorial()
+    {
+        foreach (var gun in _guns.Values)
+        {
+            gun.ResetAmmoUsage();
+            gun.ResetAmmoCount();
+        }
+        ResetHealth();
+    }
 
-	public float GetGunCooldownPercentage(GunType gunType)
-	{
-		Assert.IsTrue(_guns.ContainsKey(gunType));
-		float gunCooldown = _guns[gunType].Cooldown;
-		float lastFireTime = _guns[gunType].LastFireTime;
-		return (Time.time - lastFireTime)/gunCooldown;
-	}
+    private void ResetHealth()
+    {
+        _losesHealth = true;
+        PlayerHealth = PlayerInitialHealth;
+    }
 
-	public void BeginTutorial()
+    public void ActivateMovement()
 	{
-		_canDoMovement = false;
-		DeactivateAllGuns(); //TODO TUTORIAL undo deactivating guns step by step during tutorial
-		SetCurrentMaxHorizontalMovementLimit((MaxHorizontalMovementLimit + MinHorizontalMovementLimit) * 0.5f);
-	}
-
-	public void EndTutorial()
-	{
-		//TODO TUTORIAL anything?
-	}
-
-	public void ActivateMovement()
-	{
-		if (!_canDoMovement)
-		{
-			//first call will enable movement
-			_canDoMovement = true;
-		}
-		else
-		{
-			//second call will set movement limit as whole screen
-			SetCurrentMaxHorizontalMovementLimit(MaxHorizontalMovementLimit);
-		}
-	}
-
-	public void ActivateGun(GunType gunType)
-	{
-		Assert.IsTrue(_guns.ContainsKey(gunType));
-		_guns[gunType].CanBeFired = true;
-	}
-
-	private void DeactivateAllGuns()
-	{
-		//TODO TUTORIAL potentially, we might want to reset gun ammo counts here!
-		foreach (var element in _guns)
-		{
-			element.Value.CanBeFired = false;
-		}
-	}
-
-	private void SetCurrentMaxHorizontalMovementLimit(float newMaxLimit)
-	{
-		_currentMaxHorizontalMovementLimit = newMaxLimit;
+	    if (_currentMovementState != MovementState.MsFreeMovement)
+	    {
+	        _currentMovementState += 1;
+	    }
 	}
 
 	private void SetChildRenderers(bool value)
 	{
 		foreach (SpriteRenderer r in _childRenderers)
 		{
-			if (r.gameObject.tag == "Shield")
+			if (r.gameObject.CompareTag("Shield"))
 			{
-				if (_isShielded)
+				if (IsShielded)
 				{
 					r.enabled = value;
 				}
@@ -472,96 +451,47 @@ public class Player : MonoBehaviour
 		}
 	}
 
-	private void FireGun(GunType gunType)
+	private void FireGun(Gun gun)
 	{
-		switch (gunType)
-		{
-			case GunType.GtStun:
-				FireStunGun();
-				break;
-			case GunType.GtSpeedUp:
-				FireSpeedUpGun();
-				break;
-			case GunType.GtTeleport:
-				FireTeleportGun();
-				break;
-			default:
-				//TODO LATER perhaps you'll learn how to catch an exception properly
-				throw new ArgumentOutOfRangeException("gunType", gunType, null);
-		}
-	}
-
-	private void FireStunGun()
-	{
-		_guns[GunType.GtStun].LastFireTime = Time.time;
-
-		for (int i = 0; i < transform.childCount; i++)
-		{
-			if (transform.GetChild(i).CompareTag("BulletStart"))
-			{
-				Vector3 bulletStartPoint = transform.GetChild(i).position;
-				Instantiate(_guns[GunType.GtStun].BulletPrefab, bulletStartPoint, Quaternion.identity);
-				AudioSource.PlayClipAtPoint(FireStunGunClip, transform.GetChild(i).position);
-			}
-		}
-	}
-
-	private void FireSpeedUpGun()
-	{
-		_guns[GunType.GtSpeedUp].LastFireTime = Time.time;
-
-		for (int i = 0; i < transform.childCount; i++)
-		{
-			if (transform.GetChild(i).CompareTag("BulletStart"))
-			{
-				Vector3 bulletStartPoint = transform.GetChild(i).position;
-				Instantiate(_guns[GunType.GtSpeedUp].BulletPrefab, bulletStartPoint, Quaternion.identity);
-				_guns[GunType.GtSpeedUp].AmmoCount--;
-				AudioSource.PlayClipAtPoint(FireSpeedUpGunClip, bulletStartPoint);
-			}
-		}
-	}
-
-	private void FireTeleportGun()
-	{
-		_guns[GunType.GtTeleport].LastFireTime = Time.time;
-		for (int i = 0; i < transform.childCount; i++)
-		{
-			if (transform.GetChild(i).CompareTag("BulletStart"))
-			{
-				Vector3 bulletStartPoint = transform.GetChild(i).position;
-				_guns[GunType.GtTeleport].LastBullet = Instantiate(_guns[GunType.GtTeleport].BulletPrefab, bulletStartPoint, Quaternion.identity);
-				_guns[GunType.GtTeleport].AmmoCount--;
-				AudioSource.PlayClipAtPoint(FireTeleportGunClip, bulletStartPoint);
-			}
-		}
+	    for (int i = 0; i < transform.childCount; i++)
+	    {
+	        if (transform.GetChild(i).CompareTag("BulletStart"))
+	        {
+	            Vector3 bulletStartPoint = transform.GetChild(i).position;
+	            gun.Fire(bulletStartPoint);
+	        }
+	    }
 	}
 
 	private void TriggerTeleportBullet()
 	{
-		if (_guns[GunType.GtTeleport].LastBullet)
-		{
-			EventLogger.PrintToLog("Player Triggers Teleport");
+        //you can only trigger teleport if you have the last bullet, it's mandatory
 
-			if (TeleportDisappearPrefab != null)
-			{
-				GameObject disappearEffect = Instantiate(TeleportDisappearPrefab, transform.position, Quaternion.identity);
-				Assert.IsNotNull(disappearEffect);
-				disappearEffect.GetComponent<SpriteRenderer>().material.color = gameObject.GetComponent<SpriteRenderer>().color;
-			}
+	    Gun teleportGun = _guns[GunType.GtTeleport];
 
-			transform.position = _guns[GunType.GtTeleport].LastBullet.transform.position;
-			AudioSource.PlayClipAtPoint(_guns[GunType.GtTeleport].LastBullet.GetComponent<Bullet>().BulletHitClip, transform.position);
+        Assert.IsTrue(teleportGun.LastBullet);
 
-			if (TeleportAppearPrefab != null)
-			{
-				GameObject appearEffect = Instantiate(TeleportAppearPrefab, transform.position, Quaternion.identity);
-				Assert.IsNotNull(appearEffect);
-				appearEffect.GetComponent<SpriteRenderer>().material.color = gameObject.GetComponent<SpriteRenderer>().color;
-			}
+	    EventLogger.PrintToLog("Player Triggers Teleport");
 
-			Destroy(_guns[GunType.GtTeleport].LastBullet.gameObject);
-			_guns[GunType.GtTeleport].LastBullet = null;
-		}
-	}
+	    if (TeleportDisappearPrefab != null)
+	    {
+	        GameObject disappearEffect = Instantiate(TeleportDisappearPrefab, transform.position, Quaternion.identity);
+	        Assert.IsNotNull(disappearEffect);
+	        disappearEffect.GetComponent<SpriteRenderer>().material.color = gameObject.GetComponent<SpriteRenderer>().color;
+	    }
+
+	    transform.position = teleportGun.LastBullet.transform.position;
+	    AudioSource.PlayClipAtPoint(teleportGun.LastBullet.GetComponent<Bullet>().BulletHitClip, transform.position); 
+        //TODO LATER performance-wise, remove get component by making bullet script a member of gun
+
+	    if (TeleportAppearPrefab != null)
+	    {
+	        GameObject appearEffect = Instantiate(TeleportAppearPrefab, transform.position, Quaternion.identity);
+	        Assert.IsNotNull(appearEffect);
+	        appearEffect.GetComponent<SpriteRenderer>().material.color = gameObject.GetComponent<SpriteRenderer>().color;
+	    }
+
+	    teleportGun.ResetLastBullet();
+        TeleportedWithLastTrigger = true;
+    }
 }
