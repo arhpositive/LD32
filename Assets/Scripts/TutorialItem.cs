@@ -7,7 +7,7 @@
  */
 
 using System;
-using NUnit.Framework;
+using UnityEngine.Assertions;
 
 public enum TutorialType
 {
