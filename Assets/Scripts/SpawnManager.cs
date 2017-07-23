@@ -45,6 +45,8 @@ public class SpawnManager : MonoBehaviour
 
 	public GameObject CanvasGameObject;
 	public GameObject CanvasScorePanel;
+    public GameObject ScoreLeftAnchor;
+    public GameObject ScoreRightAnchor;
 	public GameObject TutorialPanel;
 
 	[Header("Prefabs")]
@@ -103,6 +105,35 @@ public class SpawnManager : MonoBehaviour
 	private bool _tutorialPaused;
 	private Text _tutorialText;
 
+    private static void PauseGame()
+    {
+        Time.timeScale = 0.0f;
+        print("Geme paused.");
+    }
+
+    private static void UnpauseGame()
+    {
+        Time.timeScale = 1.0f;
+        print("Geme unpaused.");
+    }
+
+    public static bool IsGamePaused()
+    {
+        return Mathf.Approximately(Time.timeScale, 0.0f);
+    }
+
+    public static void SpeedUpGame()
+    {
+        Time.timeScale += 0.1f;
+        print("Timescale Up: " + Time.timeScale);
+    }
+
+    public static void SlowDownGame()
+    {
+        Time.timeScale -= 0.1f;
+        print("Timescale Down: " + Time.timeScale);
+    }
+
 	private void Awake()
 	{
 		//instantiate player
@@ -114,7 +145,8 @@ public class SpawnManager : MonoBehaviour
 
 	private void Start()
 	{
-		Time.timeScale = GameConstants.CurrentTimeScale; //TODO LATER take notice that you adjust timescale here
+        UnpauseGame();
+
 		_difficultyManagerScript = Camera.main.GetComponent<DifficultyManager>();
 		
 		_enemySpawnMinVertDist = Mathf.Min(ShipGameObjectVertSize + 0.05f, _enemySpawnMaxVertDist);
@@ -137,8 +169,15 @@ public class SpawnManager : MonoBehaviour
 
 		if (TutorialPanel)
 		{
-			//TODO LATER this is taking the first text out of two, not really ideal as it could've been random
-			_tutorialText = TutorialPanel.GetComponentInChildren<Text>();
+		    var textComponents = TutorialPanel.GetComponentsInChildren<Text>();
+		    foreach (var curText in textComponents)
+		    {
+		        if (curText.CompareTag("InfoText"))
+		        {
+		            _tutorialText = TutorialPanel.GetComponentInChildren<Text>();
+		            break;
+		        }
+		    }
 		}
 
 		ChangeTutorialSequenceState(LoadLevel.TutorialToggleValue);
@@ -165,14 +204,6 @@ public class SpawnManager : MonoBehaviour
 
 		if (_tutorialSequenceIsActive)
 		{
-			//check if tutorial sequence timer is up, then spawn the next wave of whatever is necessary
-
-			//TODO implement tutorial sequence timer
-			//implement a simple way of spawning whatever we want instead of randomizing a wave
-			//the ability of adding new items to our tutorial should be trivially simple
-			//a new tutorial item should have a type (specific wave and enemy count, specific powerup) and a time to wait BEFORE spawn
-			//another unique type could be a "pause" and its text
-
 			//1. if tutorial sequence timer is up
 			//2. spawn new tutorial element
 			//3. get next element and set next timer
@@ -255,17 +286,14 @@ public class SpawnManager : MonoBehaviour
 		{
 			DownBound.transform.position = new Vector3(DownBound.transform.position.x, _vertMinShipSpawnCoord, DownBound.transform.position.z);
 		}
-
-		//TODO LATER remove timescale adjustments or hide them under debug mode
+        
 		if (Input.GetKeyDown(KeyCode.U))
 		{
-			Time.timeScale += 0.1f;
-			print("Timescale Up: " + Time.timeScale);
+			SpeedUpGame();
 		}
 		else if (Input.GetKeyDown(KeyCode.J))
 		{
-			Time.timeScale -= 0.1f;
-			print("Timescale Down: " + Time.timeScale);
+			SlowDownGame();
 		}
 	}
 
@@ -491,7 +519,7 @@ public class SpawnManager : MonoBehaviour
         }
 		else
 		{
-			Time.timeScale = 0.0f; //pause game
+            PauseGame();
 			_tutorialPaused = true;
 			_tutorialText.text = popupText;
 			TutorialPanel.SetActive(true);
@@ -529,7 +557,7 @@ public class SpawnManager : MonoBehaviour
 	{
 		if (popupTriggered)
 		{
-			Time.timeScale = GameConstants.CurrentTimeScale; //resume game operation
+            UnpauseGame();
 			_tutorialPaused = false;
 			TutorialPanel.SetActive(false);
 		}
@@ -551,7 +579,7 @@ public class SpawnManager : MonoBehaviour
 	
 	private void SpawnTutorialWave(TutorialWaveItem tutorialWaveItem)
 	{
-		//TODO LATER obvious duplications exist, what to do about them?
+		//TODO LATER obvious duplications exist between this and SpawnNewWave, what to do about them?
 
 		float minVerticalStartCoord = _vertMinShipSpawnCoord;
 		float maxVerticalStartCoord = _vertMaxShipSpawnCoord - (tutorialWaveItem.EnemyCountInWave - 1) * _enemySpawnMaxVertDist;
@@ -574,7 +602,7 @@ public class SpawnManager : MonoBehaviour
 
 		GameObject lineRendererObject = Instantiate(ShipConnectionPrefab, Vector3.zero, Quaternion.identity);
 		EnemyWave curEnemyWave = new EnemyWave(lineRendererObject.GetComponent<LineRenderer>());
-		curEnemyWave.Initialize(_playerScript, _canvasRectTransform, waveScoreIndicator);
+		curEnemyWave.Initialize(_playerScript, _canvasRectTransform, waveScoreIndicator, ScoreLeftAnchor, ScoreRightAnchor);
 		for (int i = 0; i < selectedFormationEntities.Count; i++)
 		{
 			Vector2 enemyPos;
@@ -791,7 +819,7 @@ public class SpawnManager : MonoBehaviour
 
 		GameObject lineRendererObject = Instantiate(ShipConnectionPrefab, Vector3.zero, Quaternion.identity);
 		EnemyWave curEnemyWave = new EnemyWave(lineRendererObject.GetComponent<LineRenderer>());
-		curEnemyWave.Initialize(_playerScript, _canvasRectTransform, waveScoreIndicator);
+		curEnemyWave.Initialize(_playerScript, _canvasRectTransform, waveScoreIndicator, ScoreLeftAnchor, ScoreRightAnchor);
 		for (int i = 0; i < selectedFormationEntities.Count; i++)
 		{
 			int enemyKind = shipTypes[i];

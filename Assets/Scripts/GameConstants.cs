@@ -17,5 +17,4 @@ public static class GameConstants
 	public const int DifficultyStepCount = (MaxDifficulty - MinDifficulty + DifficultyStep) / DifficultyStep;
 	public const float JoystickDeadZoneCoef = 0.19f;
 	public const int BaseScoreMultiplier = 10;
-	public const float CurrentTimeScale = 1.35f;
 }

@@ -53,16 +53,15 @@ public class PlayerStats
 		PowerupPickupFrequencies = new float[(int)PowerupType.PtCount];
 	}
 
-	public IEnumerator OnBulletInit(GunType gunType)
+	public IEnumerator OnBulletInit(int gunTypeIndex)
 	{
-		//TODO change implementation somehow to remove enums being used as indices
-		++_shotBulletCountsPerGun[(int) gunType];
+		++_shotBulletCountsPerGun[gunTypeIndex];
 		++_totalShotBulletCount;
 		CalculateGunUsageFrequencies();
 		if (_statsAreTemporary)
 		{
 			yield return new WaitForSeconds(_statDuration);
-			--_shotBulletCountsPerGun[(int)gunType];
+			--_shotBulletCountsPerGun[gunTypeIndex];
 			--_totalShotBulletCount;
 			CalculateGunUsageFrequencies();
 		}

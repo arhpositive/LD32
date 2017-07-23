@@ -15,6 +15,7 @@ public class Gun
     public float LastFireTime { get; private set; }
     public int CurrentAmmoCount { get; private set; }
     public GameObject LastBullet { get; private set; }
+    public Bullet LastBulletScript { get; private set; }
     public bool CanBeFired { get; private set; }
 
     private GameObject _bulletPrefab;
@@ -29,6 +30,7 @@ public class Gun
         LastFireTime = -cooldown;
         CurrentAmmoCount = initialAmmoCount;
         LastBullet = null;
+        LastBulletScript = null;
         CanBeFired = true;
 
         _bulletPrefab = bulletPrefab;
@@ -43,6 +45,7 @@ public class Gun
         Assert.IsTrue(CanBeFired);
         LastFireTime = Time.time;
         LastBullet = Object.Instantiate(_bulletPrefab, bulletStartPoint, Quaternion.identity);
+        LastBulletScript = LastBullet.GetComponent<Bullet>();
         AudioSource.PlayClipAtPoint(_gunAudioClip, bulletStartPoint);
         if (_currentlyUsesAmmo)
         {
@@ -77,6 +80,7 @@ public class Gun
     {
         Object.Destroy(LastBullet.gameObject);
         LastBullet = null;
+        LastBulletScript = null;
     }
 
     public void SetAmmoUsage(bool value)

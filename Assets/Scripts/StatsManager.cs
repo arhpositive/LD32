@@ -32,7 +32,8 @@ public class StatsManager : MonoBehaviour
 	{
 		foreach (PlayerStats ps in AllPlayerStats)
 		{
-			IEnumerator fireGunCoroutine = ps.OnBulletInit(typeOfGun);
+		    int gunTypeIndex = (int) typeOfGun;
+			IEnumerator fireGunCoroutine = ps.OnBulletInit(gunTypeIndex);
 			StartCoroutine(fireGunCoroutine);
 		}
 	}

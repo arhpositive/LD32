@@ -202,7 +202,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DoesMove: 1
-  MoveSpeed: 1.2
+  MoveSpeed: 1.6
   MoveDirX: -1
   RandomizeMoveDirX: 0
   RandomizeMoveDirXCoef: 0

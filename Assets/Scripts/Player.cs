@@ -31,7 +31,7 @@ public class Player : MonoBehaviour
 	public GameObject TeleportBulletPrefab;
 	public GameObject TeleportDisappearPrefab;
 	public GameObject TeleportAppearPrefab;
-	public float PlayerSpeedLimit;
+	public float PlayerSpeed;
 
 	public const float MinHorizontalMovementLimit = -0.15f;
 	public const float MaxHorizontalMovementLimit = 7.15f;
@@ -49,10 +49,6 @@ public class Player : MonoBehaviour
 	public bool IsDead { get; private set; }
     public bool IsShielded { get; private set; }
     public bool TeleportedWithLastTrigger { get; private set; }
-
-    //TODO LATER remove if unnecessary
-    //private const float ShortTermHealthChangeInterval = 10.0f;
-    //private const float LongTermHealthChangeInterval = 30.0f;
 
 	private bool _isInvulnerable;
     private bool _losesHealth;
@@ -168,7 +164,7 @@ public class Player : MonoBehaviour
 			SetChildRenderers(true);
 		}
         
-	    if (!Mathf.Approximately(Time.timeScale, 0.0f)) //TODO LATER find an elegant solution to pause a game, rather than just forbidding some commands
+	    if (!SpawnManager.IsGamePaused())
 	    {
 	        //shooting
 	        Gun stunGun = _guns[GunType.GtStun];
@@ -266,7 +262,7 @@ public class Player : MonoBehaviour
 		Vector2 inputDir = GetMoveDirFromInput();
 
 		Vector2 movementDir = Vector2.ClampMagnitude(inputDir, 1.0f);
-		Vector2 playerMovement = movementDir * PlayerSpeedLimit * Time.deltaTime;
+		Vector2 playerMovement = movementDir * PlayerSpeed * Time.deltaTime;
 		Vector3 oldPosition = transform.position;
 		transform.Translate(playerMovement, Space.World);
 
@@ -481,8 +477,7 @@ public class Player : MonoBehaviour
 	    }
 
 	    transform.position = teleportGun.LastBullet.transform.position;
-	    AudioSource.PlayClipAtPoint(teleportGun.LastBullet.GetComponent<Bullet>().BulletHitClip, transform.position); 
-        //TODO LATER performance-wise, remove get component by making bullet script a member of gun
+	    AudioSource.PlayClipAtPoint(teleportGun.LastBulletScript.BulletHitClip, transform.position);
 
 	    if (TeleportAppearPrefab != null)
 	    {

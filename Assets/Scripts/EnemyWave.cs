@@ -9,8 +9,6 @@ using UnityEngine.UI;
 public class EnemyWave
 {
 	private const float DistanceToBreakConnection = 2.0f;
-	private const float ScoreTextMinClamp = -330.0f; //TODO LATER big magic number here!
-	private const float ScoreTextMaxClamp = 500.0f;
 
 	private List<GameObject> _enemyList;
 	private List<BasicEnemy> _enemyScripts;
@@ -20,6 +18,8 @@ public class EnemyWave
 	private LineRenderer _waveLineRenderer;
 	private RectTransform _mainCanvasTransform;
 	private GameObject _waveScoreIndicator;
+    private RectTransform _scoreLeftAnchorTransform;
+    private RectTransform _scoreRightAnchorTransform;
 	private Text _waveScoreText;
 	private RectTransform _waveScoreIndicatorTransform;
 	private float _initialWidth;
@@ -46,13 +46,15 @@ public class EnemyWave
 		_waveMultiplier = 0;
 	}
 
-	public void Initialize(Player playerScript, RectTransform mainCanvasTransform, GameObject waveScoreIndicator)
+	public void Initialize(Player playerScript, RectTransform mainCanvasTransform, GameObject waveScoreIndicator, GameObject scoreLeftAnchor, GameObject scoreRightAnchor)
 	{
 		_playerScript = playerScript;
 		_statsManagerScript = Camera.main.GetComponent<StatsManager>();
 		_mainCanvasTransform = mainCanvasTransform;
 		_waveScoreIndicator = waveScoreIndicator;
-		_waveScoreText = _waveScoreIndicator.GetComponent<Text>();
+	    _scoreLeftAnchorTransform = scoreLeftAnchor.GetComponent<RectTransform>();
+        _scoreRightAnchorTransform = scoreRightAnchor.GetComponent<RectTransform>();
+        _waveScoreText = _waveScoreIndicator.GetComponent<Text>();
 		_waveScoreIndicatorTransform = _waveScoreIndicator.GetComponent<RectTransform>();
 	}
 
@@ -162,7 +164,7 @@ public class EnemyWave
 		//TODO LATER perhaps we should separate the UI
 		Vector3 enemyScreenPos = Camera.main.WorldToScreenPoint(_enemyList[_farthestEnemyIndex].transform.position);
 		float newPosX = enemyScreenPos.x - _mainCanvasTransform.sizeDelta.x * 0.5f;
-		newPosX = Mathf.Clamp(newPosX, ScoreTextMinClamp, ScoreTextMaxClamp);
+		newPosX = Mathf.Clamp(newPosX, _scoreLeftAnchorTransform.anchoredPosition.x, _scoreRightAnchorTransform.anchoredPosition.x);
 
 		int baseWaveScore = GetBaseWaveScore();
 
