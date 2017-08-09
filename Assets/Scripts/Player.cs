@@ -52,6 +52,7 @@ public class Player : MonoBehaviour
 
 	private bool _isInvulnerable;
     private bool _losesHealth;
+    private bool _inTutorial;
 
 	private SpawnManager _spawnManagerScript;
 	private StatsManager _statsManagerScript;
@@ -89,6 +90,7 @@ public class Player : MonoBehaviour
 		};
         _currentMovementState = MovementState.MsFreeMovement;
 	    _losesHealth = true;
+        _inTutorial = false;
 	}
 
 	private void Start()
@@ -163,7 +165,7 @@ public class Player : MonoBehaviour
 			_spriteRenderer.enabled = true;
 			SetChildRenderers(true);
 		}
-        
+
 	    if (!SpawnManager.IsGamePaused())
 	    {
 	        //shooting
@@ -182,9 +184,9 @@ public class Player : MonoBehaviour
 	        }
 	        else
 	        {
-	            fireInputGiven = Input.GetKey(KeyCode.Z);
-	            speedUpInputGiven = Input.GetKeyDown(KeyCode.X);
-	            teleportInputGiven = Input.GetKeyDown(KeyCode.C);
+	            fireInputGiven = Input.GetButton("Fire1");
+	            speedUpInputGiven = Input.GetButtonDown("Fire2");
+	            teleportInputGiven = Input.GetButtonDown("Fire3");
 	        }
 
 	        if (fireInputGiven && stunGun.CanBeFired && Time.time - stunGun.LastFireTime > stunGun.Cooldown)
@@ -285,15 +287,16 @@ public class Player : MonoBehaviour
 			return false;
 		}
 
+	    if (_inTutorial)
+	    {
+	        _spawnManagerScript.TutorialOnPlayerDeath();
+        }
+
 	    if (_losesHealth)
 	    {
 	        --PlayerHealth;
 	        _statsManagerScript.HealthChangeCoroutine(-1);
 	    }
-	    else
-	    {
-	        _spawnManagerScript.TutorialOnPlayerDeath(); //TODO LATER kinda bad code to call this here 
-        }
 
 		if (PlayerHealth == 0)
 		{
@@ -396,6 +399,7 @@ public class Player : MonoBehaviour
 	{
         _currentMovementState = MovementState.MsNoMovement;
 	    _losesHealth = false;
+	    _inTutorial = true;
 
 	    foreach (var gun in _guns.Values)
 	    {
@@ -407,6 +411,7 @@ public class Player : MonoBehaviour
 
     public void EndTutorial()
     {
+        _inTutorial = false;
         foreach (var gun in _guns.Values)
         {
             gun.ResetAmmoUsage();

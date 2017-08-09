@@ -22,7 +22,7 @@ public class PlayerStats
 	private int[] _pickupCountsPerPowerup;
 	private int _movementUpdateCount;
 
-	//TODO flesh it out, add more parameters
+	//TODO STATS should we add more stats to the game?
 	public float PlayerAccuracy { get; private set; }
 	public int HealthDifference { get; private set; }
 	public float MovementAmount { get; private set; }

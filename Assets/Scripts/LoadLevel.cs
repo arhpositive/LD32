@@ -15,13 +15,23 @@ public class LoadLevel : MonoBehaviour
 	public GameObject TutorialToggleObject;
 	
 	public static bool TutorialToggleValue;
+    private static bool _isInitialized = false;
 
 	private void Start()
 	{
-		if (TutorialToggleObject)
-		{
-			TutorialToggleValue = TutorialToggleObject.GetComponent<Toggle>().isOn;
-		}
+	    if (TutorialToggleObject)
+	    {
+	        Toggle toggleComponent = TutorialToggleObject.GetComponent<Toggle>();
+	        if (_isInitialized)
+	        {
+	            toggleComponent.isOn = TutorialToggleValue;
+	        }
+	        else
+	        {
+	            TutorialToggleValue = toggleComponent.isOn;
+	            _isInitialized = true;
+	        }
+        }
 	}
 
 	public void LoadSceneWithIndex(int levelIndex)

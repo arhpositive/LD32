@@ -100,7 +100,7 @@ public class Bullet : MonoBehaviour
 
 	private void OnDestroy()
 	{
-		if (ShotByPlayer)
+		if (ShotByPlayer && _statsManagerScript)
 		{
 			_statsManagerScript.BulletDestructionCoroutine(_destroyedByCollision);
 		}

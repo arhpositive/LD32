@@ -161,7 +161,7 @@ public class EnemyWave
 	private void UpdateWaveScoreIndicator()
 	{
 		//updating high score UI for the wave
-		//TODO LATER perhaps we should separate the UI
+		//TODO UI perhaps we should separate the UI
 		Vector3 enemyScreenPos = Camera.main.WorldToScreenPoint(_enemyList[_farthestEnemyIndex].transform.position);
 		float newPosX = enemyScreenPos.x - _mainCanvasTransform.sizeDelta.x * 0.5f;
 		newPosX = Mathf.Clamp(newPosX, _scoreLeftAnchorTransform.anchoredPosition.x, _scoreRightAnchorTransform.anchoredPosition.x);

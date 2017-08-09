@@ -39,7 +39,7 @@ public class Formation
 
 public class SpawnManager : MonoBehaviour
 {
-	//TODO LATER these bounds are temporary, remove them
+    //debug bounds
 	public GameObject UpBound;
 	public GameObject DownBound;
 
@@ -47,7 +47,8 @@ public class SpawnManager : MonoBehaviour
 	public GameObject CanvasScorePanel;
     public GameObject ScoreLeftAnchor;
     public GameObject ScoreRightAnchor;
-	public GameObject TutorialPanel;
+	public GameObject HelpPopupPanel;
+    public GameObject PausePopupPanel;
 
 	[Header("Prefabs")]
 	public GameObject PlayerPrefab;
@@ -102,19 +103,18 @@ public class SpawnManager : MonoBehaviour
 	private float _tutorialSequenceEventInterval;
 	private bool _popupEventUpcoming;
 	private List<TutorialItem> _tutorialSequenceItems;
-	private bool _tutorialPaused;
-	private Text _tutorialText;
+	private Text _pausePopupText;
 
     private static void PauseGame()
     {
         Time.timeScale = 0.0f;
-        print("Geme paused.");
+        print("Game paused.");
     }
 
     private static void UnpauseGame()
     {
         Time.timeScale = 1.0f;
-        print("Geme unpaused.");
+        print("Game unpaused.");
     }
 
     public static bool IsGamePaused()
@@ -122,13 +122,13 @@ public class SpawnManager : MonoBehaviour
         return Mathf.Approximately(Time.timeScale, 0.0f);
     }
 
-    public static void SpeedUpGame()
+    private static void SpeedUpGame()
     {
         Time.timeScale += 0.1f;
         print("Timescale Up: " + Time.timeScale);
     }
 
-    public static void SlowDownGame()
+    private static void SlowDownGame()
     {
         Time.timeScale -= 0.1f;
         print("Timescale Down: " + Time.timeScale);
@@ -147,7 +147,7 @@ public class SpawnManager : MonoBehaviour
 	{
         UnpauseGame();
 
-		_difficultyManagerScript = Camera.main.GetComponent<DifficultyManager>();
+		_difficultyManagerScript = GetComponent<DifficultyManager>();
 		
 		_enemySpawnMinVertDist = Mathf.Min(ShipGameObjectVertSize + 0.05f, _enemySpawnMaxVertDist);
 		_enemySpawnMinHorzDist = Mathf.Min(PlayerShipColliderHorzSize * 0.5f, _enemySpawnMaxHorzDist);
@@ -167,14 +167,14 @@ public class SpawnManager : MonoBehaviour
 			_canvasRectTransform = CanvasGameObject.GetComponent<RectTransform>();
 		}
 
-		if (TutorialPanel)
+		if (HelpPopupPanel)
 		{
-		    var textComponents = TutorialPanel.GetComponentsInChildren<Text>();
+		    var textComponents = HelpPopupPanel.GetComponentsInChildren<Text>();
 		    foreach (var curText in textComponents)
 		    {
 		        if (curText.CompareTag("InfoText"))
 		        {
-		            _tutorialText = TutorialPanel.GetComponentInChildren<Text>();
+		            _pausePopupText = HelpPopupPanel.GetComponentInChildren<Text>();
 		            break;
 		        }
 		    }
@@ -182,7 +182,6 @@ public class SpawnManager : MonoBehaviour
 
 		ChangeTutorialSequenceState(LoadLevel.TutorialToggleValue);
 		_popupEventUpcoming = false;
-		_tutorialPaused = false;
 		if (_tutorialSequenceIsActive)
 		{
 		    _playerScript.BeginTutorial();
@@ -208,12 +207,13 @@ public class SpawnManager : MonoBehaviour
 			//2. spawn new tutorial element
 			//3. get next element and set next timer
 
-			if (_tutorialPaused)
+			if (IsGamePaused())
 			{
-				if (Input.GetKeyDown(KeyCode.Space))
+                if (Input.GetButtonDown("TogglePause") && HelpPopupPanel.activeSelf)
 				{
-					ResumeTutorialAfterPopup(true);
+					ResumeGameAfterPopup(true, HelpPopupPanel);
 				    _tutorialSequenceEventInterval = _tutorialSequenceItems[0].TimeToWaitAfterEnd;
+                    Input.ResetInputAxes(); //clear input so that it's not being used for this frame
                 }
 			}
 
@@ -222,12 +222,14 @@ public class SpawnManager : MonoBehaviour
 		    {
 		        if (_popupEventUpcoming)
 		        {
+                    print("Event upcoming!");
 		            _tutorialSequenceLastEventTime = Time.time;
-		            PopupAndPause(_tutorialSequenceItems[0].StandardPopupText);
+                    PopupAndPause(HelpPopupPanel, _pausePopupText, SelectTutorialTextToDisplay());
 		            _tutorialSequenceEventInterval = _tutorialSequenceItems[0].TimeToWaitAfterEnd;
                 }
 		        else
 		        {
+                    print("Switch to next!");
 		            CheckTutorialEventAccomplishment();
 		        }
 		    }
@@ -236,14 +238,14 @@ public class SpawnManager : MonoBehaviour
 		        //check if event is triggered
 		        if (_tutorialSequenceItems[0].CheckTrigger())
 		        {
-                    PopupAndPause(_tutorialSequenceItems[0].TriggerPopupText);
+                    PopupAndPause(HelpPopupPanel, _pausePopupText, _tutorialSequenceItems[0].TriggerPopupText);
 		            print("Voila!");
                 }
 		    }
 		}
 		else
 		{
-			if (Time.time - _previousWaveSpawnTime > _waveSpawnInterval)
+            if (Time.time - _previousWaveSpawnTime > _waveSpawnInterval)
 			{
 				SpawnNewWave();
 				_previousWaveSpawnTime = Time.time;
@@ -268,8 +270,23 @@ public class SpawnManager : MonoBehaviour
 			}
 		}
 
-		//update each enemy wave and remove waves which have no remaining enemies
-		foreach (EnemyWave currentWave in _enemyWaves)
+	    if (Input.GetButtonDown("TogglePause")) //input is previously cleared if the tutorial menu was active
+	    {
+	        if (IsGamePaused())
+	        {
+	            if (PausePopupPanel.activeSelf)
+	            {
+	                ResumeGameAfterPause();
+                }
+	        }
+	        else
+	        {
+	            PopupAndPause(PausePopupPanel);
+	        }
+	    }
+
+        //update each enemy wave and remove waves which have no remaining enemies
+        foreach (EnemyWave currentWave in _enemyWaves)
 		{
 			currentWave.Update();
 		}
@@ -399,30 +416,38 @@ public class SpawnManager : MonoBehaviour
 
     public void TutorialOnPlayerDeath()
     {
-        PopupAndPause("Whoops! You got hit. A few more hits and it might mean game over. Try not to hit enemies, bullets or bombs.");
+        PopupAndPause(HelpPopupPanel, _pausePopupText, "Whoops! You got hit. A few more hits and it might mean game over. Try not to hit enemies, bullets or bombs.");
+    }
+
+    private string SelectTutorialTextToDisplay()
+    {
+        return CheckActiveControlModel.CurrentControlState == CheckActiveControlModel.ControlModel.CmKeyboard ||
+            _tutorialSequenceItems[0].AlternativePopupText == ""
+                ? _tutorialSequenceItems[0].StandardPopupText
+                : _tutorialSequenceItems[0].AlternativePopupText;
     }
 
     private void FillTutorialSequence()
     {
-        float powerupTimer = 10.0f;
-        float waveTimer = 10.0f;
+        const float powerupTimer = 10.0f;
+        const float waveTimer = 10.0f;
 
-        //TODO LATER changing key config should also change tutorial
-        //TODO LATER add controller support tooltips
+        //TODO LATER key help text is hardcoded, whereas making it modular would make changing key configurations possible
 
 		_tutorialSequenceItems = new List<TutorialItem>
 		{
 			new TutorialItem(TutorialType.TtNone, 3.0f),
 			new TutorialItem(TutorialType.TtNone, 3.0f, "Welcome to Dislocator Tutorial."),
 
-			new TutorialItem(TutorialType.TtActivateMovement, 3.0f, "You can move your spaceship up or down with arrow keys or W and S keys."),
+			new TutorialItem(TutorialType.TtActivateMovement, 3.0f, "You can move your spaceship up or down with arrow keys.", 0f, "", null, 
+                "You can move your spaceship up or down with directional pad."),
 		    new TutorialWaveItem(2, 0, waveTimer, "This is a basic wave of enemies. Avoid colliding with them.", 1.5f),
 		    new TutorialWaveItem(4, 1, waveTimer, "This is a more advanced wave. Be careful, these ships can shoot bullets.", 1.5f),
 
 		    new TutorialPowerupItem(PowerupType.PtHealth, powerupTimer, "This is a health power-up to give you an additional life. Pick it up.", 2f,
 		        "Great! Try to collect as much health power-ups as you can.", PlayerIncreasedHealth),
 
-            new TutorialActivateGunItem(GunType.GtStun, 5.0f, "You can fire your Stun Gun with Z key."),
+            new TutorialActivateGunItem(GunType.GtStun, 5.0f, "You can fire your Stun Gun with Z key.", 0f, "", null, "You can fire your Stun Gun with (A) button."),
 			new TutorialWaveItem(3, 1, waveTimer, "Try your Stun Gun on these enemies. It will stop their engines for a short time.", 1.5f,
 			    "Good shot! Enemies shot by a stun bullet won't be able to shoot bullets for a while.", FirstWaveIsDisrupted),
 
@@ -431,7 +456,7 @@ public class SpawnManager : MonoBehaviour
 
             new TutorialPowerupItem(PowerupType.PtSpeedup, powerupTimer, "This is an ammo for your Speed-Up Gun. Pick it up by moving through it.", 2f, 
                 "", SpeedUpGunHasAmmo),
-		    new TutorialActivateGunItem(GunType.GtSpeedUp, 5.0f, "You can fire your Speed-Up Gun with X key."),
+		    new TutorialActivateGunItem(GunType.GtSpeedUp, 5.0f, "You can fire your Speed-Up Gun with X key.", 0f, "", null, "You can fire your Speed-Up Gun with (B) button."),
 
             new TutorialWaveItem(3, 1, waveTimer, "Try your Speed-Up Gun on these enemies. It will make them go much faster.", 1.5f,
 		        "Nice! Notice that as the connection between enemy ships gets thinner, you get more points.", EnemyHitWithSpeedUp),
@@ -441,13 +466,14 @@ public class SpawnManager : MonoBehaviour
 
             new TutorialPowerupItem(PowerupType.PtBomb, powerupTimer, "This is a bomb and it should be avoided as it will explode on impact.", 2f),
 
-            new TutorialItem(TutorialType.TtActivateMovement, 3.0f, "You can move your spaceship left or right with arrow keys or A and D keys."),
+            new TutorialItem(TutorialType.TtActivateMovement, 3.0f, "You can move your spaceship left or right with arrow keys.", 0f, "", null, 
+                "You can move your spaceship left or right with directional pad."),
             
             new TutorialPowerupItem(PowerupType.PtTeleport, powerupTimer, "This is an ammo for your Teleport Gun. Pick it up.", 2f,
 			    "", TeleportGunHasAmmo),
-		    new TutorialActivateGunItem(GunType.GtTeleport, 3.0f, "You can fire your Teleport Gun with C key.", 0f, "", TeleportIsPossible),
+		    new TutorialActivateGunItem(GunType.GtTeleport, 3.0f, "You can fire your Teleport Gun with C key.", 0f, "", TeleportIsPossible, "You can fire your Teleport Gun with (X) button."),
             new TutorialItem(TutorialType.TtNone, 5.0f, "Pressing C if there's a teleport beacon on the scene will beam you to its location.", 0f, 
-                "Good job! You can avoid enemies by teleporting.", TeleportSucceeded),
+                "Good job! You can avoid enemies by teleporting.", TeleportSucceeded, "Pressing (X) if there's a teleport beacon on the scene will beam you to its location."),
             
             new TutorialWaveItem(7, 1, waveTimer, "Try to use your weapons to get through this wave of enemies without getting hit.", 1.5f),
 
@@ -476,7 +502,7 @@ public class SpawnManager : MonoBehaviour
 			if (Mathf.Approximately(timeToPopup, 0.0f))
 			{
 				print("Popup now!");
-				PopupAndPause(_tutorialSequenceItems[0].StandardPopupText);
+                PopupAndPause(HelpPopupPanel, _pausePopupText, SelectTutorialTextToDisplay());
 			    _tutorialSequenceEventInterval = _tutorialSequenceItems[0].TimeToWaitAfterEnd;
             }
 			else
@@ -511,18 +537,21 @@ public class SpawnManager : MonoBehaviour
 		}
 	}
 
-	private void PopupAndPause(string popupText)
+	private void PopupAndPause(GameObject popupPanel, Text popupTextField = null, string popupText = "")
 	{
-		if (popupText == "")
+        print("popup!");
+		if (popupTextField && popupText == "")
 		{
-			ResumeTutorialAfterPopup(false);
+			ResumeGameAfterPopup(false, popupPanel);
         }
 		else
 		{
             PauseGame();
-			_tutorialPaused = true;
-			_tutorialText.text = popupText;
-			TutorialPanel.SetActive(true);
+		    if (popupTextField)
+		    {
+		        popupTextField.text = popupText;
+            }
+		    popupPanel.SetActive(true);
 		}
 	}
 
@@ -553,17 +582,25 @@ public class SpawnManager : MonoBehaviour
 		}
 	}
 
-	private void ResumeTutorialAfterPopup(bool popupTriggered)
+    public void ResumeGameAfterPause() //TODO LATER bad naming between resumegameafterpause and resumegameafterpopup
+    {
+        ResumeGameAfterPopup(true, PausePopupPanel);
+    }
+
+	private void ResumeGameAfterPopup(bool popupTriggered, GameObject popupPanel)
 	{
+	    bool pausePopupWasActive = PausePopupPanel.activeSelf;
+
 		if (popupTriggered)
 		{
             UnpauseGame();
-			_tutorialPaused = false;
-			TutorialPanel.SetActive(false);
+		    popupPanel.SetActive(false);
 		}
-		
-		
-		_popupEventUpcoming = false;
+
+	    if (_tutorialSequenceIsActive && !pausePopupWasActive)
+	    {
+	        _popupEventUpcoming = false;
+        }
 	}
 
 	private void CheckTutorialEventAccomplishment()
@@ -850,7 +887,7 @@ public class SpawnManager : MonoBehaviour
 			Assert.IsNotNull(enemy);
 
 			BasicMove basicMoveScript = enemy.GetComponent<BasicMove>();
-			//TODO LATER this might be completely unnecessary, but then again we might need it in the future
+			//TODO LATER setting move direction of enemy is currently completely unnecessary, every enemy moves left, then again we might need it in the future
 			basicMoveScript.SetMoveDir(selectedFormationEntities[i].MoveDir, false);
 
 			curEnemyWave.AddNewEnemy(enemy);

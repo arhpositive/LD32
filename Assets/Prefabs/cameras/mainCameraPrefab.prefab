@@ -20,6 +20,7 @@ GameObject:
   - component: {fileID: 11435500}
   - component: {fileID: 114368962382954154}
   - component: {fileID: 114215934451815490}
+  - component: {fileID: 114563065195852862}
   m_Layer: 0
   m_Name: mainCameraPrefab
   m_TagString: MainCamera
@@ -181,11 +182,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 36404cded83f6b746b819d834707c786, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  IsGameScene: 1
   UpBound: {fileID: 0}
   DownBound: {fileID: 0}
   CanvasGameObject: {fileID: 0}
   CanvasScorePanel: {fileID: 0}
+  ScoreLeftAnchor: {fileID: 0}
+  ScoreRightAnchor: {fileID: 0}
+  HelpPopupPanel: {fileID: 0}
+  PausePopupPanel: {fileID: 0}
   PlayerPrefab: {fileID: 114074, guid: 58cda14e50f6d8d42a46b3077f960e56, type: 2}
   EnemyPrefabArray:
   - {fileID: 1834478848205664, guid: a05d495ce9bda314e945751860bed8aa, type: 2}
@@ -202,12 +206,6 @@ MonoBehaviour:
   - {fileID: 169616, guid: 5d7a9305dd987d44ca4c1ecf396b3599, type: 2}
   NegPowerupPrefabArray:
   - {fileID: 113784, guid: a461906a5484a2e48b374b9d9d771f02, type: 2}
-  MeteorPrefabArray:
-  - {fileID: 105448, guid: 4318761234289f640a7017713d221b7b, type: 2}
-  - {fileID: 173280, guid: 8dfdc579ad197d34a8f88fe5a10abd54, type: 2}
-  StarPrefabArray:
-  - {fileID: 157426, guid: c5f313e4e03d12a4ba060b73e0120301, type: 2}
-  - {fileID: 1130765423015340, guid: d44a5706e471dd1419db2d04cdb79e99, type: 2}
   ShipConnectionPrefab: {fileID: 1555962352551430, guid: 96ccce5796ddedf43af70c93d2365fe6,
     type: 2}
   WaveScoreIndicatorPrefab: {fileID: 1311986553129060, guid: 19b943d9b2a08b343a7d9b41098c96c5,
@@ -217,8 +215,6 @@ MonoBehaviour:
   MinHugeEnemySpawnIntervalCoef: 90
   MaxHugeEnemySpawnIntervalCoef: 180
   PowerupSpawnBaseInterval: 3
-  MeteorCount: 30
-  StarCount: 300
 --- !u!114 &11425842
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -375,5 +371,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3b94c3b43a087594ba3fd2bfa7bc8a69, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &114563065195852862
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 102966}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5ac0c22c16830804c8a741e3faff2c65, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 

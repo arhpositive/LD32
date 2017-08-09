@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 8225114}
   - component: {fileID: 11435692}
   - component: {fileID: 114145867316683640}
+  - component: {fileID: 114094123017587456}
   m_Layer: 0
   m_Name: menuCameraPrefab
   m_TagString: MainCamera
@@ -210,6 +211,17 @@ Prefab:
   m_ParentPrefab: {fileID: 0}
   m_RootGameObject: {fileID: 154240}
   m_IsPrefabParent: 1
+--- !u!114 &114094123017587456
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 154240}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5ac0c22c16830804c8a741e3faff2c65, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &114145867316683640
 MonoBehaviour:
   m_ObjectHideFlags: 1
