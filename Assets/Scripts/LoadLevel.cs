@@ -15,6 +15,7 @@ public class LoadLevel : MonoBehaviour
 	public GameObject TutorialToggleObject;
 	
 	public static bool TutorialToggleValue;
+    // ReSharper disable once RedundantDefaultMemberInitializer
     private static bool _isInitialized = false;
 
 	private void Start()

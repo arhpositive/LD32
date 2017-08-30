@@ -22,6 +22,7 @@ public enum MovementState
 
 public class Player : MonoBehaviour
 {
+    // ReSharper disable once RedundantDefaultMemberInitializer
 	public static int PlayerScore = 0;
 
 	public bool UseTouchControls;
