@@ -48,7 +48,7 @@ public class CheckActiveControlModel : MonoBehaviour
 
     private bool ControllerInputReceived()
     {
-        //TODO NEXT this is only valid for the first joystick connected to the computer
+        //TODO LATER this is only valid for the first joystick connected to the computer
         // joystick buttons
         if (Input.GetKey(KeyCode.Joystick1Button0) ||
             Input.GetKey(KeyCode.Joystick1Button1) ||

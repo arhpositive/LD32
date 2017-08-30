@@ -97,6 +97,10 @@ public class SpawnManager : MonoBehaviour
 
 	private bool _hugeEnemyExists;
 
+    //UI Properties
+    private float _scoreLeftAnchorXPos;
+    private float _scoreRightAnchorXPos;
+
 	//Tutorial Properties
 	private bool _tutorialSequenceIsActive;
 	private float _tutorialSequenceLastEventTime;
@@ -162,7 +166,10 @@ public class SpawnManager : MonoBehaviour
 		_formations = new List<Formation>();
 		_enemyWaves = new List<EnemyWave>();
 
-		if (CanvasGameObject)
+	    _scoreLeftAnchorXPos = ScoreLeftAnchor.GetComponent<RectTransform>().anchoredPosition.x;
+	    _scoreRightAnchorXPos = ScoreRightAnchor.GetComponent<RectTransform>().anchoredPosition.x;
+
+        if (CanvasGameObject)
 		{
 			_canvasRectTransform = CanvasGameObject.GetComponent<RectTransform>();
 		}
@@ -276,7 +283,7 @@ public class SpawnManager : MonoBehaviour
 	        {
 	            if (PausePopupPanel.activeSelf)
 	            {
-	                ResumeGameAfterPause();
+	                ResumeGameAfterPopup(true, PausePopupPanel);
                 }
 	        }
 	        else
@@ -316,6 +323,8 @@ public class SpawnManager : MonoBehaviour
 
 	private void PregeneratePossibleWaves()
 	{
+        //TODO BOSS devise a boss fight of some kind, stopping movement of player, encountering boss and then moving on
+
 		// TODO LATER include different movement patterns, might involve waypoints, etc.
 		// waypoint system could make the wave change movement direction after a given amount of time.
 		// be careful about randomizing too much as it will make us lose control over certain difficulty features
@@ -582,11 +591,6 @@ public class SpawnManager : MonoBehaviour
 		}
 	}
 
-    public void ResumeGameAfterPause() //TODO LATER bad naming between resumegameafterpause and resumegameafterpopup
-    {
-        ResumeGameAfterPopup(true, PausePopupPanel);
-    }
-
 	private void ResumeGameAfterPopup(bool popupTriggered, GameObject popupPanel)
 	{
 	    bool pausePopupWasActive = PausePopupPanel.activeSelf;
@@ -639,7 +643,7 @@ public class SpawnManager : MonoBehaviour
 
 		GameObject lineRendererObject = Instantiate(ShipConnectionPrefab, Vector3.zero, Quaternion.identity);
 		EnemyWave curEnemyWave = new EnemyWave(lineRendererObject.GetComponent<LineRenderer>());
-		curEnemyWave.Initialize(_playerScript, _canvasRectTransform, waveScoreIndicator, ScoreLeftAnchor, ScoreRightAnchor);
+		curEnemyWave.Initialize(_playerScript, _canvasRectTransform, waveScoreIndicator, _scoreLeftAnchorXPos, _scoreRightAnchorXPos);
 		for (int i = 0; i < selectedFormationEntities.Count; i++)
 		{
 			Vector2 enemyPos;
@@ -856,7 +860,10 @@ public class SpawnManager : MonoBehaviour
 
 		GameObject lineRendererObject = Instantiate(ShipConnectionPrefab, Vector3.zero, Quaternion.identity);
 		EnemyWave curEnemyWave = new EnemyWave(lineRendererObject.GetComponent<LineRenderer>());
-		curEnemyWave.Initialize(_playerScript, _canvasRectTransform, waveScoreIndicator, ScoreLeftAnchor, ScoreRightAnchor);
+        
+        //TODO NEXT adjust left anchor based on how many waves are remaining prior to the current wave
+
+		curEnemyWave.Initialize(_playerScript, _canvasRectTransform, waveScoreIndicator, _scoreLeftAnchorXPos, _scoreRightAnchorXPos);
 		for (int i = 0; i < selectedFormationEntities.Count; i++)
 		{
 			int enemyKind = shipTypes[i];
@@ -931,9 +938,15 @@ public class SpawnManager : MonoBehaviour
 		int hugeEnemyIndex = Random.Range(0, HugeEnemyPrefabArray.Length);
 		GameObject hugeEnemyPrefab = HugeEnemyPrefabArray[hugeEnemyIndex];
 		HugeEnemy hugeEnemyScript = hugeEnemyPrefab.GetComponent<HugeEnemy>();
+        
+	    float diffOfPosition = hugeEnemyScript.VerticalSpawnLimits[1] - hugeEnemyScript.VerticalSpawnLimits[0];
+	    int hugeEnemyIntrusionSize = (int)DifficultyParameter.DpHugeEnemyIntrusionSize;
 
-		//TODO DIFFICULTY a new difficulty parameter could manage how big a portion of play area a huge enemy obstructs
-		Vector3 hugeEnemyPos = new Vector2(hugeEnemyScript.HorizontalSpawnCoord, Random.Range(hugeEnemyScript.VerticalSpawnLimits[0], hugeEnemyScript.VerticalSpawnLimits[1]));
+	    float curDiffCoef = (float)(hugeEnemyIntrusionSize - 1) / (GameConstants.MaxDifficulty - GameConstants.MinDifficulty); // 4/4, 3/4, 2/4, 1/4, 0/4
+
+	    float verticalSpawnCoord = hugeEnemyScript.VerticalSpawnLimits[0] + diffOfPosition * curDiffCoef;
+
+        Vector3 hugeEnemyPos = new Vector2(hugeEnemyScript.HorizontalSpawnCoord, verticalSpawnCoord);
 		SpawnHugeEnemyOnPosition(hugeEnemyPrefab, hugeEnemyScript, hugeEnemyPos);
 	}
 

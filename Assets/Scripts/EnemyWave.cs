@@ -18,8 +18,8 @@ public class EnemyWave
 	private LineRenderer _waveLineRenderer;
 	private RectTransform _mainCanvasTransform;
 	private GameObject _waveScoreIndicator;
-    private RectTransform _scoreLeftAnchorTransform;
-    private RectTransform _scoreRightAnchorTransform;
+    private float _leftAnchorXPos;
+    private float _rightAnchorXPos;
 	private Text _waveScoreText;
 	private RectTransform _waveScoreIndicatorTransform;
 	private float _initialWidth;
@@ -46,14 +46,14 @@ public class EnemyWave
 		_waveMultiplier = 0;
 	}
 
-	public void Initialize(Player playerScript, RectTransform mainCanvasTransform, GameObject waveScoreIndicator, GameObject scoreLeftAnchor, GameObject scoreRightAnchor)
+	public void Initialize(Player playerScript, RectTransform mainCanvasTransform, GameObject waveScoreIndicator, float leftAnchorXPos, float rightAnchorXPos)
 	{
 		_playerScript = playerScript;
 		_statsManagerScript = Camera.main.GetComponent<StatsManager>();
 		_mainCanvasTransform = mainCanvasTransform;
 		_waveScoreIndicator = waveScoreIndicator;
-	    _scoreLeftAnchorTransform = scoreLeftAnchor.GetComponent<RectTransform>();
-        _scoreRightAnchorTransform = scoreRightAnchor.GetComponent<RectTransform>();
+	    _leftAnchorXPos = leftAnchorXPos;
+	    _rightAnchorXPos = rightAnchorXPos;
         _waveScoreText = _waveScoreIndicator.GetComponent<Text>();
 		_waveScoreIndicatorTransform = _waveScoreIndicator.GetComponent<RectTransform>();
 	}
@@ -158,13 +158,15 @@ public class EnemyWave
 		}
 	}
 
-	private void UpdateWaveScoreIndicator()
+    //TODO UI perhaps we should separate the UI
+    private void UpdateWaveScoreIndicator()
 	{
+        //TODO NEXT ui should not overwrite each other, wait for the last wave to get destroyed before moving on to leftmost spot!
+
 		//updating high score UI for the wave
-		//TODO UI perhaps we should separate the UI
 		Vector3 enemyScreenPos = Camera.main.WorldToScreenPoint(_enemyList[_farthestEnemyIndex].transform.position);
 		float newPosX = enemyScreenPos.x - _mainCanvasTransform.sizeDelta.x * 0.5f;
-		newPosX = Mathf.Clamp(newPosX, _scoreLeftAnchorTransform.anchoredPosition.x, _scoreRightAnchorTransform.anchoredPosition.x);
+		newPosX = Mathf.Clamp(newPosX, _leftAnchorXPos, _rightAnchorXPos);
 
 		int baseWaveScore = GetBaseWaveScore();
 
@@ -172,6 +174,7 @@ public class EnemyWave
 		_waveScoreText.text = baseWaveScore.ToString(CultureInfo.InvariantCulture) + " x " +
 							  _waveMultiplier.ToString(CultureInfo.InvariantCulture);
 
+        //compare with best wave score to determine text color
 		int playerBestWaveBaseScore = _statsManagerScript.GetAllTimeStats().BestWaveBaseScore;
 		if (playerBestWaveBaseScore > 0.0f)
 		{

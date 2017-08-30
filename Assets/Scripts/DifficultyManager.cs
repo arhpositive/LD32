@@ -10,12 +10,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
 
-//TODO DIFFICULTY we may have to increase the number of difficulty multipliers here
 public enum DifficultyParameter
 {
 	DpShipFireRateIncrease,
 	DpWaveSpawnRateIncrease, 
-	DpHugeEnemySpawnRateIncrease, //TODO LATER might not be necessary depending on how hard huge enemies are
+	DpHugeEnemySpawnRateIncrease,
+    DpHugeEnemyIntrusionSize,
 	DpWaveHasNoExitCoef,
 	DpPosPowerupSpawnRateDecrease,
 	DpNegPowerupSpawnRateIncrease,
@@ -180,6 +180,9 @@ public class DifficultyManager : MonoBehaviour
 
 	public float GetDifficultyMultiplier(DifficultyParameter difficultyParameter)
 	{
+        // returned values for parameters between 1 to 5 are the following:
+        // 0.44 | 0.67 | 1 | 1.5 | 2.25
+
 		int difficultyDifference = GameConstants.MidDifficulty - DifficultyCoefs[difficultyParameter];
 		float difficultyMultiplier = Mathf.Pow(GameConstants.DifficultyCoef, difficultyDifference);
 		return difficultyMultiplier;
