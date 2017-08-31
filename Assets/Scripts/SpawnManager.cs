@@ -623,63 +623,22 @@ public class SpawnManager : MonoBehaviour
 	
 	private void SpawnTutorialWave(TutorialWaveItem tutorialWaveItem)
 	{
-		//TODO LATER obvious duplications exist between this and SpawnNewWave, what to do about them?
-
 		float minVerticalStartCoord = _vertMinShipSpawnCoord;
 		float maxVerticalStartCoord = _vertMaxShipSpawnCoord - (tutorialWaveItem.EnemyCountInWave - 1) * _enemySpawnMaxVertDist;
 
 		//V. Select Enemies From Formation List
-		List<WaveEntity> selectedFormationEntities = new List<WaveEntity>();
-		for (int i = 0; i < tutorialWaveItem.EnemyCountInWave; ++i)
-		{
-			selectedFormationEntities.Add(_formations[0].WaveEntities[i]);
-		}
-		selectedFormationEntities.Sort(FormationComparison);
+	    List<WaveEntity> selectedFormationEntities = SelectEnemiesFromFormation(tutorialWaveItem.EnemyCountInWave);
+        
+        //ship type is the same for the tutorial
+	    int[] shipTypes = new int[selectedFormationEntities.Count];
+	    for (int i = 0; i < shipTypes.Length; ++i)
+	    {
+	        shipTypes[i] = tutorialWaveItem.EnemyTypeIndex;
 
-		int enemyKind = tutorialWaveItem.EnemyTypeIndex;
-		GameObject enemyPrefab = EnemyPrefabArray[enemyKind];
-		BasicEnemy enemyPrefabScript = enemyPrefab.GetComponent<BasicEnemy>();
+	    }
 
-		//VII. Spawn Enemies
-		GameObject waveScoreIndicator = Instantiate(WaveScoreIndicatorPrefab);
-		waveScoreIndicator.transform.SetParent(CanvasScorePanel.transform, false);
-
-		GameObject lineRendererObject = Instantiate(ShipConnectionPrefab, Vector3.zero, Quaternion.identity);
-		EnemyWave curEnemyWave = new EnemyWave(lineRendererObject.GetComponent<LineRenderer>());
-		curEnemyWave.Initialize(_playerScript, _canvasRectTransform, waveScoreIndicator, _scoreLeftAnchorXPos, _scoreRightAnchorXPos);
-		for (int i = 0; i < selectedFormationEntities.Count; i++)
-		{
-			Vector2 enemyPos;
-			if (i > 0)
-			{
-				Vector2 posDiff = selectedFormationEntities[i].Position - selectedFormationEntities[i - 1].Position;
-
-				int xPosDiff = (int)posDiff.x;
-				int yPosDiff = (int)posDiff.y;
-
-				int xIncrement = xPosDiff != 0 ? Math.Sign(xPosDiff) : 0;
-				int yIncrement = yPosDiff != 0 ? Math.Sign(yPosDiff) : 0;
-
-				Vector3 previousEnemyPos = curEnemyWave.GetLastEnemyPosition();
-
-				enemyPos = new Vector2(previousEnemyPos.x + xIncrement * _enemySpawnMaxHorzDist, previousEnemyPos.y + yIncrement * _enemySpawnMaxVertDist);
-			}
-			else
-			{
-				enemyPos = new Vector2(enemyPrefabScript.HorizontalSpawnCoord + selectedFormationEntities[i].Position.x * _enemySpawnMaxHorzDist, Random.Range(minVerticalStartCoord, maxVerticalStartCoord));
-			}
-
-			GameObject enemy = Instantiate(enemyPrefab, enemyPos, Quaternion.identity);
-			Assert.IsNotNull(enemy);
-
-			BasicMove basicMoveScript = enemy.GetComponent<BasicMove>();
-			basicMoveScript.SetMoveDir(selectedFormationEntities[i].MoveDir, false);
-
-			curEnemyWave.AddNewEnemy(enemy);
-			enemy.GetComponent<BasicEnemy>().Initialize(_playerScript, _difficultyManagerScript, curEnemyWave);
-		}
-		curEnemyWave.FinalizeWidthNodes();
-		_enemyWaves.Add(curEnemyWave);
+	    //VII. Spawn Enemies
+        SpawnEnemies(selectedFormationEntities, shipTypes, minVerticalStartCoord, maxVerticalStartCoord, _enemySpawnMaxHorzDist, _enemySpawnMaxVertDist, _enemySpawnMaxHorzDist);
 	}
 
 	//Generate new waves and spawn them on scene
@@ -795,12 +754,7 @@ public class SpawnManager : MonoBehaviour
 		}
 
 		//V. Select Enemies From Formation List
-		List<WaveEntity> selectedFormationEntities = new List<WaveEntity>();
-		for (int i = 0; i < enemyCount; ++i)
-		{
-			selectedFormationEntities.Add(selectedFormation.WaveEntities[i]);
-		}
-		selectedFormationEntities.Sort(FormationComparison);
+	    List<WaveEntity> selectedFormationEntities = SelectEnemiesFromFormation(enemyCount);
 
 		//VI. Determine Advanced Enemy Count
 		int enemyTypeCount = EnemyPrefabArray.Length;
@@ -858,52 +812,68 @@ public class SpawnManager : MonoBehaviour
 		}
 
 		//VII. Spawn Enemies
-		GameObject waveScoreIndicator = Instantiate(WaveScoreIndicatorPrefab);
-		waveScoreIndicator.transform.SetParent(CanvasScorePanel.transform, false);
-
-		GameObject lineRendererObject = Instantiate(ShipConnectionPrefab, Vector3.zero, Quaternion.identity);
-		EnemyWave curEnemyWave = new EnemyWave(lineRendererObject.GetComponent<LineRenderer>());
-
-		curEnemyWave.Initialize(_playerScript, _canvasRectTransform, waveScoreIndicator, _scoreLeftAnchorXPos, _scoreRightAnchorXPos);
-		for (int i = 0; i < selectedFormationEntities.Count; i++)
-		{
-			int enemyKind = shipTypes[i];
-			GameObject enemyPrefab = EnemyPrefabArray[enemyKind];
-			BasicEnemy enemyPrefabScript = enemyPrefab.GetComponent<BasicEnemy>();
-
-			Vector2 enemyPos;
-			if (i > 0)
-			{
-				Vector2 posDiff = selectedFormationEntities[i].Position - selectedFormationEntities[i - 1].Position;
-
-				int xPosDiff = (int) posDiff.x;
-				int yPosDiff = (int) posDiff.y;
-
-				int xIncrement = xPosDiff != 0 ? Math.Sign(xPosDiff) : 0;
-				int yIncrement = yPosDiff != 0 ? Math.Sign(yPosDiff) : 0;
-
-				Vector3 previousEnemyPos = curEnemyWave.GetLastEnemyPosition();
-
-				enemyPos = new Vector2(previousEnemyPos.x + xIncrement*enemyHorizontalDist, previousEnemyPos.y + yIncrement*enemyVerticalDist);
-			}
-			else
-			{
-				enemyPos = new Vector2(enemyPrefabScript.HorizontalSpawnCoord + selectedFormationEntities[i].Position.x*maxEnemyHorizontalDist, Random.Range(minVerticalStartCoord, maxVerticalStartCoord));
-			}
-
-			GameObject enemy = Instantiate(enemyPrefab, enemyPos, Quaternion.identity);
-			Assert.IsNotNull(enemy);
-
-			BasicMove basicMoveScript = enemy.GetComponent<BasicMove>();
-			//TODO LATER setting move direction of enemy is currently completely unnecessary, every enemy moves left, then again we might need it in the future
-			basicMoveScript.SetMoveDir(selectedFormationEntities[i].MoveDir, false);
-
-			curEnemyWave.AddNewEnemy(enemy);
-			enemy.GetComponent<BasicEnemy>().Initialize(_playerScript, _difficultyManagerScript, curEnemyWave);
-		}
-		curEnemyWave.FinalizeWidthNodes();
-		_enemyWaves.Add(curEnemyWave);
+		SpawnEnemies(selectedFormationEntities, shipTypes, minVerticalStartCoord, maxVerticalStartCoord, enemyHorizontalDist, enemyVerticalDist, maxEnemyHorizontalDist);
 	}
+
+    private List<WaveEntity> SelectEnemiesFromFormation(int enemyCountInWave)
+    {
+        List<WaveEntity> selectedFormationEntities = new List<WaveEntity>();
+        for (int i = 0; i < enemyCountInWave; ++i)
+        {
+            selectedFormationEntities.Add(_formations[0].WaveEntities[i]);
+        }
+        selectedFormationEntities.Sort(FormationComparison);
+        return selectedFormationEntities;
+    }
+
+    private void SpawnEnemies(List<WaveEntity> selectedFormationEntities, int[] shipTypes, float minVerticalStartCoord, float maxVerticalStartCoord, float enemyHorizontalDist, float enemyVerticalDist, float maxEnemyHorizontalDist)
+    {
+        //VII. Spawn Enemies
+        GameObject waveScoreIndicator = Instantiate(WaveScoreIndicatorPrefab);
+        waveScoreIndicator.transform.SetParent(CanvasScorePanel.transform, false);
+
+        GameObject lineRendererObject = Instantiate(ShipConnectionPrefab, Vector3.zero, Quaternion.identity);
+        EnemyWave curEnemyWave = new EnemyWave(lineRendererObject.GetComponent<LineRenderer>());
+        curEnemyWave.Initialize(_playerScript, _canvasRectTransform, waveScoreIndicator, _scoreLeftAnchorXPos, _scoreRightAnchorXPos);
+
+        for (int i = 0; i < selectedFormationEntities.Count; i++)
+        {
+            int enemyKind = shipTypes[i];
+            GameObject enemyPrefab = EnemyPrefabArray[enemyKind];
+            BasicEnemy enemyPrefabScript = enemyPrefab.GetComponent<BasicEnemy>();
+
+            Vector2 enemyPos;
+            if (i > 0)
+            {
+                Vector2 posDiff = selectedFormationEntities[i].Position - selectedFormationEntities[i - 1].Position;
+
+                int xPosDiff = (int)posDiff.x;
+                int yPosDiff = (int)posDiff.y;
+
+                int xIncrement = xPosDiff != 0 ? Math.Sign(xPosDiff) : 0;
+                int yIncrement = yPosDiff != 0 ? Math.Sign(yPosDiff) : 0;
+
+                Vector3 previousEnemyPos = curEnemyWave.GetLastEnemyPosition();
+
+                enemyPos = new Vector2(previousEnemyPos.x + xIncrement * enemyHorizontalDist, previousEnemyPos.y + yIncrement * enemyVerticalDist);
+            }
+            else
+            {
+                enemyPos = new Vector2(enemyPrefabScript.HorizontalSpawnCoord + selectedFormationEntities[i].Position.x * maxEnemyHorizontalDist, Random.Range(minVerticalStartCoord, maxVerticalStartCoord));
+            }
+
+            GameObject enemy = Instantiate(enemyPrefab, enemyPos, Quaternion.identity);
+            Assert.IsNotNull(enemy);
+
+            BasicMove basicMoveScript = enemy.GetComponent<BasicMove>();
+            basicMoveScript.SetMoveDir(selectedFormationEntities[i].MoveDir, false);
+
+            curEnemyWave.AddNewEnemy(enemy);
+            enemy.GetComponent<BasicEnemy>().Initialize(_playerScript, _difficultyManagerScript, curEnemyWave);
+        }
+        curEnemyWave.FinalizeWidthNodes();
+        _enemyWaves.Add(curEnemyWave);
+    }
 
 	private int FormationComparison(WaveEntity entity1, WaveEntity entity2)
 	{
