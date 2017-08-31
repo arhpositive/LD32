@@ -42,7 +42,7 @@ public class DifficultyManager : MonoBehaviour
 	private float _lastDifficultyAdjustmentTime;
 	private const float DifficultyAdjustmentInterval = 5.0f;
 
-	//TODO we need to define a time interval to measure the effectiveness of our last difficulty adjustment
+	//TODO LEARN we need to define a time interval to measure the effectiveness of our last difficulty adjustment
 
 	//TODO LEARN difficulty adjustment coefficients will be determined by learning algorithm for every parameter separately, 
 	// and they'll change for each adjustment depending on what size of a step the learning algorithm wants to take
@@ -59,7 +59,7 @@ public class DifficultyManager : MonoBehaviour
 		DifficultyCoefs = new Dictionary<DifficultyParameter, int>((int)DifficultyParameter.DpCount);
 		for (DifficultyParameter curParam = DifficultyParameter.DpShipFireRateIncrease; curParam < DifficultyParameter.DpCount; ++curParam)
 		{
-			//TODO LEARN LATER these multipliers have to be pulled out from our learning data (from existing player models)
+			//TODO LEARN these multipliers have to be pulled out from our learning data (from existing player models)
 			DifficultyCoefs.Add(curParam, GameConstants.StartDifficulty);
 		}
 
@@ -78,7 +78,7 @@ public class DifficultyManager : MonoBehaviour
 
 	private void Update()
 	{
-		//TODO measure the effectiveness of last difficulty adjustment
+		//TODO LEARN measure the effectiveness of last difficulty adjustment
 
 		if (!_tutorialSequenceIsActive)
 		{
@@ -105,7 +105,7 @@ public class DifficultyManager : MonoBehaviour
 
 	private void RequestNewDifficultyAdjustment()
 	{
-		//TODO this method will send the learning system a message to notify that we're on a new adjustment step
+		//TODO LEARN this method will send the learning system a message to notify that we're on a new adjustment step
 		// for now we'll just directly connect this to the response as if the system has replied with a proper answer
 
 		//you'll have all kinds of raw statistics the game can supply you with, here
@@ -141,7 +141,7 @@ public class DifficultyManager : MonoBehaviour
 
 	private void RandomDiffAdjustment(bool isIncrement)
 	{
-		//TODO remove below code after ML is implemented
+		//TODO LEARN remove below code after ML is implemented
 		//start
 		int numRetries = 3;
 		for (int i = 0; i < numRetries; ++i)

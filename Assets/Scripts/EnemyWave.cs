@@ -159,7 +159,7 @@ public class EnemyWave
 		}
 	}
 
-    //TODO UI perhaps we should separate the UI
+    //TODO LATER perhaps we should separate the UI
     private void UpdateWaveScoreIndicator(float previousWavexPos)
 	{
 		//updating high score UI for the wave

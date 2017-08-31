@@ -326,7 +326,7 @@ public class SpawnManager : MonoBehaviour
 
 	private void PregeneratePossibleWaves()
 	{
-        //TODO BOSS devise a boss fight of some kind, stopping movement of player, encountering boss and then moving on
+        //TODO NEXT devise a boss fight of some kind, stopping movement of player, encountering boss and then moving on
 
 		// TODO LATER include different movement patterns, might involve waypoints, etc.
 		// waypoint system could make the wave change movement direction after a given amount of time.
@@ -634,7 +634,6 @@ public class SpawnManager : MonoBehaviour
 	    for (int i = 0; i < shipTypes.Length; ++i)
 	    {
 	        shipTypes[i] = tutorialWaveItem.EnemyTypeIndex;
-
 	    }
 
 	    //VII. Spawn Enemies
@@ -657,7 +656,7 @@ public class SpawnManager : MonoBehaviour
 
 		bool hasNoExit = Random.Range(0, randRange) < noExitProbability;
 
-		//TODO DIFFICULTY low difficulty = wider spread & less enemies, high difficulty = shorter spread & more enemies
+		//TODO NEXT low difficulty = wider spread & less enemies, high difficulty = shorter spread & more enemies
 
 		//I. Pick a random formation type
 		Formation selectedFormation = _formations[Random.Range(0, _formations.Count)];
