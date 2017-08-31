@@ -294,10 +294,12 @@ public class SpawnManager : MonoBehaviour
 	    }
 
         //update each enemy wave and remove waves which have no remaining enemies
-        foreach (EnemyWave currentWave in _enemyWaves)
-		{
-			currentWave.Update();
-		}
+	    float previousWavexPos = float.MinValue;
+	    foreach (EnemyWave currentWave in _enemyWaves)
+	    {
+	        currentWave.Update(previousWavexPos);
+	        previousWavexPos = currentWave.GetWaveScorexPos();
+	    }
 		_enemyWaves.RemoveAll(item => item.SetForDestruction);
 	}
 
@@ -861,8 +863,6 @@ public class SpawnManager : MonoBehaviour
 
 		GameObject lineRendererObject = Instantiate(ShipConnectionPrefab, Vector3.zero, Quaternion.identity);
 		EnemyWave curEnemyWave = new EnemyWave(lineRendererObject.GetComponent<LineRenderer>());
-        
-        //TODO NEXT adjust left anchor based on how many waves are remaining prior to the current wave
 
 		curEnemyWave.Initialize(_playerScript, _canvasRectTransform, waveScoreIndicator, _scoreLeftAnchorXPos, _scoreRightAnchorXPos);
 		for (int i = 0; i < selectedFormationEntities.Count; i++)

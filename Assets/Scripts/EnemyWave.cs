@@ -9,6 +9,7 @@ using UnityEngine.UI;
 public class EnemyWave
 {
 	private const float DistanceToBreakConnection = 2.0f;
+    private const float ScoreTextDistanceFromWave = 100.0f;
 
 	private List<GameObject> _enemyList;
 	private List<BasicEnemy> _enemyScripts;
@@ -79,7 +80,7 @@ public class EnemyWave
 		EnemyDisplacementChanged = true;
 	}
 
-	public void Update()
+	public void Update(float previousWavexPos)
 	{
 		if (SetForDestruction)
 		{
@@ -142,7 +143,7 @@ public class EnemyWave
 
 			EnemyDisplacementChanged = false;
 		}
-		UpdateWaveScoreIndicator();
+		UpdateWaveScoreIndicator(previousWavexPos);
 	}
 
 	private void UpdateFarthestEnemyIndex()
@@ -159,14 +160,14 @@ public class EnemyWave
 	}
 
     //TODO UI perhaps we should separate the UI
-    private void UpdateWaveScoreIndicator()
+    private void UpdateWaveScoreIndicator(float previousWavexPos)
 	{
-        //TODO NEXT ui should not overwrite each other, wait for the last wave to get destroyed before moving on to leftmost spot!
-
 		//updating high score UI for the wave
+	    float currentLeftAnchor = Mathf.Max(_leftAnchorXPos, previousWavexPos + ScoreTextDistanceFromWave);
+
 		Vector3 enemyScreenPos = Camera.main.WorldToScreenPoint(_enemyList[_farthestEnemyIndex].transform.position);
 		float newPosX = enemyScreenPos.x - _mainCanvasTransform.sizeDelta.x * 0.5f;
-		newPosX = Mathf.Clamp(newPosX, _leftAnchorXPos, _rightAnchorXPos);
+		newPosX = Mathf.Clamp(newPosX, currentLeftAnchor, _rightAnchorXPos);
 
 		int baseWaveScore = GetBaseWaveScore();
 
@@ -188,6 +189,11 @@ public class EnemyWave
 	{
 		return Mathf.RoundToInt(_waveScore * GameConstants.BaseScoreMultiplier);
 	}
+
+    public float GetWaveScorexPos()
+    {
+        return _waveScoreIndicatorTransform.anchoredPosition.x;
+    }
 
 	public void OnEnemyCountChanged()
 	{
