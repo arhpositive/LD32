@@ -89,11 +89,11 @@ public class SpawnManager : MonoBehaviour
 	private const float PlayerShipColliderHorzSize = 0.38f;
 
 	private float _enemySpawnMinVertDist;
-	private float _enemySpawnMaxVertDist = ShipColliderVertSize * 2.0f - 0.01f;
-	private float _enemySpawnMinHorzDist;
-	private float _enemySpawnMaxHorzDist = PlayerShipColliderHorzSize * 2.0f - 0.01f;
+    private const float EnemySpawnMaxVertDist = ShipColliderVertSize * 2.0f - 0.01f;
+    private float _enemySpawnMinHorzDist;
+    private const float EnemySpawnMaxHorzDist = PlayerShipColliderHorzSize * 2.0f - 0.01f;
 
-	private float _vertMinShipSpawnCoord;
+    private float _vertMinShipSpawnCoord;
 	private float _vertMaxShipSpawnCoord;
 
 	private bool _hugeEnemyExists;
@@ -154,8 +154,8 @@ public class SpawnManager : MonoBehaviour
 
 		_difficultyManagerScript = GetComponent<DifficultyManager>();
 		
-		_enemySpawnMinVertDist = Mathf.Min(ShipGameObjectVertSize + 0.05f, _enemySpawnMaxVertDist);
-		_enemySpawnMinHorzDist = Mathf.Min(PlayerShipColliderHorzSize * 0.5f, _enemySpawnMaxHorzDist);
+		_enemySpawnMinVertDist = Mathf.Min(ShipGameObjectVertSize + 0.05f, EnemySpawnMaxVertDist);
+		_enemySpawnMinHorzDist = Mathf.Min(PlayerShipColliderHorzSize * 0.5f, EnemySpawnMaxHorzDist);
 
 		_hugeEnemyExists = false;
 		ResetVerticalSpawnLimits();
@@ -326,7 +326,7 @@ public class SpawnManager : MonoBehaviour
 
 	private void PregeneratePossibleWaves()
 	{
-        //TODO NEXT devise a boss fight of some kind, stopping movement of player, encountering boss and then moving on
+        //TODO LATER devise a boss fight of some kind, stopping movement of player, encountering boss and then moving on
 
 		// TODO LATER include different movement patterns, might involve waypoints, etc.
 		// waypoint system could make the wave change movement direction after a given amount of time.
@@ -624,7 +624,7 @@ public class SpawnManager : MonoBehaviour
 	private void SpawnTutorialWave(TutorialWaveItem tutorialWaveItem)
 	{
 		float minVerticalStartCoord = _vertMinShipSpawnCoord;
-		float maxVerticalStartCoord = _vertMaxShipSpawnCoord - (tutorialWaveItem.EnemyCountInWave - 1) * _enemySpawnMaxVertDist;
+		float maxVerticalStartCoord = _vertMaxShipSpawnCoord - (tutorialWaveItem.EnemyCountInWave - 1) * EnemySpawnMaxVertDist;
 
 		//V. Select Enemies From Formation List
 	    List<WaveEntity> selectedFormationEntities = SelectEnemiesFromFormation(tutorialWaveItem.EnemyCountInWave);
@@ -637,7 +637,7 @@ public class SpawnManager : MonoBehaviour
 	    }
 
 	    //VII. Spawn Enemies
-        SpawnEnemies(selectedFormationEntities, shipTypes, minVerticalStartCoord, maxVerticalStartCoord, _enemySpawnMaxHorzDist, _enemySpawnMaxVertDist, _enemySpawnMaxHorzDist);
+        SpawnEnemies(selectedFormationEntities, shipTypes, minVerticalStartCoord, maxVerticalStartCoord, EnemySpawnMaxHorzDist, EnemySpawnMaxVertDist, EnemySpawnMaxHorzDist);
 	}
 
 	//Generate new waves and spawn them on scene
@@ -645,25 +645,25 @@ public class SpawnManager : MonoBehaviour
 	{
 		EventLogger.PrintToLog("New Wave Spawn");
 
+        //determine next wave spawn interval
 		float randomIntervalCoef = Random.Range(MinWaveSpawnIntervalCoef, MaxWaveSpawnIntervalCoef);
 		_waveSpawnInterval = randomIntervalCoef/_difficultyManagerScript.GetDifficultyMultiplier(DifficultyParameter.DpWaveSpawnRateIncrease);
+        
+        //determine if current wave formation has an empty space bigger than the size of the player ship
+		const int randRange = 100;
+		const float stepSize = (float) randRange/GameConstants.DifficultyStepCount; //step size is currently 20
 
-
-		int randRange = 100;
-		float stepSize = (float) randRange/GameConstants.DifficultyStepCount;
-
-		float noExitProbability = _difficultyManagerScript.DifficultyCoefs[DifficultyParameter.DpWaveHasNoExitCoef]*stepSize - stepSize*0.5f;
-
+	    // 10 30 50 70 90 no exit probability for difficulties 1 2 3 4 5
+        float noExitProbability =
+	        (_difficultyManagerScript.DifficultyCoefs[DifficultyParameter.DpWaveHasNoExitCoef] - 0.5f) * stepSize; 
 		bool hasNoExit = Random.Range(0, randRange) < noExitProbability;
-
-		//TODO NEXT low difficulty = wider spread & less enemies, high difficulty = shorter spread & more enemies
 
 		//I. Pick a random formation type
 		Formation selectedFormation = _formations[Random.Range(0, _formations.Count)];
 
 		//II. Determine Horizontal Distance Between Enemies
-		float nextWaveHorizontalDistance = _waveSpawnInterval*BasicEnemy.MoveSpeed;
-		float maxEnemyHorizontalDist = nextWaveHorizontalDistance - _enemySpawnMaxHorzDist;
+		float nextWaveHorizontalDistance = _waveSpawnInterval * BasicEnemy.MoveSpeed;
+		float maxEnemyHorizontalDist = nextWaveHorizontalDistance - EnemySpawnMaxHorzDist;
 		if (selectedFormation.HorizontalShipSpan > 1)
 		{
 			maxEnemyHorizontalDist /= selectedFormation.HorizontalShipSpan;
@@ -676,7 +676,7 @@ public class SpawnManager : MonoBehaviour
 		}
 		else
 		{
-			maxEnemyHorizontalDist = Mathf.Clamp(maxEnemyHorizontalDist, _enemySpawnMinHorzDist, _enemySpawnMaxHorzDist);
+			maxEnemyHorizontalDist = Mathf.Clamp(maxEnemyHorizontalDist, _enemySpawnMinHorzDist, EnemySpawnMaxHorzDist);
 			enemyHorizontalDist = Random.Range(_enemySpawnMinHorzDist, maxEnemyHorizontalDist);
 		}
 
@@ -693,7 +693,7 @@ public class SpawnManager : MonoBehaviour
 				minEnemyVerticalDist = minVerticalDistance;
 			}
 		}
-		float enemyVerticalDist = Random.Range(minEnemyVerticalDist, _enemySpawnMaxVertDist);
+		float enemyVerticalDist = Random.Range(minEnemyVerticalDist, EnemySpawnMaxVertDist);
 
 		//IV. Determine Number of Enemies
 		int lowerIntervalCount = Mathf.FloorToInt((verticalMovementLength - ShipColliderVertSize)/enemyVerticalDist);
@@ -712,9 +712,16 @@ public class SpawnManager : MonoBehaviour
 		}
 		else
 		{
-			//no possible no-exits here!
+			//no possible no-exits here, this is why we subtract 1 from max possible ship count, we want at least a sufficient opening
 			int enemyMaxCount = Mathf.Min(maxPossibleShipCount - 1, selectedFormation.WaveEntities.Count);
-			enemyCount = Random.Range(enemyMaxCount - 2, enemyMaxCount);
+            
+		    int minimumEnemyCountCoef = _difficultyManagerScript.DifficultyCoefs[DifficultyParameter.DpMinimumEnemyCountCoef];
+
+            //diff param (1 2 3 4 5) : min count = max count - (4 3 2 1 0)
+            //TODO LATER if 5 level difficulty is changed, enemy counts will break as we don't take min max difficulty difference into account
+		    int enemyMinCount = Mathf.Max(1, enemyMaxCount - (GameConstants.MaxDifficulty - minimumEnemyCountCoef));
+
+            enemyCount = Random.Range(enemyMinCount, enemyMaxCount);
 		}
 
 		int actualVerticalIntervalCount = enemyCount - 1;
@@ -910,7 +917,8 @@ public class SpawnManager : MonoBehaviour
 		HugeEnemy hugeEnemyScript = hugeEnemyPrefab.GetComponent<HugeEnemy>();
         
 	    float diffOfPosition = hugeEnemyScript.VerticalSpawnLimits[1] - hugeEnemyScript.VerticalSpawnLimits[0];
-	    int hugeEnemyIntrusionSize = (int)DifficultyParameter.DpHugeEnemyIntrusionSize;
+	    
+	    int hugeEnemyIntrusionSize = _difficultyManagerScript.DifficultyCoefs[DifficultyParameter.DpHugeEnemyIntrusionSize];
 
 	    float curDiffCoef = (float)(hugeEnemyIntrusionSize - 1) / (GameConstants.MaxDifficulty - GameConstants.MinDifficulty); // 4/4, 3/4, 2/4, 1/4, 0/4
 

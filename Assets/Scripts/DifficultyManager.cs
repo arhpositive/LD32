@@ -12,6 +12,7 @@ using UnityEngine.Assertions;
 
 public enum DifficultyParameter
 {
+    DpNone,
 	DpShipFireRateIncrease,
 	DpWaveSpawnRateIncrease, 
 	DpHugeEnemySpawnRateIncrease,
@@ -20,6 +21,7 @@ public enum DifficultyParameter
 	DpPosPowerupSpawnRateDecrease,
 	DpNegPowerupSpawnRateIncrease,
 	DpEnemyShipStrength,
+    DpMinimumEnemyCountCoef,
 	DpCount
 }
 
@@ -57,7 +59,7 @@ public class DifficultyManager : MonoBehaviour
 	private void Start()
 	{
 		DifficultyCoefs = new Dictionary<DifficultyParameter, int>((int)DifficultyParameter.DpCount);
-		for (DifficultyParameter curParam = DifficultyParameter.DpShipFireRateIncrease; curParam < DifficultyParameter.DpCount; ++curParam)
+		for (DifficultyParameter curParam = DifficultyParameter.DpNone + 1; curParam < DifficultyParameter.DpCount; ++curParam)
 		{
 			//TODO LEARN these multipliers have to be pulled out from our learning data (from existing player models)
 			DifficultyCoefs.Add(curParam, GameConstants.StartDifficulty);
@@ -146,7 +148,7 @@ public class DifficultyManager : MonoBehaviour
 		int numRetries = 3;
 		for (int i = 0; i < numRetries; ++i)
 		{
-		    DifficultyParameter selectedDifficultyParameter = (DifficultyParameter)Random.Range((int)DifficultyParameter.DpShipFireRateIncrease, (int)DifficultyParameter.DpCount);
+		    DifficultyParameter selectedDifficultyParameter = (DifficultyParameter)Random.Range((int)DifficultyParameter.DpNone + 1, (int)DifficultyParameter.DpCount);
 		    int oldValue = DifficultyCoefs[selectedDifficultyParameter];
 
 			if (isIncrement ? oldValue < GameConstants.MaxDifficulty : oldValue > GameConstants.MinDifficulty)
@@ -169,7 +171,7 @@ public class DifficultyManager : MonoBehaviour
 	public float GetAverageDifficultyLevel()
 	{
 		float avgDifficulty = 0.0f;
-		for (DifficultyParameter curParam = DifficultyParameter.DpShipFireRateIncrease; curParam < DifficultyParameter.DpCount; ++curParam)
+		for (DifficultyParameter curParam = DifficultyParameter.DpNone + 1; curParam < DifficultyParameter.DpCount; ++curParam)
 		{
 			avgDifficulty += DifficultyCoefs[curParam];
 		}
