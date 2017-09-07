@@ -340,7 +340,16 @@ public class SpawnManager : MonoBehaviour
 			//  2
 			//  1
 			//  0
-			new WaveEntity(Vector2.zero, Vector2.left), new WaveEntity(new Vector2(0, 1), Vector2.left), new WaveEntity(new Vector2(0, 2), Vector2.left), new WaveEntity(new Vector2(0, 3), Vector2.left), new WaveEntity(new Vector2(0, 4), Vector2.left), new WaveEntity(new Vector2(0, 5), Vector2.left), new WaveEntity(new Vector2(0, 6), Vector2.left), new WaveEntity(new Vector2(0, 7), Vector2.left), new WaveEntity(new Vector2(0, 8), Vector2.left), new WaveEntity(new Vector2(0, 9), Vector2.left)
+			new WaveEntity(Vector2.zero, Vector2.left),
+            new WaveEntity(new Vector2(0, 1), Vector2.left),
+            new WaveEntity(new Vector2(0, 2), Vector2.left),
+            new WaveEntity(new Vector2(0, 3), Vector2.left),
+            new WaveEntity(new Vector2(0, 4), Vector2.left),
+            new WaveEntity(new Vector2(0, 5), Vector2.left),
+            new WaveEntity(new Vector2(0, 6), Vector2.left),
+            new WaveEntity(new Vector2(0, 7), Vector2.left),
+            new WaveEntity(new Vector2(0, 8), Vector2.left),
+            new WaveEntity(new Vector2(0, 9), Vector2.left)
 		};
 		_formations.Add(new Formation(straightLine, 0));
 
@@ -352,7 +361,16 @@ public class SpawnManager : MonoBehaviour
 			//  2
 			//      1
 			//  0
-			new WaveEntity(Vector2.zero, Vector2.left), new WaveEntity(new Vector2(1, 1), Vector2.left), new WaveEntity(new Vector2(0, 2), Vector2.left), new WaveEntity(new Vector2(1, 3), Vector2.left), new WaveEntity(new Vector2(0, 4), Vector2.left), new WaveEntity(new Vector2(1, 5), Vector2.left), new WaveEntity(new Vector2(0, 6), Vector2.left), new WaveEntity(new Vector2(1, 7), Vector2.left), new WaveEntity(new Vector2(0, 8), Vector2.left), new WaveEntity(new Vector2(1, 9), Vector2.left)
+			new WaveEntity(Vector2.zero, Vector2.left),
+            new WaveEntity(new Vector2(1, 1), Vector2.left),
+            new WaveEntity(new Vector2(0, 2), Vector2.left),
+            new WaveEntity(new Vector2(1, 3), Vector2.left),
+            new WaveEntity(new Vector2(0, 4), Vector2.left),
+            new WaveEntity(new Vector2(1, 5), Vector2.left),
+            new WaveEntity(new Vector2(0, 6), Vector2.left),
+            new WaveEntity(new Vector2(1, 7), Vector2.left),
+            new WaveEntity(new Vector2(0, 8), Vector2.left),
+            new WaveEntity(new Vector2(1, 9), Vector2.left)
 		};
 		_formations.Add(new Formation(echelonLine, 1));
 
@@ -364,7 +382,16 @@ public class SpawnManager : MonoBehaviour
 			//  4
 			//      2
 			//          0
-			new WaveEntity(new Vector2(4, 0), Vector2.left), new WaveEntity(new Vector2(4, 9), Vector2.left), new WaveEntity(new Vector2(3, 1), Vector2.left), new WaveEntity(new Vector2(3, 8), Vector2.left), new WaveEntity(new Vector2(2, 2), Vector2.left), new WaveEntity(new Vector2(2, 7), Vector2.left), new WaveEntity(new Vector2(1, 3), Vector2.left), new WaveEntity(new Vector2(1, 6), Vector2.left), new WaveEntity(new Vector2(0, 4), Vector2.left), new WaveEntity(new Vector2(0, 5), Vector2.left)
+			new WaveEntity(new Vector2(4, 0), Vector2.left),
+            new WaveEntity(new Vector2(4, 9), Vector2.left),
+            new WaveEntity(new Vector2(3, 1), Vector2.left),
+            new WaveEntity(new Vector2(3, 8), Vector2.left),
+            new WaveEntity(new Vector2(2, 2), Vector2.left),
+            new WaveEntity(new Vector2(2, 7), Vector2.left),
+            new WaveEntity(new Vector2(1, 3), Vector2.left),
+            new WaveEntity(new Vector2(1, 6), Vector2.left),
+            new WaveEntity(new Vector2(0, 4), Vector2.left),
+            new WaveEntity(new Vector2(0, 5), Vector2.left)
 		};
 		_formations.Add(new Formation(forwardsWedge, 4));
 
@@ -376,7 +403,16 @@ public class SpawnManager : MonoBehaviour
 			//          4
 			//      2
 			//  0
-			new WaveEntity(Vector2.zero, Vector2.left), new WaveEntity(new Vector2(0, 9), Vector2.left), new WaveEntity(new Vector2(1, 1), Vector2.left), new WaveEntity(new Vector2(1, 8), Vector2.left), new WaveEntity(new Vector2(2, 2), Vector2.left), new WaveEntity(new Vector2(2, 7), Vector2.left), new WaveEntity(new Vector2(3, 3), Vector2.left), new WaveEntity(new Vector2(3, 6), Vector2.left), new WaveEntity(new Vector2(4, 4), Vector2.left), new WaveEntity(new Vector2(4, 5), Vector2.left)
+			new WaveEntity(Vector2.zero, Vector2.left),
+            new WaveEntity(new Vector2(0, 9), Vector2.left),
+            new WaveEntity(new Vector2(1, 1), Vector2.left),
+            new WaveEntity(new Vector2(1, 8), Vector2.left),
+            new WaveEntity(new Vector2(2, 2), Vector2.left),
+            new WaveEntity(new Vector2(2, 7), Vector2.left),
+            new WaveEntity(new Vector2(3, 3), Vector2.left),
+            new WaveEntity(new Vector2(3, 6), Vector2.left),
+            new WaveEntity(new Vector2(4, 4), Vector2.left),
+            new WaveEntity(new Vector2(4, 5), Vector2.left)
 		};
 		_formations.Add(new Formation(backwardsWedge, 4));
 	}
