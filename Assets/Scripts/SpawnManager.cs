@@ -217,7 +217,7 @@ public class SpawnManager : MonoBehaviour
 
 			if (IsGamePaused())
 			{
-                if (Input.GetButtonDown("TogglePause") && HelpPopupPanel.activeSelf)
+                if (Input.GetButtonDown("Submit") && HelpPopupPanel.activeSelf)
 				{
 					ResumeGameAfterPopup(true, HelpPopupPanel);
 				    _tutorialSequenceEventInterval = _tutorialSequenceItems[0].TimeToWaitAfterEnd;

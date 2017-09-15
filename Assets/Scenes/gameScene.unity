@@ -247,7 +247,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Press Space To Continue
+  m_Text: Press Enter To Continue
 --- !u!222 &44400703
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -265,8 +265,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d37986cb3cfee0f428adcd46aa839347, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GamepadText: Press Start To Continue
-  KeyboardText: Press Space To Continue
+  GamepadText: Press (A) To Continue
+  KeyboardText: Press Enter To Continue
 --- !u!1 &85756742
 GameObject:
   m_ObjectHideFlags: 0
@@ -370,7 +370,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: -60}
-  m_SizeDelta: {x: 180, y: 20}
+  m_SizeDelta: {x: 200, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &212565787
 MonoBehaviour:
@@ -404,7 +404,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Press Space To Continue
+  m_Text: Press Escape To Continue
 --- !u!222 &212565788
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -423,7 +423,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   GamepadText: Press Start To Continue
-  KeyboardText: Press Space To Continue
+  KeyboardText: Press Escape To Continue
 --- !u!1 &252074021
 GameObject:
   m_ObjectHideFlags: 0

@@ -6,6 +6,10 @@ namespace ui
 {
     public class RegainFocus : MonoBehaviour
     {
+		//TODO NEXT switch between default active game objects upon switching panels
+	    public GameObject MainMenuDefaultGameObject;
+		public GameObject QuestionnaireDefaultGameObject;
+
         private GameObject _lastSelectedGameObject;
         
         // Update is called once per frame
