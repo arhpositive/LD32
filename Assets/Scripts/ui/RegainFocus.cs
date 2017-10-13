@@ -6,29 +6,29 @@ namespace ui
 {
     public class RegainFocus : MonoBehaviour
     {
-		//TODO NEXT switch between default active game objects upon switching panels
-	    public GameObject MainMenuDefaultGameObject;
-		public GameObject QuestionnaireDefaultGameObject;
+	    public GameObject DefaultGameObject;
 
         private GameObject _lastSelectedGameObject;
         
         // Update is called once per frame
-        void Update()
+	    private void Update()
         {
             if (EventSystem.current.currentSelectedGameObject)
             {
                 _lastSelectedGameObject = EventSystem.current.currentSelectedGameObject;
             }
-            else if (Input.GetButtonDown("Submit") || !Mathf.Approximately(Input.GetAxis("Vertical"), 0.0f) || !Mathf.Approximately(Input.GetAxis("Horizontal"), 0.0f))
+            else if (Input.GetButtonDown("Submit") || !Mathf.Approximately(Input.GetAxis("Vertical"), 0.0f) ||
+                     !Mathf.Approximately(Input.GetAxis("Horizontal"), 0.0f))
             {
-                EventSystem.current.SetSelectedGameObject(_lastSelectedGameObject);
+	            EventSystem.current.SetSelectedGameObject(_lastSelectedGameObject);
             }
         }
 
-        void OnEnable()
+	    private void OnEnable()
         {
             if (EventSystem.current.currentSelectedGameObject)
             {
+				EventSystem.current.SetSelectedGameObject(DefaultGameObject);
                 EventSystem.current.currentSelectedGameObject.GetComponent<Selectable>().OnSelect(null);
             }
         }

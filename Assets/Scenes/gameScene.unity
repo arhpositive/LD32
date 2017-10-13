@@ -2914,6 +2914,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 106eb27c97041e140b39a535f7985c7e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  MainMenuDefaultGameObject: {fileID: 0}
+  QuestionnaireDefaultGameObject: {fileID: 0}
 --- !u!1 &1777884851
 GameObject:
   m_ObjectHideFlags: 0
