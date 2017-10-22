@@ -13,6 +13,11 @@ public class Question
 		_selectedAnswer = -1;
 	}
 
+	public string GetQuestionText()
+	{
+		return _question;
+	}
+
 	public string GetOptionText(int optionIndex)
 	{
 		return _answers[optionIndex];
@@ -26,5 +31,10 @@ public class Question
 	public int GetSelectedAnswer()
 	{
 		return _selectedAnswer;
+	}
+
+	public int GetOptionCount()
+	{
+		return _answers.Length;
 	}
 }
