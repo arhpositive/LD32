@@ -1,16 +1,23 @@
-﻿using System.Collections.Generic;
+﻿/* 
+ * Game: Dislocator
+ * Author: Arhan Bakan
+ * 
+ * QuestionnaireManager.cs
+ * Handles questionnaire flow
+ */
+
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
-//TODO NEXT might get moved completely to ui namespace
+//TODO LATER might get moved completely to ui namespace
 public class QuestionnaireManager : MonoBehaviour
 {
 	public Transform QuestionnaireToggleGroupTransform;
-	public Text _questionText;
-	public Text _questionCountText;
-
-	private LoadLevel _levelManager;
+	public Text QuestionText;
+	public Text QuestionCountText;
+	
 	private List<Question> _questions;
 	private int _currentQuestionIndex;
 	private ToggleGroup _questionnaireToggleGroup;
@@ -19,7 +26,6 @@ public class QuestionnaireManager : MonoBehaviour
 	
 	private void Awake ()
 	{
-		_levelManager = Camera.main.gameObject.GetComponent<LoadLevel>();
 		_questionnaireToggleGroup = QuestionnaireToggleGroupTransform.GetComponent<ToggleGroup>();
 		_questionnaireAnswerGameObjects = new List<GameObject>();
 		_questionnaireAnswerTexts = new List<Text>();
@@ -29,14 +35,28 @@ public class QuestionnaireManager : MonoBehaviour
 			_questionnaireAnswerGameObjects.Add(child.gameObject);
 			_questionnaireAnswerTexts.Add(child.gameObject.GetComponentInChildren<Text>());
 		}
-
-		//TODO NEXT write questions and link them together, put all your shit together, in a box, get your shit together, all your shit, together
+		
 		_questions = new List<Question>
 		{
-			new Question("What is your age range?", "0-17", "18-26", "27-44", "45+"),
-			new Question("How many hours in a week are you spending playing video games?", "Less than 2", "Between 2 and 10",
-				"Between 10 and 20", "More than 20"),
-			new Question("Have you played shoot'em up games before?", "No, I have not.", "Only a few.", "I play them a lot.")
+			//TODO NEXT give an initial weight to the options, as well as the question
+			//we will take the average weight of given responses and start the game with a difficulty level
+			//that takes this average weight into account
+			//TODO LATER later on these questionnaires will give their own answer as scores of players will change weighting
+			
+			new Question("What is your age range?", 
+				new QuestionAnswer("0-17", 2.0f), 
+				new QuestionAnswer("18-26", 3.0f), 
+				new QuestionAnswer("27-44", 2.0f), 
+				new QuestionAnswer("45+", 1.0f)),
+			new Question("How many hours in a week are you spending playing video games?", 
+				new QuestionAnswer("Less than 2", 1.0f), 
+				new QuestionAnswer("Between 2 and 10", 2.0f),
+				new QuestionAnswer("Between 10 and 20", 3.0f), 
+				new QuestionAnswer("More than 20", 4.0f)),
+			new Question("Have you played shoot'em up games before?", 
+				new QuestionAnswer("No, I have not.", 1.0f), 
+				new QuestionAnswer("Only a few.", 2.0f), 
+				new QuestionAnswer("I play them a lot.", 4.0f))
 		};
 	}
 
@@ -61,8 +81,8 @@ public class QuestionnaireManager : MonoBehaviour
 		//display next question in ui
 		Question nextQuestion = _questions[_currentQuestionIndex];
 		int optionCount = nextQuestion.GetOptionCount();
-		_questionCountText.text = "Question " + (_currentQuestionIndex + 1) + " / " + _questions.Count;
-		_questionText.text = nextQuestion.GetQuestionText();
+		QuestionCountText.text = "Question " + (_currentQuestionIndex + 1) + " / " + _questions.Count;
+		QuestionText.text = nextQuestion.GetQuestionText();
 
 		for (int i = 0; i < _questionnaireAnswerTexts.Count; ++i)
 		{
@@ -93,15 +113,27 @@ public class QuestionnaireManager : MonoBehaviour
 			}
 			else
 			{
-				_levelManager.LoadSceneWithIndex(1);
+				//the questionnaire is finished, start the game after processing the answers
+				ProcessAnswers();
+				LoadLevel.LoadSceneWithIndex(1);
 			}
 		}
 	}
 
-	public void CancelQuestionnaire()
+	private float GetMaxQuestionnaireDifficultyWeight()
 	{
-		//TODO NEXT do stuff related to questionnaire being cancelled, rollback player model, erase answers, etc.
-		//if you can't find anything to do, move this function entirely to loadLevel
-		_levelManager.SwapActiveLeftPanel();
+		//TODO NEXT use this weight to decide which scale of the difficulty we plan on starting the game with
+		float result = 0.0f;
+		foreach (Question q in _questions)
+		{
+			//TODO LATER right now we're adding, see if we want to multiply instead
+			result += q.GetMaxAnswerDifficultyWeight();
+		}
+		return result;
+	}
+
+	private void ProcessAnswers()
+	{
+		//TODO NEXT process the answers and give an initial difficulty with regards to these answers
 	}
 }

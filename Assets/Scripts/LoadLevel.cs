@@ -20,7 +20,8 @@ public class LoadLevel : MonoBehaviour
 	public GameObject QuestionnaireToggleObject;
 	
 	public static bool TutorialToggleValue;
-	public static bool QuestionnaireToggleValue;
+
+	private static bool _questionnaireToggleValue;
     // ReSharper disable once RedundantDefaultMemberInitializer
     private static bool _isInitialized = false;
 
@@ -48,17 +49,18 @@ public class LoadLevel : MonoBehaviour
 			Toggle toggleComponent = QuestionnaireToggleObject.GetComponent<Toggle>();
 			if (_isInitialized)
 			{
-				toggleComponent.isOn = QuestionnaireToggleValue;
+				toggleComponent.isOn = _questionnaireToggleValue;
 			}
 			else
 			{
-				QuestionnaireToggleValue = toggleComponent.isOn;
+				_questionnaireToggleValue = toggleComponent.isOn;
 			}
 		}
 
 		_isInitialized = true;
 	}
 
+	// ReSharper disable once MemberCanBePrivate.Global
 	public void SwapActiveLeftPanel()
 	{
 		if (StartGamePanel.activeSelf)
@@ -79,7 +81,7 @@ public class LoadLevel : MonoBehaviour
 	{
 		//clicking play button on main menu
 
-		if (QuestionnaireToggleValue)
+		if (_questionnaireToggleValue)
 		{
 			//if questionnaire is open, the player has to answer some questions
 			SwapActiveLeftPanel();
@@ -96,7 +98,7 @@ public class LoadLevel : MonoBehaviour
 		SwapActiveLeftPanel();
 	}
 
-	public void LoadSceneWithIndex(int levelIndex)
+	public static void LoadSceneWithIndex(int levelIndex)
 	{
 		SceneManager.LoadScene(levelIndex);
 	}
@@ -108,6 +110,6 @@ public class LoadLevel : MonoBehaviour
 
 	public void OnQuestionnaireButtonClick(bool newValue)
 	{
-		QuestionnaireToggleValue = newValue;
+		_questionnaireToggleValue = newValue;
 	}
 }

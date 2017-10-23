@@ -2059,8 +2059,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1499479905}
-        m_MethodName: CancelQuestionnaire
+      - m_Target: {fileID: 1983994510}
+        m_MethodName: SwapActiveLeftPanel
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -2278,8 +2278,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   QuestionnaireToggleGroupTransform: {fileID: 1126971648}
-  _questionText: {fileID: 1888178010}
-  _questionCountText: {fileID: 311081338}
+  QuestionText: {fileID: 1888178010}
+  QuestionCountText: {fileID: 311081338}
 --- !u!1 &1569677440
 GameObject:
   m_ObjectHideFlags: 0
