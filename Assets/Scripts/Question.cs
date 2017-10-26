@@ -45,12 +45,17 @@ public class Question
 		return _maxAnswerDifficultyWeight;
 	}
 
+	public float GetSelectedAnswerDifficultyWeight()
+	{
+		return _answers[_selectedAnswer].GetDifficultyWeight();
+	}
+
 	public void AnswerQuestion(int selectedOptionIndex)
 	{
 		_selectedAnswer = selectedOptionIndex;
 	}
 
-	public int GetSelectedAnswer()
+	public int GetSelectedAnswerIndex()
 	{
 		return _selectedAnswer;
 	}

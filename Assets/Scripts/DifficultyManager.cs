@@ -58,12 +58,7 @@ public class DifficultyManager : MonoBehaviour
 
 	private void Start()
 	{
-		DifficultyCoefs = new Dictionary<DifficultyParameter, int>((int)DifficultyParameter.DpCount);
-		for (DifficultyParameter curParam = DifficultyParameter.DpNone + 1; curParam < DifficultyParameter.DpCount; ++curParam)
-		{
-			//TODO LEARN these multipliers have to be pulled out from our learning data (from existing player models)
-			DifficultyCoefs.Add(curParam, GameConstants.StartDifficulty);
-		}
+		DetermineInitialDifficultyLevels();
 
 		_lastDifficultyAdjustmentTime = Time.time;
 
@@ -102,6 +97,20 @@ public class DifficultyManager : MonoBehaviour
 		if (!_tutorialSequenceIsActive)
 		{
 			_lastDifficultyAdjustmentTime = Time.time;
+		}
+	}
+
+	private void DetermineInitialDifficultyLevels()
+	{
+		//TODO NEXT pull avg difficulty from questionnaire
+		float initialDifficultyGoal = QuestionnaireManager.DeterminedInitialDifficultyCoef;
+
+		
+		DifficultyCoefs = new Dictionary<DifficultyParameter, int>((int)DifficultyParameter.DpCount);
+		for (DifficultyParameter curParam = DifficultyParameter.DpNone + 1; curParam < DifficultyParameter.DpCount; ++curParam)
+		{
+			//TODO LEARN these multipliers have to be pulled out from our learning data (from existing player models)
+			DifficultyCoefs.Add(curParam, GameConstants.StartDifficulty);
 		}
 	}
 

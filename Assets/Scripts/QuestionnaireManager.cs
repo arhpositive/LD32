@@ -14,6 +14,8 @@ using UnityEngine.UI;
 //TODO LATER might get moved completely to ui namespace
 public class QuestionnaireManager : MonoBehaviour
 {
+	public static float DeterminedInitialDifficultyCoef;
+
 	public Transform QuestionnaireToggleGroupTransform;
 	public Text QuestionText;
 	public Text QuestionCountText;
@@ -62,6 +64,7 @@ public class QuestionnaireManager : MonoBehaviour
 
 	private void OnEnable()
 	{
+		DeterminedInitialDifficultyCoef = GameConstants.StartDifficulty;
 		_currentQuestionIndex = -1;
 		DisplayNextQuestion();
 	}
@@ -114,7 +117,7 @@ public class QuestionnaireManager : MonoBehaviour
 			else
 			{
 				//the questionnaire is finished, start the game after processing the answers
-				ProcessAnswers();
+				DetermineInitialGameDifficulty();
 				LoadLevel.LoadSceneWithIndex(1);
 			}
 		}
@@ -132,8 +135,26 @@ public class QuestionnaireManager : MonoBehaviour
 		return result;
 	}
 
-	private void ProcessAnswers()
+	private float GetSelectedQuestionnaireDifficultyWeight()
 	{
-		//TODO NEXT process the answers and give an initial difficulty with regards to these answers
+		float result = 0.0f;
+		foreach (Question q in _questions)
+		{
+			result += q.GetSelectedAnswerDifficultyWeight();
+		}
+		return result;
+	}
+
+	private void DetermineInitialGameDifficulty()
+	{
+		float maxWeight = GetMaxQuestionnaireDifficultyWeight();
+		float selectedWeight = GetSelectedQuestionnaireDifficultyWeight();
+
+		//TODO NEXT check if giving untraditional difficulty percentages cause any trouble
+		float difficultyBoundsDiff = (GameConstants.MaxDifficulty - GameConstants.MinDifficulty) * 0.8f;
+
+		//TODO LATER right now we're just assigning default difficulty values to options
+		//we should determine these difficulty values from the choices past players have made
+		DeterminedInitialDifficultyCoef = GameConstants.MinDifficulty + (selectedWeight / maxWeight) * difficultyBoundsDiff;
 	}
 }
