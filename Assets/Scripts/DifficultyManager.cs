@@ -7,12 +7,12 @@
  */
 
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Assertions;
 
 public enum DifficultyParameter
 {
-    DpNone,
 	DpShipFireRateIncrease,
 	DpWaveSpawnRateIncrease, 
 	DpHugeEnemySpawnRateIncrease,
@@ -102,16 +102,39 @@ public class DifficultyManager : MonoBehaviour
 
 	private void DetermineInitialDifficultyLevels()
 	{
-		//TODO NEXT pull avg difficulty from questionnaire
+		//pull avg difficulty from questionnaire
 		float initialDifficultyGoal = QuestionnaireManager.DeterminedInitialDifficultyCoef;
 
-		
-		DifficultyCoefs = new Dictionary<DifficultyParameter, int>((int)DifficultyParameter.DpCount);
-		for (DifficultyParameter curParam = DifficultyParameter.DpNone + 1; curParam < DifficultyParameter.DpCount; ++curParam)
+		//TODO LATER temporarily, we're automatically trying to match starting difficulty level
+		//with the determined initial difficulty
+		//by increasing difficulty coefficients until we're close enough to the initial difficulty
+
+		const int diffParamCount = (int)DifficultyParameter.DpCount;
+		int[] difficultyWeights = Enumerable.Repeat(GameConstants.MinDifficulty, diffParamCount).ToArray();
+		int currentWeightIndex = 0;
+
+		float achievedDifficultyCoef = GameConstants.MinDifficulty;
+		int requiredIncrementCount = 0;
+		while (achievedDifficultyCoef < initialDifficultyGoal)
+		{
+			requiredIncrementCount += GameConstants.DifficultyStep;
+			difficultyWeights[currentWeightIndex] += GameConstants.DifficultyStep;
+			currentWeightIndex = (currentWeightIndex + 1) % diffParamCount;
+			achievedDifficultyCoef = (float)(GameConstants.MinDifficulty * diffParamCount + requiredIncrementCount) / diffParamCount;
+		}
+		print("Target: " + initialDifficultyGoal + ", Achieved: " + achievedDifficultyCoef);
+
+		//shuffle the array
+		new System.Random().Shuffle(difficultyWeights);
+
+		DifficultyCoefs = new Dictionary<DifficultyParameter, int>(diffParamCount);
+		for (DifficultyParameter curParam = 0; curParam < DifficultyParameter.DpCount; ++curParam)
 		{
 			//TODO LEARN these multipliers have to be pulled out from our learning data (from existing player models)
-			DifficultyCoefs.Add(curParam, GameConstants.StartDifficulty);
+			DifficultyCoefs.Add(curParam, difficultyWeights[(int)curParam]);
+			print("Param: " + curParam + " Weight: " + DifficultyCoefs[curParam]);
 		}
+		print("Average Difficulty: " + GetAverageDifficultyLevel());
 	}
 
 	private void RequestNewDifficultyAdjustment()
@@ -157,7 +180,7 @@ public class DifficultyManager : MonoBehaviour
 		int numRetries = 3;
 		for (int i = 0; i < numRetries; ++i)
 		{
-		    DifficultyParameter selectedDifficultyParameter = (DifficultyParameter)Random.Range((int)DifficultyParameter.DpNone + 1, (int)DifficultyParameter.DpCount);
+		    DifficultyParameter selectedDifficultyParameter = (DifficultyParameter)Random.Range(0, (int)DifficultyParameter.DpCount);
 		    int oldValue = DifficultyCoefs[selectedDifficultyParameter];
 
 			if (isIncrement ? oldValue < GameConstants.MaxDifficulty : oldValue > GameConstants.MinDifficulty)
@@ -180,7 +203,7 @@ public class DifficultyManager : MonoBehaviour
 	public float GetAverageDifficultyLevel()
 	{
 		float avgDifficulty = 0.0f;
-		for (DifficultyParameter curParam = DifficultyParameter.DpNone + 1; curParam < DifficultyParameter.DpCount; ++curParam)
+		for (DifficultyParameter curParam = 0; curParam < DifficultyParameter.DpCount; ++curParam)
 		{
 			avgDifficulty += DifficultyCoefs[curParam];
 		}

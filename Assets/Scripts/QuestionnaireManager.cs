@@ -40,7 +40,6 @@ public class QuestionnaireManager : MonoBehaviour
 		
 		_questions = new List<Question>
 		{
-			//TODO NEXT give an initial weight to the options, as well as the question
 			//we will take the average weight of given responses and start the game with a difficulty level
 			//that takes this average weight into account
 			//TODO LATER later on these questionnaires will give their own answer as scores of players will change weighting
@@ -125,7 +124,6 @@ public class QuestionnaireManager : MonoBehaviour
 
 	private float GetMaxQuestionnaireDifficultyWeight()
 	{
-		//TODO NEXT use this weight to decide which scale of the difficulty we plan on starting the game with
 		float result = 0.0f;
 		foreach (Question q in _questions)
 		{
@@ -149,8 +147,7 @@ public class QuestionnaireManager : MonoBehaviour
 	{
 		float maxWeight = GetMaxQuestionnaireDifficultyWeight();
 		float selectedWeight = GetSelectedQuestionnaireDifficultyWeight();
-
-		//TODO NEXT check if giving untraditional difficulty percentages cause any trouble
+		
 		float difficultyBoundsDiff = (GameConstants.MaxDifficulty - GameConstants.MinDifficulty) * 0.8f;
 
 		//TODO LATER right now we're just assigning default difficulty values to options
