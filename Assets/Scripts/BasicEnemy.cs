@@ -28,11 +28,12 @@ public class BasicEnemy : MonoBehaviour
 
 	//enemy displacement is used for scoring
 	public float DisplacementLength { get; private set; }
-	public bool IsDisplaced { get; private set; }
     public bool SpeedBoostIsActive { get; private set; }
+	public Vector2 InitialMoveDir { get; private set; }
 
     private Player _playerScript;
-	protected bool HasCollided;
+	private bool _isDisplaced;
+	private bool _hasCollided;
 
 	private DifficultyManager _difficultyManagerScript;
 	private BasicMove _basicMoveScript;
@@ -40,37 +41,36 @@ public class BasicEnemy : MonoBehaviour
 	private EnemyWave _assignedEnemyWave;
 	
 	private List<Transform> _gunTransforms; 
-	private bool _isStunned;
+	public bool IsStunned { get; private set; }
 	private float _lastStunTime;
 	private float _lastFireTime;
 	private float _nextFiringInterval;
 
 	protected virtual void Start()
 	{
-		_difficultyManagerScript = Camera.main.GetComponent<DifficultyManager>();
-		_basicMoveScript = gameObject.GetComponent<BasicMove>();
 		_basicObjectScript = gameObject.GetComponent<BasicObject>();
 
 		InitGunPositions();
-		HasCollided = false;
-		_isStunned = false;
+		_hasCollided = false;
+		IsStunned = false;
 		_lastStunTime = 0.0f;
 		SpeedBoostIsActive = false;
 		_lastFireTime = Time.time;
 		SetNextFiringInterval();
 		DisplacementLength = 0.0f;
-		IsDisplaced = false;
+		InitialMoveDir = Vector2.zero;
+		_isDisplaced = false;
 	}
 
 	private void Update()
 	{
 		// if stun timer expired
-		if (_isStunned && Time.time - _lastStunTime > StunDuration)
+		if (IsStunned && Time.time - _lastStunTime > StunDuration)
 		{
 			RemoveStun();
 		}
 
-		if (!_isStunned)
+		if (!IsStunned)
 		{
 			// if fire timer expired
 			if (CanShoot && Time.time - _lastFireTime > _nextFiringInterval)
@@ -101,16 +101,20 @@ public class BasicEnemy : MonoBehaviour
 		}
 	}
 
-	public void Initialize(Player playerScript, DifficultyManager difficultyManagerScript, EnemyWave assignedWave = null)
+	public void Initialize(Player playerScript, DifficultyManager difficultyManagerScript, BasicMove basicMoveScript, 
+		Vector2 initialMoveDir, EnemyWave assignedWave = null)
 	{
 		_playerScript = playerScript;
 		_difficultyManagerScript = difficultyManagerScript;
+		_basicMoveScript = basicMoveScript;
 		_assignedEnemyWave = assignedWave;
+		InitialMoveDir = initialMoveDir;
+		SetMoveDir(initialMoveDir);
 	}
 
 	public virtual void TriggerStun()
 	{
-		_isStunned = true;
+		IsStunned = true;
 		_lastStunTime = Time.time;
 		_basicMoveScript.DoesMove = false;
 
@@ -120,9 +124,19 @@ public class BasicEnemy : MonoBehaviour
 		}
 	}
 
+	public void SetMoveDir(Vector2 newMoveDir)
+	{
+		_basicMoveScript.SetMoveDir(newMoveDir);
+	}
+
+	public void ResetMoveDir()
+	{
+		_basicMoveScript.SetMoveDir(InitialMoveDir);
+	}
+
 	private void RemoveStun()
 	{
-		_isStunned = false;
+		IsStunned = false;
 		_lastFireTime = Time.time;
 		_basicMoveScript.DoesMove = true;
 		float currentDisplacement = StunDuration*_basicMoveScript.MoveSpeed;
@@ -161,7 +175,7 @@ public class BasicEnemy : MonoBehaviour
 
 	private void OnTriggerStay2D(Collider2D other)
 	{
-		if (HasCollided)
+		if (_hasCollided)
 		{
 			return;
 		}
@@ -176,7 +190,7 @@ public class BasicEnemy : MonoBehaviour
 	{
 		bool collisionExists = false;
 
-		if (other.gameObject.tag == "Player")
+		if (other.gameObject.CompareTag("Player"))
 		{
 			Assert.IsNotNull(_playerScript);
 			bool playerGotHit = _playerScript.PlayerGotHit();
@@ -186,7 +200,7 @@ public class BasicEnemy : MonoBehaviour
 				collisionExists = true;
 			}
 		}
-		else if (other.gameObject.tag == "Shield")
+		else if (other.gameObject.CompareTag("Shield"))
 		{
 			Assert.IsNotNull(_playerScript);
 			bool shieldGotHit = _playerScript.ShieldGotHit();
@@ -196,7 +210,7 @@ public class BasicEnemy : MonoBehaviour
 				collisionExists = true;
 			}
 		}
-		else if (other.gameObject.tag == "Enemy")
+		else if (other.gameObject.CompareTag("Enemy"))
 		{
 			EventLogger.PrintToLog("Enemy Collision v Enemy");
 			collisionExists = true;
@@ -242,9 +256,9 @@ public class BasicEnemy : MonoBehaviour
 
 	private void OnDisplaced(float displacementChange)
 	{
-		if (!IsDisplaced)
+		if (!_isDisplaced)
 		{
-			IsDisplaced = true;
+			_isDisplaced = true;
 			if (_assignedEnemyWave != null)
 			{
 				_assignedEnemyWave.IncreaseWaveMultiplier();
@@ -273,7 +287,7 @@ public class BasicEnemy : MonoBehaviour
 			//player might not be alive, game might have ended, do not score negative points in this case
 			_playerScript.TriggerEnemyDestruction();
 		}
-		HasCollided = true;
+		_hasCollided = true;
 		_basicObjectScript.OnDestruction();
 		Destroy(gameObject);
 	}

@@ -57,9 +57,9 @@ public class Powerup : MonoBehaviour
 	{
 		if (!_hasCollided)
 		{
-			if (other.gameObject.tag == "Player" || other.gameObject.tag == "Shield")
+			if (other.gameObject.CompareTag("Player") || other.gameObject.CompareTag("Shield"))
 			{
-				bool collidesWithPlayer = other.gameObject.tag == "Player";
+				bool collidesWithPlayer = other.gameObject.CompareTag("Player");
 
 				Player playerScript = collidesWithPlayer ?
 					other.gameObject.GetComponent<Player>() :

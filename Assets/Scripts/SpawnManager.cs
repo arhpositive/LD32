@@ -875,6 +875,7 @@ public class SpawnManager : MonoBehaviour
         waveScoreIndicator.transform.SetParent(CanvasScorePanel.transform, false);
 
         GameObject lineRendererObject = Instantiate(ShipConnectionPrefab, Vector3.zero, Quaternion.identity);
+		//TODO NEXT arrange maneuvering enemies
         EnemyWave curEnemyWave = new EnemyWave(lineRendererObject.GetComponent<LineRenderer>());
         curEnemyWave.Initialize(_playerScript, _canvasRectTransform, waveScoreIndicator, _scoreLeftAnchorXPos, _scoreRightAnchorXPos);
 
@@ -907,11 +908,12 @@ public class SpawnManager : MonoBehaviour
             GameObject enemy = Instantiate(enemyPrefab, enemyPos, Quaternion.identity);
             Assert.IsNotNull(enemy);
 
+	        BasicEnemy basicEnemyScript = enemy.GetComponent<BasicEnemy>();
             BasicMove basicMoveScript = enemy.GetComponent<BasicMove>();
-            basicMoveScript.SetMoveDir(selectedFormationEntities[i].MoveDir, false);
 
-            curEnemyWave.AddNewEnemy(enemy);
-            enemy.GetComponent<BasicEnemy>().Initialize(_playerScript, _difficultyManagerScript, curEnemyWave);
+            curEnemyWave.AddNewEnemy(enemy, basicEnemyScript);
+            basicEnemyScript.Initialize(_playerScript, _difficultyManagerScript, basicMoveScript, selectedFormationEntities[i].MoveDir, curEnemyWave);
+			basicEnemyScript.SetMoveDir(selectedFormationEntities[i].MoveDir);
         }
         curEnemyWave.FinalizeWidthNodes();
         _enemyWaves.Add(curEnemyWave);
@@ -967,7 +969,8 @@ public class SpawnManager : MonoBehaviour
 	private void SpawnHugeEnemyOnPosition(GameObject hugeEnemyPrefab, HugeEnemy hugeEnemyScript, Vector2 spawnPos)
 	{
 		GameObject hugeEnemy = Instantiate(hugeEnemyPrefab, spawnPos, Quaternion.identity);
-		hugeEnemy.GetComponent<HugeEnemy>().Initialize(_playerScript, _difficultyManagerScript);
+		//TODO LATER we want to pull move dir of huge enemy from the corresponding basicmove script
+		hugeEnemy.GetComponent<HugeEnemy>().Initialize(_playerScript, _difficultyManagerScript, hugeEnemy.GetComponent<BasicMove>(), Vector2.left);
 
 		float colliderBoundary = hugeEnemyScript.VerticalColliderBoundary;
 		if (Mathf.Approximately(Mathf.Sign(colliderBoundary), 1.0f))
@@ -1000,7 +1003,7 @@ public class SpawnManager : MonoBehaviour
 		BasicMove powerupMoveScript = selectedPowerup.GetComponent<BasicMove>();
 		Vector3 powerupPos = new Vector2(powerupMoveScript.HorizontalLimits[1], (powerupMoveScript.VerticalLimits[0] + powerupMoveScript.VerticalLimits[1]) * 0.5f);
 		GameObject instantiatedPowerup = Instantiate(selectedPowerup, powerupPos, Quaternion.identity);
-		instantiatedPowerup.GetComponent<BasicMove>().SetMoveDir(Vector2.left, false);
+		instantiatedPowerup.GetComponent<BasicMove>().SetMoveDir(Vector2.left);
 	}
 
 	private void SpawnNewPowerup(bool isPositive)

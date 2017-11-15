@@ -27,7 +27,6 @@ public enum DifficultyParameter
 
 public class DifficultyManager : MonoBehaviour
 {
-	//TODO LEARN a questionnaire regarding player preferences and experience level will be implemented to the start of the game, separate and before the tutorial
 	//TODO LEARN player will be placed in one of the preset player models after the questionnaire ends
 
 	// these difficulty multipliers will be given their initial value via our learning program

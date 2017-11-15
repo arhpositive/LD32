@@ -26,13 +26,20 @@ public class EnemyWave
 	private float _initialWidth;
 	private bool _enemyCountChanged;
 	
+	private bool _performsManeuvers;
+	private Vector2 _maneuverDirection;
+	private float _lastManeuverTime;
+	private float _nextManeuverInterval;
+	private bool _maneuverInProcess;
+
 	private float _waveScore;
 	private int _waveMultiplier;
 
     public bool EnemyDisplacementChanged { get; private set; }
     public bool SetForDestruction { get; private set; }
 
-    public EnemyWave(LineRenderer waveLineRenderer)
+    public EnemyWave(LineRenderer waveLineRenderer, bool performsManeuvers = false, 
+		Vector2 maneuverDirection = default(Vector2), float maneuverIntervalInSecs = 0.0f)
 	{
 		_enemyList = new List<GameObject>();
 		_waveLineRenderer = waveLineRenderer;
@@ -45,9 +52,16 @@ public class EnemyWave
 
 		_waveScore = 0.0f;
 		_waveMultiplier = 0;
+
+		_performsManeuvers = performsManeuvers;
+		_maneuverDirection = maneuverDirection;
+		_lastManeuverTime = Time.time;
+		_nextManeuverInterval = maneuverIntervalInSecs;
+		_maneuverInProcess = false;
 	}
 
-	public void Initialize(Player playerScript, RectTransform mainCanvasTransform, GameObject waveScoreIndicator, float leftAnchorXPos, float rightAnchorXPos)
+	public void Initialize(Player playerScript, RectTransform mainCanvasTransform, 
+		GameObject waveScoreIndicator, float leftAnchorXPos, float rightAnchorXPos)
 	{
 		_playerScript = playerScript;
 		_statsManagerScript = Camera.main.GetComponent<StatsManager>();
@@ -59,10 +73,10 @@ public class EnemyWave
 		_waveScoreIndicatorTransform = _waveScoreIndicator.GetComponent<RectTransform>();
 	}
 
-	public void AddNewEnemy(GameObject newEnemy)
+	public void AddNewEnemy(GameObject newEnemy, BasicEnemy enemyScript)
 	{
 		_enemyList.Add(newEnemy);
-		_enemyScripts.Add(newEnemy.GetComponent<BasicEnemy>());
+		_enemyScripts.Add(enemyScript);
 
 		int enemyCount = _enemyList.Count;
 		_waveLineRenderer.positionCount = enemyCount;
@@ -85,6 +99,11 @@ public class EnemyWave
 		if (SetForDestruction)
 		{
 			return;
+		}
+
+		if (_performsManeuvers && Time.time - _lastManeuverTime > _nextManeuverInterval)
+		{
+			PerformManeuver(_maneuverInProcess);
 		}
 
 		if (_enemyCountChanged)
@@ -146,6 +165,30 @@ public class EnemyWave
 		UpdateWaveScoreIndicator(previousWavexPos);
 	}
 
+	private void PerformManeuver(bool resetMoveDir)
+	{
+		if (resetMoveDir)
+		{
+			foreach (BasicEnemy e in _enemyScripts)
+			{
+				e.ResetMoveDir();
+			}
+			_maneuverInProcess = false;
+			return;
+		}
+		
+		_lastManeuverTime = Time.time;
+		foreach (BasicEnemy e in _enemyScripts)
+		{
+			Vector2 newDirection = (e.InitialMoveDir + _maneuverDirection).normalized;
+			e.SetMoveDir(newDirection);
+		}
+
+		//reverse direction of maneuver
+		_maneuverDirection *= -1;
+		_maneuverInProcess = true;
+	}
+
 	private void UpdateFarthestEnemyIndex()
 	{
 		float farthestXPos = float.MinValue;
@@ -159,7 +202,7 @@ public class EnemyWave
 		}
 	}
 
-    //TODO LATER perhaps we should separate the UI
+    //TODO LATER we should separate the UI
     private void UpdateWaveScoreIndicator(float previousWavexPos)
 	{
 		//updating high score UI for the wave
@@ -240,4 +283,10 @@ public class EnemyWave
     {
         return _enemyScripts.Any(enemy => enemy.SpeedBoostIsActive);
     }
+
+	//TODO NEXT use to determine if this wave can maneuver or not
+	public bool HasStunnedEnemy()
+	{
+		return _enemyScripts.Any(enemy => enemy.IsStunned);
+	}
 }

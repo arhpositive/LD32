@@ -72,7 +72,7 @@ public class BasicMove : MonoBehaviour
 		}
 	}
 
-	public void SetMoveDir(Vector2 newMoveDir, bool keepRandomizations)
+	public void SetMoveDir(Vector2 newMoveDir, bool keepRandomizations = false)
 	{
 		_moveDir = newMoveDir;
 
