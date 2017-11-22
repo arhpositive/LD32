@@ -226,7 +226,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4531216ae561308459c6b4f35cc6b52f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  StartGamePanel: {fileID: 0}
+  QuestionnairePanel: {fileID: 0}
   TutorialToggleObject: {fileID: 0}
+  QuestionnaireToggleObject: {fileID: 0}
 --- !u!114 &11435500
 MonoBehaviour:
   m_ObjectHideFlags: 1

@@ -47,7 +47,7 @@ public class BasicMove : MonoBehaviour
 	{
 		if (DoesMove)
 		{
-			transform.Translate(_moveDir * MoveSpeed * SpeedCoef * Time.deltaTime, Space.World);
+			transform.Translate(GetMoveVelocity() * Time.deltaTime, Space.World);
 		}
 
 		if (DoesRotate)
@@ -126,5 +126,10 @@ public class BasicMove : MonoBehaviour
 		}
 
 		_moveDir.Normalize();
+	}
+
+	public Vector2 GetMoveVelocity()
+	{
+		return MoveSpeed * SpeedCoef * _moveDir;
 	}
 }

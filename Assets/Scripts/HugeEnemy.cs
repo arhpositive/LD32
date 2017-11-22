@@ -7,9 +7,9 @@ public class HugeEnemy : BasicEnemy
 
 	private SpawnManager _spawnManagerScript;
 
-	protected override void Start()
+	protected override void Awake()
 	{
-		base.Start();
+		base.Awake();
 		_spawnManagerScript = Camera.main.GetComponent<SpawnManager>();
 	}
 

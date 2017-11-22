@@ -868,16 +868,50 @@ public class SpawnManager : MonoBehaviour
         return selectedFormationEntities;
     }
 
-    private void SpawnEnemies(List<WaveEntity> selectedFormationEntities, int[] shipTypes, float minVerticalStartCoord, float maxVerticalStartCoord, float enemyHorizontalDist, float enemyVerticalDist, float maxEnemyHorizontalDist)
+    private void SpawnEnemies(List<WaveEntity> selectedFormationEntities, int[] shipTypes, float minVerticalStartCoord, 
+		float maxVerticalStartCoord, float enemyHorizontalDist, float enemyVerticalDist, float maxEnemyHorizontalDist)
     {
+	    bool waveManeuvers = false;
+		Vector2 maneuveringDirection;
+	    float maneuveringVerticalLength = 0.0f;
+
+	    float selectedVerticalStartCoord = Random.Range(minVerticalStartCoord, maxVerticalStartCoord);
+	    float diffFromCeiling = maxVerticalStartCoord - selectedVerticalStartCoord;
+	    float diffFromFloor = selectedVerticalStartCoord - minVerticalStartCoord;
+
+
+	    float waveManeuveringRoom;
+	    if (diffFromCeiling > diffFromFloor)
+	    {
+		    waveManeuveringRoom = diffFromCeiling;
+			maneuveringDirection = Vector2.up;
+	    }
+	    else
+	    {
+		    waveManeuveringRoom = diffFromFloor;
+			maneuveringDirection = Vector2.down;
+	    }
+		
+	    if (waveManeuveringRoom > ShipColliderVertSize)
+	    {
+			//TODO NEXT maneuvering slows enemies down so that they collide with the next wave without player interaction
+		    int doManeuver = Random.Range(0, 3);
+		    if (doManeuver == 2)
+		    {
+			    //TODO NEXT we always maneuver with .33 chance, change this with a better method later on
+				waveManeuvers = true;
+			    maneuveringVerticalLength = Random.Range(ShipColliderVertSize, waveManeuveringRoom);
+			}
+	    }
+
         //VII. Spawn Enemies
         GameObject waveScoreIndicator = Instantiate(WaveScoreIndicatorPrefab);
         waveScoreIndicator.transform.SetParent(CanvasScorePanel.transform, false);
 
         GameObject lineRendererObject = Instantiate(ShipConnectionPrefab, Vector3.zero, Quaternion.identity);
-		//TODO NEXT arrange maneuvering enemies
-        EnemyWave curEnemyWave = new EnemyWave(lineRendererObject.GetComponent<LineRenderer>());
-        curEnemyWave.Initialize(_playerScript, _canvasRectTransform, waveScoreIndicator, _scoreLeftAnchorXPos, _scoreRightAnchorXPos);
+		
+        EnemyWave curEnemyWave = new EnemyWave(_playerScript, lineRendererObject.GetComponent<LineRenderer>(), 
+			_canvasRectTransform, waveScoreIndicator, _scoreLeftAnchorXPos, _scoreRightAnchorXPos);
 
         for (int i = 0; i < selectedFormationEntities.Count; i++)
         {
@@ -902,7 +936,7 @@ public class SpawnManager : MonoBehaviour
             }
             else
             {
-                enemyPos = new Vector2(enemyPrefabScript.HorizontalSpawnCoord + selectedFormationEntities[i].Position.x * maxEnemyHorizontalDist, Random.Range(minVerticalStartCoord, maxVerticalStartCoord));
+                enemyPos = new Vector2(enemyPrefabScript.HorizontalSpawnCoord + selectedFormationEntities[i].Position.x * maxEnemyHorizontalDist, selectedVerticalStartCoord);
             }
 
             GameObject enemy = Instantiate(enemyPrefab, enemyPos, Quaternion.identity);
@@ -915,7 +949,7 @@ public class SpawnManager : MonoBehaviour
             basicEnemyScript.Initialize(_playerScript, _difficultyManagerScript, basicMoveScript, selectedFormationEntities[i].MoveDir, curEnemyWave);
 			basicEnemyScript.SetMoveDir(selectedFormationEntities[i].MoveDir);
         }
-        curEnemyWave.FinalizeWidthNodes();
+        curEnemyWave.FinalizeAfterWaveIsFilled(waveManeuvers, maneuveringDirection, maneuveringVerticalLength);
         _enemyWaves.Add(curEnemyWave);
     }
 
@@ -936,7 +970,8 @@ public class SpawnManager : MonoBehaviour
 	{
 		GameObject hugeEnemyPrefab = HugeEnemyPrefabArray[0];
 		HugeEnemy hugeEnemyScript = hugeEnemyPrefab.GetComponent<HugeEnemy>();
-		Vector3 hugeEnemyPos = new Vector2(hugeEnemyScript.HorizontalSpawnCoord, (hugeEnemyScript.VerticalSpawnLimits[0] + hugeEnemyScript.VerticalSpawnLimits[1]) * 0.5f);
+		Vector3 hugeEnemyPos = new Vector2(hugeEnemyScript.HorizontalSpawnCoord, 
+			(hugeEnemyScript.VerticalSpawnLimits[0] + hugeEnemyScript.VerticalSpawnLimits[1]) * 0.5f);
 		SpawnHugeEnemyOnPosition(hugeEnemyPrefab, hugeEnemyScript, hugeEnemyPos);
 	}
 

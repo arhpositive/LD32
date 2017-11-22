@@ -24,7 +24,8 @@ public class BasicEnemy : MonoBehaviour
 	
 	public float HorizontalSpawnCoord;
 
-	public const float MoveSpeed = 1.2f;
+	//TODO LATER this is a duplicate magic number with basicMove moveSpeed variable, VERY BAD!
+	public const float MoveSpeed = 1.6f;
 
 	//enemy displacement is used for scoring
 	public float DisplacementLength { get; private set; }
@@ -46,7 +47,7 @@ public class BasicEnemy : MonoBehaviour
 	private float _lastFireTime;
 	private float _nextFiringInterval;
 
-	protected virtual void Start()
+	protected virtual void Awake()
 	{
 		_basicObjectScript = gameObject.GetComponent<BasicObject>();
 
@@ -56,7 +57,7 @@ public class BasicEnemy : MonoBehaviour
 		_lastStunTime = 0.0f;
 		SpeedBoostIsActive = false;
 		_lastFireTime = Time.time;
-		SetNextFiringInterval();
+		_nextFiringInterval = 0.0f;
 		DisplacementLength = 0.0f;
 		InitialMoveDir = Vector2.zero;
 		_isDisplaced = false;
@@ -106,6 +107,7 @@ public class BasicEnemy : MonoBehaviour
 	{
 		_playerScript = playerScript;
 		_difficultyManagerScript = difficultyManagerScript;
+		SetNextFiringInterval();
 		_basicMoveScript = basicMoveScript;
 		_assignedEnemyWave = assignedWave;
 		InitialMoveDir = initialMoveDir;
@@ -122,6 +124,11 @@ public class BasicEnemy : MonoBehaviour
 		{
 			_assignedEnemyWave.OnEnemyDisplacementChanged();
 		}
+	}
+
+	public Vector2 GetMoveVelocity()
+	{
+		return _basicMoveScript.GetMoveVelocity();
 	}
 
 	public void SetMoveDir(Vector2 newMoveDir)
