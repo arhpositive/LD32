@@ -22,6 +22,7 @@ public enum DifficultyParameter
 	DpNegPowerupSpawnRateIncrease,
 	DpEnemyShipStrength,
     DpMinimumEnemyCountCoef,
+	DpWaveManeuveringChance,
 	DpCount
 }
 

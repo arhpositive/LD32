@@ -25,7 +25,7 @@ public class EnemyWave
 
 	//maneuver variables
 	private bool _maneuvers;
-	private Vector2 _maneuveringDirection;
+	private Vector2 _maneuveringVector;
 	private float _lastManeuveringTime;
 	private float _nextManeuveringInterval;
 	private const float DefaultManeuveringInterval = 1.0f;
@@ -63,7 +63,7 @@ public class EnemyWave
 		_waveMultiplier = 0;
 
 		_maneuvers = false;
-		_maneuveringDirection = Vector2.zero;
+		_maneuveringVector = Vector2.zero;
 		_lastManeuveringTime = 0.0f;
 		_nextManeuveringInterval = 0.0f;
 		_maneuveringInProcess = false;
@@ -93,15 +93,12 @@ public class EnemyWave
 		_waveLineRenderer.SetPosition(enemyCount - 1, newEnemy.transform.position);
 	}
 
-	public void FinalizeAfterWaveIsFilled(bool maneuvers, Vector2 maneuveringDirection, float maneuveringVerticalLength)
+	public void FinalizeAfterWaveIsFilled(bool maneuvers, Vector2 maneuveringVector, float maneuveringVerticalLength)
 	{
 		_maneuvers = maneuvers;
-		_maneuveringDirection = maneuveringDirection;
+		_maneuveringVector = maneuveringVector;
 		_lastManeuveringTime = Time.time;
-
-		//TODO NEXT we want the wave to move vertically up until the difference reaches this in vertical length
-		//make a calculation with enemy speed and determine optimal time to spend doing vertical to reach this length
-
+		
 		float enemySpeed = BasicEnemy.MoveSpeed;
 
 		foreach (GameObject e in _enemyList)
@@ -220,7 +217,7 @@ public class EnemyWave
 
 		foreach (BasicEnemy e in _enemyScripts)
 		{
-			Vector2 newDirection = (e.InitialMoveDir + _maneuveringDirection).normalized;
+			Vector2 newDirection = (e.InitialMoveDir + _maneuveringVector);
 			e.SetMoveDir(newDirection);
 
 			float currentEnemyVerticalSpeed = Mathf.Abs(e.GetMoveVelocity().y);
@@ -236,7 +233,7 @@ public class EnemyWave
 		_maneuveringInProcess = true;
 
 		//reverse direction of maneuver
-		_maneuveringDirection *= -1;
+		_maneuveringVector *= -1;
 		
 	}
 
@@ -345,8 +342,7 @@ public class EnemyWave
     {
         return _enemyScripts.Any(enemy => enemy.SpeedBoostIsActive);
     }
-
-	//TODO NEXT check if this works
+	
 	private bool HasStunnedEnemy()
 	{
 		return _enemyScripts.Any(enemy => enemy.IsStunned);

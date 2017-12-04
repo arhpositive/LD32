@@ -663,7 +663,8 @@ public class SpawnManager : MonoBehaviour
 		float maxVerticalStartCoord = _vertMaxShipSpawnCoord - (tutorialWaveItem.EnemyCountInWave - 1) * EnemySpawnMaxVertDist;
 
 		//V. Select Enemies From Formation List
-	    List<WaveEntity> selectedFormationEntities = SelectEnemiesFromFormation(tutorialWaveItem.EnemyCountInWave);
+		int selectedFormationIndex = Random.Range(0, _formations.Count);
+		List<WaveEntity> selectedFormationEntities = SelectEnemiesFromFormation(selectedFormationIndex, tutorialWaveItem.EnemyCountInWave);
         
         //ship type is the same for the tutorial
 	    int[] shipTypes = new int[selectedFormationEntities.Count];
@@ -680,10 +681,6 @@ public class SpawnManager : MonoBehaviour
 	private void SpawnNewWave()
 	{
 		EventLogger.PrintToLog("New Wave Spawn");
-
-        //determine next wave spawn interval
-		float randomIntervalCoef = Random.Range(MinWaveSpawnIntervalCoef, MaxWaveSpawnIntervalCoef);
-		_waveSpawnInterval = randomIntervalCoef/_difficultyManagerScript.GetDifficultyMultiplier(DifficultyParameter.DpWaveSpawnRateIncrease);
         
         //determine if current wave formation has an empty space bigger than the size of the player ship
 		const int randRange = 100;
@@ -695,8 +692,13 @@ public class SpawnManager : MonoBehaviour
 		bool hasNoExit = Random.Range(0, randRange) < noExitProbability;
 
 		//I. Pick a random formation type
-		Formation selectedFormation = _formations[Random.Range(0, _formations.Count)];
+		int selectedFormationIndex = Random.Range(0, _formations.Count);
+		Formation selectedFormation = _formations[selectedFormationIndex];
 
+		//determine next wave spawn interval
+		float randomIntervalCoef = Random.Range(MinWaveSpawnIntervalCoef, MaxWaveSpawnIntervalCoef);
+		_waveSpawnInterval = randomIntervalCoef / _difficultyManagerScript.GetDifficultyMultiplier(DifficultyParameter.DpWaveSpawnRateIncrease); 
+		
 		//II. Determine Horizontal Distance Between Enemies
 		float nextWaveHorizontalDistance = _waveSpawnInterval * BasicEnemy.MoveSpeed;
 		float maxEnemyHorizontalDist = nextWaveHorizontalDistance - EnemySpawnMaxHorzDist;
@@ -796,7 +798,7 @@ public class SpawnManager : MonoBehaviour
 		}
 
 		//V. Select Enemies From Formation List
-	    List<WaveEntity> selectedFormationEntities = SelectEnemiesFromFormation(enemyCount);
+	    List<WaveEntity> selectedFormationEntities = SelectEnemiesFromFormation(selectedFormationIndex, enemyCount);
 
 		//VI. Determine Advanced Enemy Count
 		int enemyTypeCount = EnemyPrefabArray.Length;
@@ -857,12 +859,12 @@ public class SpawnManager : MonoBehaviour
 		SpawnEnemies(selectedFormationEntities, shipTypes, minVerticalStartCoord, maxVerticalStartCoord, enemyHorizontalDist, enemyVerticalDist, maxEnemyHorizontalDist);
 	}
 
-    private List<WaveEntity> SelectEnemiesFromFormation(int enemyCountInWave)
+    private List<WaveEntity> SelectEnemiesFromFormation(int selectedFormationIndex, int enemyCountInWave)
     {
         List<WaveEntity> selectedFormationEntities = new List<WaveEntity>();
         for (int i = 0; i < enemyCountInWave; ++i)
         {
-            selectedFormationEntities.Add(_formations[0].WaveEntities[i]);
+            selectedFormationEntities.Add(_formations[selectedFormationIndex].WaveEntities[i]);
         }
         selectedFormationEntities.Sort(FormationComparison);
         return selectedFormationEntities;
@@ -871,8 +873,10 @@ public class SpawnManager : MonoBehaviour
     private void SpawnEnemies(List<WaveEntity> selectedFormationEntities, int[] shipTypes, float minVerticalStartCoord, 
 		float maxVerticalStartCoord, float enemyHorizontalDist, float enemyVerticalDist, float maxEnemyHorizontalDist)
     {
+		print("MaxEnemyHorizontalDist: " + maxEnemyHorizontalDist);
+		print("EnemyHorizontalDist: " + enemyHorizontalDist);
 	    bool waveManeuvers = false;
-		Vector2 maneuveringDirection;
+		Vector2 maneuveringVector;
 	    float maneuveringVerticalLength = 0.0f;
 
 	    float selectedVerticalStartCoord = Random.Range(minVerticalStartCoord, maxVerticalStartCoord);
@@ -884,21 +888,23 @@ public class SpawnManager : MonoBehaviour
 	    if (diffFromCeiling > diffFromFloor)
 	    {
 		    waveManeuveringRoom = diffFromCeiling;
-			maneuveringDirection = Vector2.up;
+			maneuveringVector = Vector2.up * 0.25f; //TODO NEXT deal with magic number, perhaps add it as another difficulty adjustment
 	    }
 	    else
 	    {
 		    waveManeuveringRoom = diffFromFloor;
-			maneuveringDirection = Vector2.down;
+			maneuveringVector = Vector2.down * 0.25f;
 	    }
 		
 	    if (waveManeuveringRoom > ShipColliderVertSize)
 	    {
-			//TODO NEXT maneuvering slows enemies down so that they collide with the next wave without player interaction
-		    int doManeuver = Random.Range(0, 3);
-		    if (doManeuver == 2)
+			//20 40 60 80 100 percent chance of a maneuvering wave depending on difficulty coefficient
+			float waveManeuveringChangePercentage = (float)(_difficultyManagerScript.DifficultyCoefs[DifficultyParameter.DpWaveManeuveringChance] * 100) /
+			    GameConstants.MaxDifficulty;
+			
+		    int doManeuver = Random.Range(0, 100);
+		    if (doManeuver < waveManeuveringChangePercentage)
 		    {
-			    //TODO NEXT we always maneuver with .33 chance, change this with a better method later on
 				waveManeuvers = true;
 			    maneuveringVerticalLength = Random.Range(ShipColliderVertSize, waveManeuveringRoom);
 			}
@@ -936,6 +942,7 @@ public class SpawnManager : MonoBehaviour
             }
             else
             {
+				//determining first enemy position
                 enemyPos = new Vector2(enemyPrefabScript.HorizontalSpawnCoord + selectedFormationEntities[i].Position.x * maxEnemyHorizontalDist, selectedVerticalStartCoord);
             }
 
@@ -949,7 +956,7 @@ public class SpawnManager : MonoBehaviour
             basicEnemyScript.Initialize(_playerScript, _difficultyManagerScript, basicMoveScript, selectedFormationEntities[i].MoveDir, curEnemyWave);
 			basicEnemyScript.SetMoveDir(selectedFormationEntities[i].MoveDir);
         }
-        curEnemyWave.FinalizeAfterWaveIsFilled(waveManeuvers, maneuveringDirection, maneuveringVerticalLength);
+        curEnemyWave.FinalizeAfterWaveIsFilled(waveManeuvers, maneuveringVector, maneuveringVerticalLength);
         _enemyWaves.Add(curEnemyWave);
     }
 
