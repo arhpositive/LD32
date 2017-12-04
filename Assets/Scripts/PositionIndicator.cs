@@ -16,7 +16,6 @@ public class PositionIndicator : MonoBehaviour
 	{
 		if (_statsManagerScript)
 		{
-			//TODO LATER if we don't move our ship at all and game ends, this line gives an error
 			transform.position = _statsManagerScript.AllPlayerStats[StatsIndex].PlayerAveragePosition;
 		}
 	}

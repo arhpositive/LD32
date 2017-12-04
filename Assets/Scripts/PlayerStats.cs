@@ -141,7 +141,7 @@ public class PlayerStats
 		MovementAmount += movementMagnitude * multiplier;
 		_movementUpdateCount = _movementUpdateCount + multiplier;
 
-		PlayerAveragePosition = positionTotal / _movementUpdateCount;
+		PlayerAveragePosition = _movementUpdateCount > 0 ? positionTotal / _movementUpdateCount : Vector3.zero;
 	}
 
 	private void CalculateGunUsageFrequencies()

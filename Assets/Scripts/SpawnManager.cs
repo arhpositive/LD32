@@ -87,6 +87,7 @@ public class SpawnManager : MonoBehaviour
 	private const float ShipColliderVertSize = 0.46f;
 	private const float ShipGameObjectVertSize = 0.5f;
 	private const float PlayerShipColliderHorzSize = 0.38f;
+	private const float ManeuveringDirectionMoveSpeed = 0.25f;
 
 	private float _enemySpawnMinVertDist;
     private const float EnemySpawnMaxVertDist = ShipColliderVertSize * 2.0f - 0.01f;
@@ -873,8 +874,6 @@ public class SpawnManager : MonoBehaviour
     private void SpawnEnemies(List<WaveEntity> selectedFormationEntities, int[] shipTypes, float minVerticalStartCoord, 
 		float maxVerticalStartCoord, float enemyHorizontalDist, float enemyVerticalDist, float maxEnemyHorizontalDist)
     {
-		print("MaxEnemyHorizontalDist: " + maxEnemyHorizontalDist);
-		print("EnemyHorizontalDist: " + enemyHorizontalDist);
 	    bool waveManeuvers = false;
 		Vector2 maneuveringVector;
 	    float maneuveringVerticalLength = 0.0f;
@@ -883,17 +882,16 @@ public class SpawnManager : MonoBehaviour
 	    float diffFromCeiling = maxVerticalStartCoord - selectedVerticalStartCoord;
 	    float diffFromFloor = selectedVerticalStartCoord - minVerticalStartCoord;
 
-
 	    float waveManeuveringRoom;
 	    if (diffFromCeiling > diffFromFloor)
 	    {
 		    waveManeuveringRoom = diffFromCeiling;
-			maneuveringVector = Vector2.up * 0.25f; //TODO NEXT deal with magic number, perhaps add it as another difficulty adjustment
+			maneuveringVector = Vector2.up * ManeuveringDirectionMoveSpeed;
 	    }
 	    else
 	    {
 		    waveManeuveringRoom = diffFromFloor;
-			maneuveringVector = Vector2.down * 0.25f;
+			maneuveringVector = Vector2.down * ManeuveringDirectionMoveSpeed;
 	    }
 		
 	    if (waveManeuveringRoom > ShipColliderVertSize)

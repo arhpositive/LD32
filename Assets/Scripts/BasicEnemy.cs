@@ -24,7 +24,7 @@ public class BasicEnemy : MonoBehaviour
 	
 	public float HorizontalSpawnCoord;
 
-	//TODO LATER this is a duplicate magic number with basicMove moveSpeed variable, VERY BAD!
+	//TODO LATER we've asserted that this move speed equals to the move speed of enemy prefabs, but still things could've been handled better
 	public const float MoveSpeed = 1.6f;
 
 	//enemy displacement is used for scoring
